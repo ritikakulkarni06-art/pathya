@@ -1,0 +1,77 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "current_revision": {
+      "minimum": 0,
+      "title": "Current Revision",
+      "type": "integer"
+    },
+    "id": {
+      "pattern": "^[A-Za-z0-9_-]{1,128}$",
+      "title": "Id",
+      "type": "string"
+    },
+    "languages": {
+      "items": {
+        "enum": [
+          "en",
+          "hi"
+        ],
+        "type": "string"
+      },
+      "maxItems": 2,
+      "minItems": 1,
+      "title": "Languages",
+      "type": "array"
+    },
+    "owner_id": {
+      "pattern": "^[A-Za-z0-9_-]{1,128}$",
+      "title": "Owner Id",
+      "type": "string"
+    },
+    "retention_until": {
+      "format": "date-time",
+      "title": "Retention Until",
+      "type": "string"
+    },
+    "rights_note": {
+      "maxLength": 2000,
+      "minLength": 1,
+      "title": "Rights Note",
+      "type": "string"
+    },
+    "state": {
+      "enum": [
+        "uploading",
+        "queued",
+        "processing",
+        "review_required",
+        "building",
+        "ready",
+        "failed",
+        "deleting",
+        "deleted"
+      ],
+      "title": "State",
+      "type": "string"
+    },
+    "title": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Title",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "owner_id",
+    "title",
+    "languages",
+    "current_revision",
+    "state",
+    "rights_note",
+    "retention_until"
+  ],
+  "title": "Document",
+  "type": "object"
+}

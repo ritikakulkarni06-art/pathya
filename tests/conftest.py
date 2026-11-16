@@ -23,7 +23,7 @@ def seeded(database):
         conn.execute("INSERT INTO revisions VALUES ('d',1,'initial',NULL,'2026-01-01','u')")
         conn.execute("INSERT INTO pages VALUES ('p','d',0,'iii',100,100,0,NULL,'[1,0,0,1,0,0]')")
         conn.execute(
-            "INSERT INTO blocks VALUES ('b','d','p','paragraph',NULL,1,'[0,0,1,1]','Synthetic text','Synthetic text','en',1,'ok','{}','{}',0,'[]')"
+            "INSERT INTO blocks(id,document_id,page_id,type,parent_id,order_key,bbox_json,text_raw,text_current,lang,revision,status,confidence_json,provenance_json,critical_flag,successor_ids_json) VALUES ('b','d','p','paragraph',NULL,1,'[0,0,1,1]','Synthetic text','Synthetic text','en',1,'ok','{}','{}',0,'[]')"
         )
         conn.execute(
             "INSERT INTO block_versions VALUES ('b',1,1,'Synthetic text','[]','u','2026-01-01')"

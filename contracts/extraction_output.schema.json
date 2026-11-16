@@ -1,0 +1,504 @@
+{
+  "$defs": {
+    "Block": {
+      "additionalProperties": false,
+      "properties": {
+        "bbox": {
+          "maxItems": 4,
+          "minItems": 4,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Bbox",
+          "type": "array"
+        },
+        "confidence": {
+          "$ref": "#/$defs/Confidence"
+        },
+        "critical_flag": {
+          "default": false,
+          "title": "Critical Flag",
+          "type": "boolean"
+        },
+        "id": {
+          "pattern": "^[A-Za-z0-9_-]{1,128}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "lang": {
+          "enum": [
+            "en",
+            "hi"
+          ],
+          "title": "Lang",
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/$defs/BlockMetadata"
+        },
+        "order_key": {
+          "title": "Order Key",
+          "type": "number"
+        },
+        "page_id": {
+          "pattern": "^[A-Za-z0-9_-]{1,128}$",
+          "title": "Page Id",
+          "type": "string"
+        },
+        "parent_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9_-]{1,128}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Parent Id"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "revision": {
+          "default": 1,
+          "minimum": 1,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "status": {
+          "enum": [
+            "ok",
+            "needs_review",
+            "corrected",
+            "reviewed",
+            "unsupported",
+            "not_scored"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "successor_ids": {
+          "items": {
+            "pattern": "^[A-Za-z0-9_-]{1,128}$",
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Successor Ids",
+          "type": "array"
+        },
+        "text_current": {
+          "maxLength": 100000,
+          "title": "Text Current",
+          "type": "string"
+        },
+        "text_raw": {
+          "maxLength": 100000,
+          "title": "Text Raw",
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "heading",
+            "paragraph",
+            "list_item",
+            "table",
+            "table_cell",
+            "equation",
+            "figure",
+            "caption"
+          ],
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "page_id",
+        "type",
+        "parent_id",
+        "order_key",
+        "bbox",
+        "text_raw",
+        "text_current",
+        "lang",
+        "status",
+        "confidence",
+        "provenance"
+      ],
+      "title": "Block",
+      "type": "object"
+    },
+    "BlockMetadata": {
+      "additionalProperties": false,
+      "properties": {
+        "alt_text_extended": {
+          "anyOf": [
+            {
+              "maxLength": 10000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Alt Text Extended"
+        },
+        "alt_text_short": {
+          "anyOf": [
+            {
+              "maxLength": 1000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Alt Text Short"
+        },
+        "caption_block_ids": {
+          "items": {
+            "pattern": "^[A-Za-z0-9_-]{1,128}$",
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Caption Block Ids",
+          "type": "array"
+        },
+        "header_cell_ids": {
+          "items": {
+            "pattern": "^[A-Za-z0-9_-]{1,128}$",
+            "type": "string"
+          },
+          "maxItems": 200,
+          "title": "Header Cell Ids",
+          "type": "array"
+        },
+        "mathml": {
+          "anyOf": [
+            {
+              "maxLength": 20000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mathml"
+        },
+        "spoken_fallback": {
+          "anyOf": [
+            {
+              "maxLength": 5000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Spoken Fallback"
+        }
+      },
+      "title": "BlockMetadata",
+      "type": "object"
+    },
+    "Confidence": {
+      "additionalProperties": false,
+      "properties": {
+        "engine": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Engine",
+          "type": "string"
+        },
+        "flags": {
+          "items": {
+            "maxLength": 128,
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Flags",
+          "type": "array"
+        },
+        "score": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Score"
+        }
+      },
+      "required": [
+        "engine",
+        "score",
+        "flags"
+      ],
+      "title": "Confidence",
+      "type": "object"
+    },
+    "Edge": {
+      "additionalProperties": false,
+      "properties": {
+        "from_id": {
+          "pattern": "^[A-Za-z0-9_-]{1,128}$",
+          "title": "From Id",
+          "type": "string"
+        },
+        "relation": {
+          "enum": [
+            "contains",
+            "precedes",
+            "caption_of",
+            "refers_to",
+            "header_for",
+            "supersedes"
+          ],
+          "title": "Relation",
+          "type": "string"
+        },
+        "to_id": {
+          "pattern": "^[A-Za-z0-9_-]{1,128}$",
+          "title": "To Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "from_id",
+        "relation",
+        "to_id"
+      ],
+      "title": "Edge",
+      "type": "object"
+    },
+    "Page": {
+      "additionalProperties": false,
+      "properties": {
+        "height": {
+          "exclusiveMinimum": 0,
+          "title": "Height",
+          "type": "number"
+        },
+        "id": {
+          "pattern": "^[A-Za-z0-9_-]{1,128}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "pdf_index_0": {
+          "minimum": 0,
+          "title": "Pdf Index 0",
+          "type": "integer"
+        },
+        "printed_label": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Printed Label",
+          "type": "string"
+        },
+        "rotation": {
+          "default": 0,
+          "enum": [
+            0,
+            90,
+            180,
+            270
+          ],
+          "title": "Rotation",
+          "type": "integer"
+        },
+        "source_asset_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9_-]{1,128}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Asset Id"
+        },
+        "transform": {
+          "maxItems": 6,
+          "minItems": 6,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Transform",
+          "type": "array"
+        },
+        "width": {
+          "exclusiveMinimum": 0,
+          "title": "Width",
+          "type": "number"
+        }
+      },
+      "required": [
+        "id",
+        "pdf_index_0",
+        "printed_label",
+        "width",
+        "height",
+        "transform"
+      ],
+      "title": "Page",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "changed_at": {
+          "format": "date-time",
+          "title": "Changed At",
+          "type": "string"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Model"
+        },
+        "parser": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Parser",
+          "type": "string"
+        },
+        "reviewer": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9_-]{1,128}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reviewer"
+        },
+        "version": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "parser",
+        "model",
+        "version",
+        "reviewer",
+        "changed_at"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "blocks": {
+      "items": {
+        "$ref": "#/$defs/Block"
+      },
+      "maxItems": 100000,
+      "title": "Blocks",
+      "type": "array"
+    },
+    "edges": {
+      "items": {
+        "$ref": "#/$defs/Edge"
+      },
+      "maxItems": 200000,
+      "title": "Edges",
+      "type": "array"
+    },
+    "pages": {
+      "items": {
+        "$ref": "#/$defs/Page"
+      },
+      "maxItems": 1000,
+      "minItems": 1,
+      "title": "Pages",
+      "type": "array"
+    },
+    "parser_versions": {
+      "additionalProperties": {
+        "maxLength": 128,
+        "type": "string"
+      },
+      "propertyNames": {
+        "maxLength": 128
+      },
+      "title": "Parser Versions",
+      "type": "object"
+    },
+    "quality_flags": {
+      "items": {
+        "maxLength": 128,
+        "type": "string"
+      },
+      "maxItems": 1000,
+      "title": "Quality Flags",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "pages",
+    "blocks",
+    "edges",
+    "quality_flags",
+    "parser_versions"
+  ],
+  "title": "ExtractionResult",
+  "type": "object"
+}

@@ -2,7 +2,6 @@ PYTHON ?= python
 .PHONY: install dev worker test lint typecheck check openapi contracts
 install:
 	$(PYTHON) -m pip install -r requirements.lock
-	$(PYTHON) -m pip install --no-deps --no-build-isolation -e .
 dev:
 	$(PYTHON) -m uvicorn app.main:create_app --factory --host 127.0.0.1 --port 8000 --workers 1 --no-access-log
 worker:

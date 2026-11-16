@@ -33,3 +33,18 @@
 - Login limits are bounded, in-memory and single-process; no distributed deployment claim is made. Public registration currently reveals that an account is unavailable (409); this is a conscious project usability tradeoff.
 - Admin is an operations role only; it does not grant document visibility. Existing reader/reviewer permissions yield 403 for insufficient actions; invisible documents yield 404.
 - Permission dependencies cover every current protected route. Future block/job/artifact/question routes must resolve their resource back to a document and use the same checks.
+
+## P5
+
+- Extraction v1.0.0 is a draft, pending written approval. Later stages will not be built against it until Person 1 confirms it.
+- Adapter IDs are document-local stable identifiers. A transactionally persisted mapping assigns UUID4 backend IDs, preserving retry idempotency and cross-document separation.
+- Migration 002 adds structured math/description/table metadata and import receipts/maps; no applied migration file was edited. Metadata is never silently dropped.
+- Parent/reading-order uniqueness is per page and parent; page-local containers avoid ambiguous cross-page coordinates. This interpretation needs teammate approval.
+- Initial import only publishes revision 1 and cannot overwrite existing content. It records review_required or building; actual derivative workers are a later stage.
+- Subprocess mode fails closed on Windows or when unprivileged Linux namespaces are unavailable. The Linux child runs in a network namespace with rlimits and whole-group timeout termination; this requires a deployment-host smoke test. Trusted Python adapters are explicitly not sandboxed.
+- JSON Schema structural validation and cross-reference validation are separate: both are tested. MathML accepts a small inert attribute-free subset only; arbitrary markup and external entities are rejected.
+- Correction operation schemas are only descriptive drafts at P5; the strict discriminated operation union and HTTP correction workflow arrive at P8.
+
+- `make install` installs the exact locked environment for source-checkout execution; it does not require an unpinned editable-build bootstrap. `make check` also enforces >=85% coverage of app/db.
+
+- User override, 16 November 2026: teammate approval is deferred. Continue P6 onwards against the draft using fixtures; never represent this as actual teammate acceptance. Reconcile before connecting real adapters.

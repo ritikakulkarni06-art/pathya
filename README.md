@@ -1,64 +1,46 @@
-# Pathya — AI Textbook Reader
+# Pathya ? AI Textbook Reader
 
-An accessible textbook reader proposed for students with visual impairment or dyslexia. Pathya will turn authorized English and Hindi textbook chapters into structured, page-linked content that students can read, listen to, correct, download, and ask questions about using textbook evidence.
+Pathya is a proposed accessible English/Hindi textbook reader. This repository contains the team plan and the **Role 3 backend foundation**. Students will eventually read, listen, correct content and inspect evidence-linked explanations.
 
-**Status:** repository foundation only. Application features are planned and have not yet been implemented or validated.
+## Current implementation
 
-## Project documents
+P1?P5 of the [backend playbook](docs/PLAYBOOK.md): FastAPI configuration/health/errors, content-safe logs, transactional SQLite migrations and immutable history, private file storage, local/session authentication, CSRF and document roles, versioned extraction schemas, adapters and atomic initial import.
 
-- [Full project report](docs/Pathya_AI_Textbook_Reader_Project_Report.pdf)
-- [Project idea and three-person roles](docs/Pathya_Project_Idea_and_Three_Person_Roles.pdf)
-- [Team responsibilities](docs/TEAM_ROLES.md)
-- [Proposed architecture](docs/ARCHITECTURE.md)
-- [Development roadmap](docs/ROADMAP.md)
+The extraction contract is **draft v1.0.0**; the user authorized deferring teammate approval while implementation continues with fixtures. Uploads, processing jobs, correction endpoints, retrieval, speech, grounded answers, packages and deletion workflows are scheduled for P6?P16 and are not implemented yet. LLM calls remain disabled. This is not a production-ready service or a measured accessibility/accuracy result.
 
-## Planned capabilities
+## Quick start ? Python 3.12
 
-- English/Hindi extraction with source-page links, reading order, and review flags.
-- Accessible navigation, adjustable reading preferences, narration, and sentence focus.
-- Corrections that update narration, search, and answer evidence consistently.
-- Chapter-scoped, evidence-linked answers with clear abstention when support is missing.
-- Explicit chapter downloads and offline reading/resume.
+```bash
+python -m venv .venv
+# Activate the virtual environment for your shell.
+python -m pip install -r requirements.lock
+python -m scripts.check
+python -m uvicorn app.main:create_app --factory --host 127.0.0.1 --port 8000 --workers 1 --no-access-log
+```
+
+On this Windows checkout use `.venv\Scripts\python.exe` directly, or activate `.venv\Scripts\Activate.ps1`. `GET http://127.0.0.1:8000/healthz` and `/readyz` report service health. `GET /auth/me` shows the fixed local demo user. Public interactive API docs are disabled; inspect [the exported OpenAPI contract](contracts/openapi.json).
+
+Local mode needs no secrets and binds only loopback. To customize, copy `.env.example` to `.env` and edit local values. Session mode requires a random secret of at least 32 characters and HTTPS because cookies are always Secure. Do not use local mode in production. Disable raw access logs as shown; they can contain query text.
+
+On systems with GNU Make, `make check`, `make dev`, `make contracts` and `make openapi` are available. Windows equivalents are `python -m scripts.check` and `python -m scripts.export_contracts`. The worker command deliberately refuses until P7 is implemented.
 
 ## Team and branches
 
 | Branch | Owner | Scope |
 | --- | --- | --- |
 | `main` | Shared | Integrated project baseline |
-| `person-1` | Person 1 | Document AI, OCR, structured content, extraction evaluation |
+| `person-1` | Person 1 | Document AI, OCR, structured content |
 | `person-2` | Person 2 | Accessible reader, speech, offline experience |
-| `person-3` | Person 3 — Ritika | Backend, revision consistency, grounded AI |
+| `person-3` | Person 3 ? Ritika | Backend, revision consistency, grounded AI |
 
-Use pull requests into `main` and request a teammate's review before merging. Git branch names use hyphens because spaces are unsupported.
+Backend code uses `app/`, shared schemas use `contracts/`, and tests use `tests/`. Existing `document-ai/`, `frontend/` and `shared/` folders remain available for teammates. [CONTRIBUTING.md](CONTRIBUTING.md) describes the PR workflow. Only person-3 contains the implementation until a reviewed integration PR is merged.
 
-## Repository layout
+## Documents and handoffs
 
-```text
-backend/         Person 3: API, storage, jobs, revision handling, retrieval and AI
-document-ai/     Person 1: extraction, layout, quality checks and content operations
-frontend/        Person 2: reader, speech, accessibility and offline support
-shared/          Shared contracts and integration examples
-tests/           Future integration and system checks
-docs/            Original reports and project guidance
-.github/         Issue and pull request templates
-```
+- [Original project report](docs/Pathya_AI_Textbook_Reader_Project_Report.pdf) and [three-person role plan](docs/Pathya_Project_Idea_and_Three_Person_Roles.pdf)
+- [Implementation status](docs/IMPLEMENTATION_STATUS.md), [decisions](docs/DECISIONS.md), [dependency/license inventory](docs/DEPENDENCIES.md)
+- [Extraction contract](docs/CONTRACTS.md), [Person 1 handoff](docs/HANDOFF_FOR_EXTRACTION.md), [pending approvals](docs/CONTRACT_APPROVALS.md)
+- [Manual steps needed now and later](docs/MANUAL_SETUP.md)
+- [Team roles](docs/TEAM_ROLES.md), [proposed architecture](docs/ARCHITECTURE.md), [roadmap](docs/ROADMAP.md)
 
-## Getting started
-
-```bash
-git clone https://github.com/ritikakulkarni06-art/pathya.git
-cd pathya
-git switch person-3
-```
-
-Read the reports and agree on shared identifiers and revision contracts before implementation. See [CONTRIBUTING.md](CONTRIBUTING.md) for the team workflow. Module READMEs describe each work area; install/run commands will be added when runnable components exist.
-
-The reports suggest React/TypeScript for the reader and Python/FastAPI, SQLite, private file storage, and a durable worker for backend development. These are proposed choices, not installed dependencies.
-
-## Data and credentials
-
-Commit only content the team has permission to share. Keep uploaded textbooks, private source files, personal data, credentials, databases, generated audio, and model artifacts outside version control. Store runtime configuration locally using `.env` and document variable names in `.env.example` when selected.
-
-## License
-
-A software license has not yet been selected. Publication of this repository does not grant an open-source license. Original reports and third-party content retain their respective rights.
+Use authorized or synthetic content. Never commit .env, private source files, databases, generated audio, user data or API credentials. The included ten-page JSON chapter is entirely synthetic development data, not an evaluation result. A software license has not yet been selected; reports and third-party material retain their respective rights.
