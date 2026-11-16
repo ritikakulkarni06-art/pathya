@@ -47,3 +47,7 @@ Thumbs.db
 .codex-tmp/
 .agents/
 .codex/
+
+# Test runner scratch files
+pytest-cache-files-*/
+eval/out/
