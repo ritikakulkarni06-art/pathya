@@ -8,3 +8,5 @@ Next manual gate: approve the extraction/speech/identifier contracts with teamma
 - P2 implemented: transactional migrations, immutable history, FTS triggers and aggregate reads; 18 tests passed; app/db coverage 96% (target >=85%).
 
 - P3 complete: 33 tests passed, including bounded streaming, path escape rejection, deduplication, permissions, idempotent physical deletion and rollback after file publication failure.
+
+- P4 complete: 64 tests passed, including the role matrix, full route audit, real Argon2id login/logout, secure cookies, CSRF, expiry/revocation and safe unexpected errors.

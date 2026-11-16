@@ -24,3 +24,12 @@
 - `secure_delete_document` means path-confined physical file removal, not guaranteed forensic erasure on SSDs or removal from external backups. P13 coordinates row purging and backup policy.
 - Private storage directories must be writable only by the service account. Resolve-based checks defend traversal/symlinks; they do not protect against a malicious local administrator racing filesystem changes.
 - File-store reads use owner/grant checks now, shared with the P4 API authorization dependency. Artifact HTTP routes and Range support remain scheduled for P8/P9.
+
+## P4
+
+- Local mode seeds one fixed demo user; routes still use ordinary owner/grant checks. Local mode refuses production startup and the supplied server binds loopback.
+- Session authentication uses Argon2id password hashes and random 256-bit session tokens stored as SHA-256 digests. Secure cookies require HTTPS; integration tests use HTTPS URLs. Frontend deployments must configure TLS, not disable cookie security.
+- A session-bound HMAC CSRF token must match the cookie and request header on authenticated writes. Public login/registration reject untrusted browser origins and have IP, email and pair limits.
+- Login limits are bounded, in-memory and single-process; no distributed deployment claim is made. Public registration currently reveals that an account is unavailable (409); this is a conscious project usability tradeoff.
+- Admin is an operations role only; it does not grant document visibility. Existing reader/reviewer permissions yield 403 for insufficient actions; invisible documents yield 404.
+- Permission dependencies cover every current protected route. Future block/job/artifact/question routes must resolve their resource back to a document and use the same checks.

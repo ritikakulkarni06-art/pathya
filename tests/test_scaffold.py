@@ -52,3 +52,18 @@ def test_health_ready_and_error(tmp_path, caplog):
         assert response.headers["content-type"].startswith("application/problem+json")
         assert response.headers["X-Request-ID"]
     assert "private-question" not in caplog.text
+
+
+def test_unexpected_error_never_logs_sensitive_exception(tmp_path, caplog):
+    application = create_app(Settings(_env_file=None, pathya_env="test", pathya_data_dir=tmp_path))
+
+    @application.get("/test-only-failure")
+    def fail():
+        raise ValueError("PRIVATE SOURCE TEXT OR SECRET")
+
+    with TestClient(application) as client:
+        response = client.get("/test-only-failure")
+        assert response.status_code == 500
+        assert response.json()["code"] == "internal_error"
+        assert "PRIVATE SOURCE" not in response.text
+    assert "PRIVATE SOURCE" not in caplog.text
