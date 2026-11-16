@@ -1,0 +1,11 @@
+# Local credentials and runtime data
+.env
+.env.*
+!.env.example
+node_modules/
+.venv/
+__pycache__/
+*.db
+uploads/
+storage/
+.codex-tmp/
