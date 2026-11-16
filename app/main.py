@@ -13,6 +13,8 @@ from starlette.middleware.base import RequestResponseEndpoint
 from starlette.responses import Response
 
 from app.config import Settings
+from app.db.connection import Database
+from app.db.migrate import migrate
 from app.errors import Problem
 from app.logging import log_event
 
@@ -23,6 +25,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @asynccontextmanager
     async def lifespan(application: FastAPI) -> AsyncIterator[None]:
         config.pathya_data_dir.mkdir(parents=True, exist_ok=True)
+        assert config.pathya_db_path is not None
+        migrate(Database(config.pathya_db_path))
         yield
 
     application = FastAPI(
@@ -34,6 +38,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         openapi_url=None,
     )
     application.state.settings = config
+    assert config.pathya_db_path is not None
+    application.state.database = Database(config.pathya_db_path)
     application.add_middleware(
         CORSMiddleware,
         allow_origins=config.cors_origins,
@@ -110,7 +116,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             assert config.pathya_db_path is not None
             with sqlite3.connect(config.pathya_db_path) as conn:
                 conn.execute("SELECT 1")
-        except (OSError, sqlite3.Error):
+            migrate(application.state.database, apply=False)
+        except (OSError, sqlite3.Error, ValueError):
             raise Problem(
                 503, "not_ready", "Storage is unavailable. Please contact the project maintainer."
             ) from None
