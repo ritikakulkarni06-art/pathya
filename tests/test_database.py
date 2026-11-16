@@ -17,13 +17,15 @@ def test_fresh_and_reapply(database):
         assert conn.execute("PRAGMA journal_mode").fetchone()["journal_mode"] == "wal"
         assert conn.execute("PRAGMA foreign_keys").fetchone()["foreign_keys"] == 1
         assert conn.execute("PRAGMA busy_timeout").fetchone()["timeout"] == 5000
-        assert conn.execute("SELECT count(*) AS n FROM schema_migrations").fetchone()["n"] == 1
+        assert conn.execute("SELECT count(*) AS n FROM schema_migrations").fetchone()["n"] == 2
 
 
 def test_changed_and_missing_migration(database, tmp_path):
     directory = tmp_path / "migrations"
     directory.mkdir()
     original = MIGRATIONS / "001_initial.sql"
+    for path in MIGRATIONS.glob("*.sql"):
+        (directory / path.name).write_bytes(path.read_bytes())
     (directory / original.name).write_bytes(original.read_bytes() + b"\n-- changed")
     with pytest.raises(ValueError, match="checksum"):
         migrate(database, directory)

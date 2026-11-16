@@ -1,0 +1,91 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "height": {
+      "exclusiveMinimum": 0,
+      "title": "Height",
+      "type": "number"
+    },
+    "id": {
+      "pattern": "^[A-Za-z0-9_-]{1,128}$",
+      "title": "Id",
+      "type": "string"
+    },
+    "pdf_index_0": {
+      "minimum": 0,
+      "title": "Pdf Index 0",
+      "type": "integer"
+    },
+    "printed_label": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Printed Label",
+      "type": "string"
+    },
+    "rotation": {
+      "default": 0,
+      "enum": [
+        0,
+        90,
+        180,
+        270
+      ],
+      "title": "Rotation",
+      "type": "integer"
+    },
+    "source_asset_id": {
+      "anyOf": [
+        {
+          "pattern": "^[A-Za-z0-9_-]{1,128}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Asset Id"
+    },
+    "transform": {
+      "maxItems": 6,
+      "minItems": 6,
+      "prefixItems": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "number"
+        }
+      ],
+      "title": "Transform",
+      "type": "array"
+    },
+    "width": {
+      "exclusiveMinimum": 0,
+      "title": "Width",
+      "type": "number"
+    }
+  },
+  "required": [
+    "id",
+    "pdf_index_0",
+    "printed_label",
+    "width",
+    "height",
+    "transform"
+  ],
+  "title": "Page",
+  "type": "object"
+}

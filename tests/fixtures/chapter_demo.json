@@ -1,0 +1,970 @@
+{
+  "schema_version": "1.0.0",
+  "pages": [
+    {
+      "id": "page-1",
+      "pdf_index_0": 0,
+      "printed_label": "11",
+      "width": 600,
+      "height": 800,
+      "rotation": 0,
+      "source_asset_id": null,
+      "transform": [
+        600,
+        0,
+        0,
+        800,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "page-2",
+      "pdf_index_0": 1,
+      "printed_label": "12",
+      "width": 600,
+      "height": 800,
+      "rotation": 0,
+      "source_asset_id": null,
+      "transform": [
+        600,
+        0,
+        0,
+        800,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "page-3",
+      "pdf_index_0": 2,
+      "printed_label": "13",
+      "width": 600,
+      "height": 800,
+      "rotation": 0,
+      "source_asset_id": null,
+      "transform": [
+        600,
+        0,
+        0,
+        800,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "page-4",
+      "pdf_index_0": 3,
+      "printed_label": "14",
+      "width": 600,
+      "height": 800,
+      "rotation": 0,
+      "source_asset_id": null,
+      "transform": [
+        600,
+        0,
+        0,
+        800,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "page-5",
+      "pdf_index_0": 4,
+      "printed_label": "15",
+      "width": 600,
+      "height": 800,
+      "rotation": 0,
+      "source_asset_id": null,
+      "transform": [
+        600,
+        0,
+        0,
+        800,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "page-6",
+      "pdf_index_0": 5,
+      "printed_label": "16",
+      "width": 600,
+      "height": 800,
+      "rotation": 0,
+      "source_asset_id": null,
+      "transform": [
+        600,
+        0,
+        0,
+        800,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "page-7",
+      "pdf_index_0": 6,
+      "printed_label": "17",
+      "width": 600,
+      "height": 800,
+      "rotation": 0,
+      "source_asset_id": null,
+      "transform": [
+        600,
+        0,
+        0,
+        800,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "page-8",
+      "pdf_index_0": 7,
+      "printed_label": "18",
+      "width": 600,
+      "height": 800,
+      "rotation": 0,
+      "source_asset_id": null,
+      "transform": [
+        600,
+        0,
+        0,
+        800,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "page-9",
+      "pdf_index_0": 8,
+      "printed_label": "19",
+      "width": 600,
+      "height": 800,
+      "rotation": 0,
+      "source_asset_id": null,
+      "transform": [
+        600,
+        0,
+        0,
+        800,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "page-10",
+      "pdf_index_0": 9,
+      "printed_label": "20",
+      "width": 600,
+      "height": 800,
+      "rotation": 0,
+      "source_asset_id": null,
+      "transform": [
+        600,
+        0,
+        0,
+        800,
+        0,
+        0
+      ]
+    }
+  ],
+  "blocks": [
+    {
+      "id": "paragraph-1",
+      "page_id": "page-1",
+      "type": "paragraph",
+      "parent_id": null,
+      "order_key": 10,
+      "bbox": [
+        0.05,
+        0.1,
+        0.95,
+        0.2
+      ],
+      "text_raw": "Synthetic lesson 1: plants use light energy to make food. This is invented demonstration text.",
+      "text_current": "Synthetic lesson 1: plants use light energy to make food. This is invented demonstration text.",
+      "lang": "en",
+      "revision": 1,
+      "status": "not_scored",
+      "confidence": {
+        "engine": "synthetic-native",
+        "score": null,
+        "flags": []
+      },
+      "provenance": {
+        "parser": "synthetic-fixture",
+        "model": null,
+        "version": "1.0.0",
+        "reviewer": null,
+        "changed_at": "2026-01-01T00:00:00Z"
+      },
+      "critical_flag": false,
+      "successor_ids": [],
+      "metadata": {}
+    },
+    {
+      "id": "heading-1",
+      "page_id": "page-1",
+      "type": "heading",
+      "parent_id": null,
+      "order_key": 0,
+      "bbox": [
+        0.05,
+        0.02,
+        0.95,
+        0.08
+      ],
+      "text_raw": "Synthetic plant energy chapter",
+      "text_current": "Synthetic plant energy chapter",
+      "lang": "en",
+      "revision": 1,
+      "status": "not_scored",
+      "confidence": {
+        "engine": "synthetic-native",
+        "score": null,
+        "flags": []
+      },
+      "provenance": {
+        "parser": "synthetic-fixture",
+        "model": null,
+        "version": "1.0.0",
+        "reviewer": null,
+        "changed_at": "2026-01-01T00:00:00Z"
+      },
+      "critical_flag": false,
+      "successor_ids": [],
+      "metadata": {}
+    },
+    {
+      "id": "paragraph-2",
+      "page_id": "page-2",
+      "type": "paragraph",
+      "parent_id": null,
+      "order_key": 10,
+      "bbox": [
+        0.05,
+        0.1,
+        0.95,
+        0.2
+      ],
+      "text_raw": "Synthetic lesson 2: plants use light energy to make food. This is invented demonstration text.",
+      "text_current": "Synthetic lesson 2: plants use light energy to make food. This is invented demonstration text.",
+      "lang": "en",
+      "revision": 1,
+      "status": "not_scored",
+      "confidence": {
+        "engine": "synthetic-native",
+        "score": null,
+        "flags": []
+      },
+      "provenance": {
+        "parser": "synthetic-fixture",
+        "model": null,
+        "version": "1.0.0",
+        "reviewer": null,
+        "changed_at": "2026-01-01T00:00:00Z"
+      },
+      "critical_flag": false,
+      "successor_ids": [],
+      "metadata": {}
+    },
+    {
+      "id": "column-left",
+      "page_id": "page-2",
+      "type": "paragraph",
+      "parent_id": null,
+      "order_key": 20,
+      "bbox": [
+        0.05,
+        0.3,
+        0.45,
+        0.8
+      ],
+      "text_raw": "Synthetic left column: sunlight provides energy.",
+      "text_current": "Synthetic left column: sunlight provides energy.",
+      "lang": "en",
+      "revision": 1,
+      "status": "not_scored",
+      "confidence": {
+        "engine": "synthetic-native",
+        "score": null,
+        "flags": []
+      },
+      "provenance": {
+        "parser": "synthetic-fixture",
+        "model": null,
+        "version": "1.0.0",
+        "reviewer": null,
+        "changed_at": "2026-01-01T00:00:00Z"
+      },
+      "critical_flag": false,
+      "successor_ids": [],
+      "metadata": {}
+    },
+    {
+      "id": "column-right",
+      "page_id": "page-2",
+      "type": "paragraph",
+      "parent_id": null,
+      "order_key": 30,
+      "bbox": [
+        0.55,
+        0.3,
+        0.95,
+        0.8
+      ],
+      "text_raw": "Synthetic right column: leaves contain green pigment.",
+      "text_current": "Synthetic right column: leaves contain green pigment.",
+      "lang": "en",
+      "revision": 1,
+      "status": "not_scored",
+      "confidence": {
+        "engine": "synthetic-native",
+        "score": null,
+        "flags": []
+      },
+      "provenance": {
+        "parser": "synthetic-fixture",
+        "model": null,
+        "version": "1.0.0",
+        "reviewer": null,
+        "changed_at": "2026-01-01T00:00:00Z"
+      },
+      "critical_flag": false,
+      "successor_ids": [],
+      "metadata": {}
+    },
+    {
+      "id": "paragraph-3",
+      "page_id": "page-3",
+      "type": "paragraph",
+      "parent_id": null,
+      "order_key": 10,
+      "bbox": [
+        0.05,
+        0.1,
+        0.95,
+        0.2
+      ],
+      "text_raw": "Synthetic lesson 3: plants use light energy to make food. This is invented demonstration text.",
+      "text_current": "Synthetic lesson 3: plants use light energy to make food. This is invented demonstration text.",
+      "lang": "en",
+      "revision": 1,
+      "status": "not_scored",
+      "confidence": {
+        "engine": "synthetic-native",
+        "score": null,
+        "flags": []
+      },
+      "provenance": {
+        "parser": "synthetic-fixture",
+        "model": null,
+        "version": "1.0.0",
+        "reviewer": null,
+        "changed_at": "2026-01-01T00:00:00Z"
+      },
+      "critical_flag": false,
+      "successor_ids": [],
+      "metadata": {}
+    },
+    {
+      "id": "table-1",
+      "page_id": "page-3",
+      "type": "table",
+      "parent_id": null,
+      "order_key": 20,
+      "bbox": [
+        0.05,
+        0.3,
+        0.95,
+        0.8
+      ],
+      "text_raw": "Synthetic seed counts",
+      "text_current": "Synthetic seed counts",
+      "lang": "en",
+      "revision": 1,
+      "status": "not_scored",
+      "confidence": {
+        "engine": "synthetic-native",
+        "score": null,
+        "flags": []
+      },
+      "provenance": {
+        "parser": "synthetic-fixture",
+        "model": null,
+        "version": "1.0.0",
+        "reviewer": null,
+        "changed_at": "2026-01-01T00:00:00Z"
+      },
+      "critical_flag": false,
+      "successor_ids": [],
+      "metadata": {}
+    },
+    {
+      "id": "header-kind",
+      "page_id": "page-3",
+      "type": "table_cell",
+      "parent_id": "table-1",
+      "order_key": 0,
+      "bbox": [
+        0.05,
+        0.3,
+        0.4,
+        0.45
+      ],
+      "text_raw": "Seed kind",
+      "text_current": "Seed kind",
+      "lang": "en",
+      "revision": 1,
+      "status": "not_scored",
+      "confidence": {
+        "engine": "synthetic-native",
+        "score": null,
+        "flags": []
+      },
+      "provenance": {
+        "parser": "synthetic-fixture",
+        "model": null,
+        "version": "1.0.0",
+        "reviewer": null,
+        "changed_at": "2026-01-01T00:00:00Z"
+      },
+      "critical_flag": false,
+      "successor_ids": [],
+      "metadata": {}
+    },
+    {
+      "id": "header-count",
+      "page_id": "page-3",
+      "type": "table_cell",
+      "parent_id": "table-1",
+      "order_key": 1,
+      "bbox": [
+        0.45,
+        0.3,
+        0.8,
+        0.45
+      ],
+      "text_raw": "Count",
+      "text_current": "Count",
+      "lang": "en",
+      "revision": 1,
+      "status": "not_scored",
+      "confidence": {
+        "engine": "synthetic-native",
+        "score": null,
+        "flags": []
+      },
+      "provenance": {
+        "parser": "synthetic-fixture",
+        "model": null,
+        "version": "1.0.0",
+        "reviewer": null,
+        "changed_at": "2026-01-01T00:00:00Z"
+      },
+      "critical_flag": false,
+      "successor_ids": [],
+      "metadata": {}
+    },
+    {
+      "id": "cell-kind",
+      "page_id": "page-3",
+      "type": "table_cell",
+      "parent_id": "table-1",
+      "order_key": 2,
+      "bbox": [
+        0.05,
+        0.5,
+        0.4,
+        0.65
+      ],
+      "text_raw": "Bean",
+      "text_current": "Bean",
+      "lang": "en",
+      "revision": 1,
+      "status": "not_scored",
+      "confidence": {
+        "engine": "synthetic-native",
+        "score": null,
+        "flags": []
+      },
+      "provenance": {
+        "parser": "synthetic-fixture",
+        "model": null,
+        "version": "1.0.0",
+        "reviewer": null,
+        "changed_at": "2026-01-01T00:00:00Z"
+      },
+      "critical_flag": false,
+      "successor_ids": [],
+      "metadata": {
+        "header_cell_ids": [
+          "header-kind"
+        ]
+      }
+    },
+    {
+      "id": "cell-count",
+      "page_id": "page-3",
+      "type": "table_cell",
+      "parent_id": "table-1",
+      "order_key": 3,
+      "bbox": [
+        0.45,
+        0.5,
+        0.8,
+        0.65
+      ],
+      "text_raw": "4",
+      "text_current": "4",
+      "lang": "en",
+      "revision": 1,
+      "status": "not_scored",
+      "confidence": {
+        "engine": "synthetic-native",
+        "score": null,
+        "flags": []
+      },
+      "provenance": {
+        "parser": "synthetic-fixture",
+        "model": null,
+        "version": "1.0.0",
+        "reviewer": null,
+        "changed_at": "2026-01-01T00:00:00Z"
+      },
+      "critical_flag": false,
+      "successor_ids": [],
+      "metadata": {
+        "header_cell_ids": [
+          "header-count"
+        ]
+      }
+    },
+    {
+      "id": "paragraph-4",
+      "page_id": "page-4",
+      "type": "paragraph",
+      "parent_id": null,
+      "order_key": 10,
+      "bbox": [
+        0.05,
+        0.1,
+        0.95,
+        0.2
+      ],
+      "text_raw": "Synthetic lesson 4: plants use light energy to make food. This is invented demonstration text.",
+      "text_current": "Synthetic lesson 4: plants use light energy to make food. This is invented demonstration text.",
+      "lang": "en",
+      "revision": 1,
+      "status": "not_scored",
+      "confidence": {
+        "engine": "synthetic-native",
+        "score": null,
+        "flags": []
+      },
+      "provenance": {
+        "parser": "synthetic-fixture",
+        "model": null,
+        "version": "1.0.0",
+        "reviewer": null,
+        "changed_at": "2026-01-01T00:00:00Z"
+      },
+      "critical_flag": false,
+      "successor_ids": [],
+      "metadata": {}
+    },
+    {
+      "id": "equation-1",
+      "page_id": "page-4",
+      "type": "equation",
+      "parent_id": null,
+      "order_key": 20,
+      "bbox": [
+        0.05,
+        0.1,
+        0.95,
+        0.2
+      ],
+      "text_raw": "2 + 2 = 4",
+      "text_current": "2 + 2 = 4",
+      "lang": "en",
+      "revision": 1,
+      "status": "reviewed",
+      "confidence": {
+        "engine": "synthetic-native",
+        "score": null,
+        "flags": []
+      },
+      "provenance": {
+        "parser": "synthetic-fixture",
+        "model": null,
+        "version": "1.0.0",
+        "reviewer": "synthetic-reviewer",
+        "changed_at": "2026-01-01T00:00:00Z"
+      },
+      "critical_flag": false,
+      "successor_ids": [],
+      "metadata": {
+        "mathml": "<math><mrow><mn>2</mn><mo>+</mo><mn>2</mn><mo>=</mo><mn>4</mn></mrow></math>",
+        "spoken_fallback": "Two plus two equals four."
+      }
+    },
+    {
+      "id": "paragraph-5",
+      "page_id": "page-5",
+      "type": "paragraph",
+      "parent_id": null,
+      "order_key": 10,
+      "bbox": [
+        0.05,
+        0.1,
+        0.95,
+        0.2
+      ],
+      "text_raw": "Synthetic lesson 5: plants use light energy to make food. This is invented demonstration text.",
+      "text_current": "Synthetic lesson 5: plants use light energy to make food. This is invented demonstration text.",
+      "lang": "en",
+      "revision": 1,
+      "status": "not_scored",
+      "confidence": {
+        "engine": "synthetic-native",
+        "score": null,
+        "flags": []
+      },
+      "provenance": {
+        "parser": "synthetic-fixture",
+        "model": null,
+        "version": "1.0.0",
+        "reviewer": null,
+        "changed_at": "2026-01-01T00:00:00Z"
+      },
+      "critical_flag": false,
+      "successor_ids": [],
+      "metadata": {}
+    },
+    {
+      "id": "figure-1",
+      "page_id": "page-5",
+      "type": "figure",
+      "parent_id": null,
+      "order_key": 20,
+      "bbox": [
+        0.05,
+        0.1,
+        0.95,
+        0.2
+      ],
+      "text_raw": "",
+      "text_current": "",
+      "lang": "en",
+      "revision": 1,
+      "status": "reviewed",
+      "confidence": {
+        "engine": "synthetic-native",
+        "score": null,
+        "flags": []
+      },
+      "provenance": {
+        "parser": "synthetic-fixture",
+        "model": null,
+        "version": "1.0.0",
+        "reviewer": "synthetic-reviewer",
+        "changed_at": "2026-01-01T00:00:00Z"
+      },
+      "critical_flag": false,
+      "successor_ids": [],
+      "metadata": {
+        "alt_text_short": "A synthetic blue square beside a red circle.",
+        "caption_block_ids": [
+          "caption-1"
+        ]
+      }
+    },
+    {
+      "id": "caption-1",
+      "page_id": "page-5",
+      "type": "caption",
+      "parent_id": null,
+      "order_key": 30,
+      "bbox": [
+        0.05,
+        0.1,
+        0.95,
+        0.2
+      ],
+      "text_raw": "Synthetic shapes: a square and a circle.",
+      "text_current": "Synthetic shapes: a square and a circle.",
+      "lang": "en",
+      "revision": 1,
+      "status": "not_scored",
+      "confidence": {
+        "engine": "synthetic-native",
+        "score": null,
+        "flags": []
+      },
+      "provenance": {
+        "parser": "synthetic-fixture",
+        "model": null,
+        "version": "1.0.0",
+        "reviewer": null,
+        "changed_at": "2026-01-01T00:00:00Z"
+      },
+      "critical_flag": false,
+      "successor_ids": [],
+      "metadata": {}
+    },
+    {
+      "id": "paragraph-6",
+      "page_id": "page-6",
+      "type": "paragraph",
+      "parent_id": null,
+      "order_key": 10,
+      "bbox": [
+        0.05,
+        0.1,
+        0.95,
+        0.2
+      ],
+      "text_raw": "Synthetic lesson 6: plants use light energy to make food. This is invented demonstration text.",
+      "text_current": "Synthetic lesson 6: plants use light energy to make food. This is invented demonstration text.",
+      "lang": "en",
+      "revision": 1,
+      "status": "not_scored",
+      "confidence": {
+        "engine": "synthetic-native",
+        "score": null,
+        "flags": []
+      },
+      "provenance": {
+        "parser": "synthetic-fixture",
+        "model": null,
+        "version": "1.0.0",
+        "reviewer": null,
+        "changed_at": "2026-01-01T00:00:00Z"
+      },
+      "critical_flag": false,
+      "successor_ids": [],
+      "metadata": {}
+    },
+    {
+      "id": "damaged-minus",
+      "page_id": "page-6",
+      "type": "paragraph",
+      "parent_id": null,
+      "order_key": 20,
+      "bbox": [
+        0.05,
+        0.1,
+        0.95,
+        0.2
+      ],
+      "text_raw": "The synthetic value is 5.",
+      "text_current": "The synthetic value is 5.",
+      "lang": "en",
+      "revision": 1,
+      "status": "needs_review",
+      "confidence": {
+        "engine": "synthetic-ocr",
+        "score": 0.51,
+        "flags": [
+          "critical_minus_sign_uncertain"
+        ]
+      },
+      "provenance": {
+        "parser": "synthetic-fixture",
+        "model": null,
+        "version": "1.0.0",
+        "reviewer": null,
+        "changed_at": "2026-01-01T00:00:00Z"
+      },
+      "critical_flag": true,
+      "successor_ids": [],
+      "metadata": {}
+    },
+    {
+      "id": "paragraph-7",
+      "page_id": "page-7",
+      "type": "paragraph",
+      "parent_id": null,
+      "order_key": 10,
+      "bbox": [
+        0.05,
+        0.1,
+        0.95,
+        0.2
+      ],
+      "text_raw": "यह कृत्रिम पाठ है। पौधे प्रकाश ऊर्जा से भोजन बनाते हैं।",
+      "text_current": "यह कृत्रिम पाठ है। पौधे प्रकाश ऊर्जा से भोजन बनाते हैं।",
+      "lang": "hi",
+      "revision": 1,
+      "status": "not_scored",
+      "confidence": {
+        "engine": "synthetic-native",
+        "score": null,
+        "flags": []
+      },
+      "provenance": {
+        "parser": "synthetic-fixture",
+        "model": null,
+        "version": "1.0.0",
+        "reviewer": null,
+        "changed_at": "2026-01-01T00:00:00Z"
+      },
+      "critical_flag": false,
+      "successor_ids": [],
+      "metadata": {}
+    },
+    {
+      "id": "paragraph-8",
+      "page_id": "page-8",
+      "type": "paragraph",
+      "parent_id": null,
+      "order_key": 10,
+      "bbox": [
+        0.05,
+        0.1,
+        0.95,
+        0.2
+      ],
+      "text_raw": "Synthetic lesson 8: plants use light energy to make food. This is invented demonstration text.",
+      "text_current": "Synthetic lesson 8: plants use light energy to make food. This is invented demonstration text.",
+      "lang": "en",
+      "revision": 1,
+      "status": "not_scored",
+      "confidence": {
+        "engine": "synthetic-native",
+        "score": null,
+        "flags": []
+      },
+      "provenance": {
+        "parser": "synthetic-fixture",
+        "model": null,
+        "version": "1.0.0",
+        "reviewer": null,
+        "changed_at": "2026-01-01T00:00:00Z"
+      },
+      "critical_flag": false,
+      "successor_ids": [],
+      "metadata": {}
+    },
+    {
+      "id": "paragraph-9",
+      "page_id": "page-9",
+      "type": "paragraph",
+      "parent_id": null,
+      "order_key": 10,
+      "bbox": [
+        0.05,
+        0.1,
+        0.95,
+        0.2
+      ],
+      "text_raw": "यह कृत्रिम पाठ है। पौधे प्रकाश ऊर्जा से भोजन बनाते हैं।",
+      "text_current": "यह कृत्रिम पाठ है। पौधे प्रकाश ऊर्जा से भोजन बनाते हैं।",
+      "lang": "hi",
+      "revision": 1,
+      "status": "not_scored",
+      "confidence": {
+        "engine": "synthetic-native",
+        "score": null,
+        "flags": []
+      },
+      "provenance": {
+        "parser": "synthetic-fixture",
+        "model": null,
+        "version": "1.0.0",
+        "reviewer": null,
+        "changed_at": "2026-01-01T00:00:00Z"
+      },
+      "critical_flag": false,
+      "successor_ids": [],
+      "metadata": {}
+    },
+    {
+      "id": "paragraph-10",
+      "page_id": "page-10",
+      "type": "paragraph",
+      "parent_id": null,
+      "order_key": 10,
+      "bbox": [
+        0.05,
+        0.1,
+        0.95,
+        0.2
+      ],
+      "text_raw": "यह कृत्रिम पाठ है। पौधे प्रकाश ऊर्जा से भोजन बनाते हैं।",
+      "text_current": "यह कृत्रिम पाठ है। पौधे प्रकाश ऊर्जा से भोजन बनाते हैं।",
+      "lang": "hi",
+      "revision": 1,
+      "status": "not_scored",
+      "confidence": {
+        "engine": "synthetic-native",
+        "score": null,
+        "flags": []
+      },
+      "provenance": {
+        "parser": "synthetic-fixture",
+        "model": null,
+        "version": "1.0.0",
+        "reviewer": null,
+        "changed_at": "2026-01-01T00:00:00Z"
+      },
+      "critical_flag": false,
+      "successor_ids": [],
+      "metadata": {}
+    }
+  ],
+  "edges": [
+    {
+      "from_id": "column-left",
+      "relation": "precedes",
+      "to_id": "column-right"
+    },
+    {
+      "from_id": "table-1",
+      "relation": "contains",
+      "to_id": "header-kind"
+    },
+    {
+      "from_id": "table-1",
+      "relation": "contains",
+      "to_id": "header-count"
+    },
+    {
+      "from_id": "table-1",
+      "relation": "contains",
+      "to_id": "cell-kind"
+    },
+    {
+      "from_id": "table-1",
+      "relation": "contains",
+      "to_id": "cell-count"
+    },
+    {
+      "from_id": "header-kind",
+      "relation": "header_for",
+      "to_id": "cell-kind"
+    },
+    {
+      "from_id": "header-count",
+      "relation": "header_for",
+      "to_id": "cell-count"
+    },
+    {
+      "from_id": "caption-1",
+      "relation": "caption_of",
+      "to_id": "figure-1"
+    }
+  ],
+  "quality_flags": [
+    "synthetic_demo_only",
+    "critical_minus_sign_uncertain"
+  ],
+  "parser_versions": {
+    "synthetic-fixture": "1.0.0"
+  }
+}

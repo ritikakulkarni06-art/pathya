@@ -9,7 +9,8 @@ def main() -> None:
         ["ruff", "check", "."],
         ["ruff", "format", "--check", "."],
         ["mypy"],
-        ["pytest", "-q"],
+        ["coverage", "run", "-m", "pytest", "-q"],
+        ["coverage", "report", "--include=app/db/*", "--fail-under=85"],
     ]:
         subprocess.run([sys.executable, "-m", *args], check=True)
 

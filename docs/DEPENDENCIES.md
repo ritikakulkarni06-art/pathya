@@ -10,6 +10,7 @@ Resolved for Python 3.12. Versions are pinned in requirements.lock. License meta
 | argon2-cffi | 25.1.0 | MIT | Runtime, tooling or transitive dependency | Pending review |
 | argon2-cffi-bindings | 26.2.0 | MIT | Runtime, tooling or transitive dependency | Pending review |
 | ast_serialize | 0.13.1 | MIT | Runtime, tooling or transitive dependency | Pending review |
+| attrs | 26.1.0 | MIT | Runtime, tooling or transitive dependency | Pending review |
 | certifi | 2026.10.23 | MPL-2.0 | Runtime, tooling or transitive dependency | Pending review |
 | cffi | 2.1.1 | MIT-0 | Runtime, tooling or transitive dependency | Pending review |
 | click | 8.5.1 | BSD-3-Clause | Runtime, tooling or transitive dependency | Pending review |
@@ -22,6 +23,8 @@ Resolved for Python 3.12. Versions are pinned in requirements.lock. License meta
 | httpx | 0.28.1 | BSD-3-Clause | Runtime, tooling or transitive dependency | Pending review |
 | idna | 3.20 | BSD-3-Clause | Runtime, tooling or transitive dependency | Pending review |
 | iniconfig | 2.3.1 | MIT | Runtime, tooling or transitive dependency | Pending review |
+| jsonschema | 4.26.0 | MIT | Runtime, tooling or transitive dependency | Pending review |
+| jsonschema-specifications | 2025.9.1 | MIT | Runtime, tooling or transitive dependency | Pending review |
 | librt | 0.16.0 | MIT | Runtime, tooling or transitive dependency | Pending review |
 | mypy | 2.4.1 | MIT | Runtime, tooling or transitive dependency | Pending review |
 | mypy_extensions | 1.2.0 | MIT | Runtime, tooling or transitive dependency | Pending review |
@@ -41,6 +44,8 @@ Resolved for Python 3.12. Versions are pinned in requirements.lock. License meta
 | python-dotenv | 1.2.4 | BSD-3-Clause | Runtime, tooling or transitive dependency | Pending review |
 | python-multipart | 0.0.34 | Apache-2.0 | Runtime, tooling or transitive dependency | Pending review |
 | PyYAML | 6.0.3 | MIT | Runtime, tooling or transitive dependency | Pending review |
+| referencing | 0.37.0 | MIT | Runtime, tooling or transitive dependency | Pending review |
+| rpds-py | 2026.9.1 | MIT | Runtime, tooling or transitive dependency | Pending review |
 | ruff | 0.17.5 | MIT | Runtime, tooling or transitive dependency | Pending review |
 | starlette | 1.10.0 | BSD-3-Clause | Runtime, tooling or transitive dependency | Pending review |
 | typing-inspection | 0.4.5 | MIT | Runtime, tooling or transitive dependency | Pending review |
