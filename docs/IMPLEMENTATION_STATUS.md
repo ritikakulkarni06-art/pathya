@@ -6,3 +6,5 @@ Next manual gate: approve the extraction/speech/identifier contracts with teamma
 
 - P1 complete: lint, strict types, 8 tests and live localhost health check passed.
 - P2 implemented: transactional migrations, immutable history, FTS triggers and aggregate reads; 18 tests passed; app/db coverage 96% (target >=85%).
+
+- P3 complete: 33 tests passed, including bounded streaming, path escape rejection, deduplication, permissions, idempotent physical deletion and rollback after file publication failure.
