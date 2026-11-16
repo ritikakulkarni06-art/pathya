@@ -10,3 +10,10 @@
 - Existing main/person branches and teammates' work areas are preserved.
 
 - Supplied Uvicorn commands disable access logs to avoid raw question URLs; structured logs use route templates.
+
+## P2
+
+- FTS uses a normal, content-storing virtual table maintained by triggers: only current, eligible chunks are present. This avoids contentless-table deletion incompatibilities and permits stale rows to remain in `chunks` history. The additional private text copy is purged with the source rows.
+- Migrations execute complete SQL statements inside one BEGIN IMMEDIATE transaction; executescript is avoided because it implicitly commits. Applied checksums and missing files are verified at startup and readiness.
+- Published content/history and manifests reject mutation. P13 must add an explicit controlled purge mechanism that reconciles append-only history with physical deletion; ordinary request code cannot delete history.
+- Aggregate repositories added for currently reachable reads; later aggregate writes will be added in the stage that implements them, using bound SQL parameters.
