@@ -32,6 +32,7 @@ Resolved for Python 3.12. Versions are pinned in requirements.lock. License meta
 | orjson | 3.13.0 | MPL-2.0 AND (Apache-2.0 OR MIT) | Runtime, tooling or transitive dependency | Pending review |
 | packaging | 26.3 | Apache-2.0 OR BSD-2-Clause | Runtime, tooling or transitive dependency | Pending review |
 | pathspec | 1.1.1 | Mozilla Public License 2.0 (MPL 2.0) | Runtime, tooling or transitive dependency | Pending review |
+| pillow | 13.0.0 | MIT-CMU | Runtime, tooling or transitive dependency | Pending review |
 | pip | 25.0.1 | MIT | Runtime, tooling or transitive dependency | Pending review |
 | pluggy | 1.7.0 | MIT | Runtime, tooling or transitive dependency | Pending review |
 | pycparser | 3.12 | BSD-3-Clause | Runtime, tooling or transitive dependency | Pending review |
@@ -39,6 +40,7 @@ Resolved for Python 3.12. Versions are pinned in requirements.lock. License meta
 | pydantic-settings | 2.16.3 | MIT | Runtime, tooling or transitive dependency | Pending review |
 | pydantic_core | 2.50.4 | MIT | Runtime, tooling or transitive dependency | Pending review |
 | Pygments | 2.21.0 | BSD-2-Clause | Runtime, tooling or transitive dependency | Pending review |
+| pypdf | 7.1.0 | BSD-3-Clause | Runtime, tooling or transitive dependency | Pending review |
 | pytest | 9.2.0 | MIT | Runtime, tooling or transitive dependency | Pending review |
 | pytest-asyncio | 1.5.0 | Apache-2.0 | Runtime, tooling or transitive dependency | Pending review |
 | python-dotenv | 1.2.4 | BSD-3-Clause | Runtime, tooling or transitive dependency | Pending review |

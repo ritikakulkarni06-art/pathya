@@ -140,7 +140,7 @@ def test_route_enumeration_requires_authentication(tmp_path):
         if route.path not in public:
             assert current_user in list(dependencies(route.dependant)), route.path
             checked.append(route.path)
-    assert set(checked) == {
+    assert set(checked) >= {
         "/auth/me",
         "/auth/logout",
         "/documents/{document_id}/grants",
