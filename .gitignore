@@ -1,11 +1,49 @@
-# Local credentials and runtime data
+# Local configuration and credentials
 .env
 .env.*
 !.env.example
-node_modules/
-.venv/
+*.pem
+*.key
+credentials.json
+.aws/
+
+# Python
 __pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage*
+*.egg-info/
+
+# JavaScript and build outputs
+node_modules/
+dist/
+build/
+coverage/
+.next/
+.cache/
+
+# Runtime and private content
 *.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.log
+data/
 uploads/
 storage/
+audio/
+models/
+
+# Editor, OS and setup scratch files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
 .codex-tmp/
+.agents/
+.codex/
