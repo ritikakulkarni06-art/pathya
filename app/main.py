@@ -12,11 +12,13 @@ from starlette.exceptions import HTTPException
 from starlette.middleware.base import RequestResponseEndpoint
 from starlette.responses import Response
 
+from app.api.auth import router as auth_router
 from app.config import Settings
 from app.db.connection import Database
 from app.db.migrate import migrate
 from app.errors import Problem
 from app.logging import log_event
+from app.services.auth import LoginLimiter, seed_local
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -27,6 +29,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         config.pathya_data_dir.mkdir(parents=True, exist_ok=True)
         assert config.pathya_db_path is not None
         migrate(Database(config.pathya_db_path))
+        if config.auth_mode == "local":
+            seed_local(application.state.database)
         yield
 
     application = FastAPI(
@@ -40,6 +44,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     application.state.settings = config
     assert config.pathya_db_path is not None
     application.state.database = Database(config.pathya_db_path)
+    application.state.login_limiter = LoginLimiter(
+        config.login_rate_limit, config.login_window_seconds
+    )
+    application.include_router(auth_router)
     application.add_middleware(
         CORSMiddleware,
         allow_origins=config.cors_origins,
@@ -52,7 +60,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def request_context(request: Request, call_next: RequestResponseEndpoint) -> Response:
         request.state.request_id = str(uuid4())
         start = time.monotonic()
-        response = await call_next(request)
+        try:
+            response = await call_next(request)
+        except Exception:
+            # Do not allow framework tracebacks to serialize sensitive response/input data.
+            response = problem_response(
+                500, "internal_error", "The request could not be completed. Please try again."
+            )
         response.headers["X-Request-ID"] = request.state.request_id
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["Referrer-Policy"] = "no-referrer"
@@ -81,7 +95,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @application.exception_handler(Problem)
     async def handle_problem(request: Request, exc: Problem) -> JSONResponse:
-        return problem_response(exc.status, exc.code, exc.detail)
+        response = problem_response(exc.status, exc.code, exc.detail)
+        if exc.status == 429:
+            response.headers["Retry-After"] = str(config.login_window_seconds)
+        return response
 
     @application.exception_handler(RequestValidationError)
     async def handle_validation(request: Request, exc: RequestValidationError) -> JSONResponse:
