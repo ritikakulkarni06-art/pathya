@@ -258,6 +258,7 @@ def test_inconsistent_table_becomes_uncertain_candidate(textbook: tuple[Path, An
     assert table.table.cell_ids == [] and table.table.row_count is None
     assert QualityFlag.TABLE_STRUCTURE_UNCERTAIN in table.quality_flags
     assert "Quantity" in table.raw_text and "m/s" in table.raw_text  # text preserved, no cells invented
+    assert table.raw_text.startswith("Quantity SI unit Symbol Distance metre m")  # row by row, not by column
     assert not any(b.block_type is BlockType.TABLE_CELL for b in result.document.blocks)
 
 
@@ -499,6 +500,51 @@ def test_document_validates_against_schema(textbook: tuple[Path, Any]) -> None:
     precedes = [e for e in doc.edges if e.edge_type is EdgeType.PRECEDES]
     page_of = {b.id: b.page_id for b in doc.blocks}
     assert all(page_of[e.source_id] == page_of[e.target_id] for e in precedes)
+
+
+# ------------------------------------------- word order inside a block (audit C1)
+
+
+def _paragraph_doc(tmp_path: Path, texts: list[Text]) -> tuple[Any, Any]:
+    ex = extract_native_pdf(write_pdf(tmp_path / "p.pdf", [PageSpec(texts=texts)]))
+    box = _around([w.bbox for w in ex.pages[0].words], pad=0.01)
+    result = build_layout_document(ex, {0: _layout(0, [_region(0, RegionKind.TEXT, box)])}, source_uri="asset://p")
+    return ex, _blocks(result)[0]
+
+
+def test_lines_drawn_in_reverse_visual_order_read_top_to_bottom(tmp_path: Path) -> None:
+    # The content stream draws the bottom line first (common in edited/InDesign PDFs).
+    texts = [Text(72, 680, "second line of the paragraph"), Text(72, 700, "first line of the paragraph")]
+    ex, block = _paragraph_doc(tmp_path, texts)
+    assert ex.pages[0].words[0].text == "second"  # stream order really is reversed
+    assert block.raw_text == "first line of the paragraph second line of the paragraph"
+
+
+def test_words_drawn_right_to_left_within_a_line_read_left_to_right(tmp_path: Path) -> None:
+    texts = [Text(200, 700, "world"), Text(150, 700, "brave"), Text(72, 700, "Hello")]
+    _, block = _paragraph_doc(tmp_path, texts)
+    assert block.raw_text == "Hello brave world"
+
+
+def test_normal_multi_line_paragraph_unchanged(tmp_path: Path) -> None:
+    lines = ["Motion is the change in position", "of an object over time and is", "described by speed."]
+    _, block = _paragraph_doc(tmp_path, [Text(72, 700 - i * 14.5, t, 11) for i, t in enumerate(lines)])
+    assert block.raw_text == " ".join(lines)
+
+
+def test_superscript_and_mixed_sizes_stay_on_their_line(tmp_path: Path) -> None:
+    texts = [Text(72, 700, "area is 4 m", 12), Text(140, 705, "2", 7), Text(150, 700, "here", 12),
+             Text(72, 684, "next line", 12)]
+    _, block = _paragraph_doc(tmp_path, texts)
+    assert block.raw_text == "area is 4 m 2 here next line"
+
+
+def test_two_text_columns_inside_one_region_read_column_by_column(tmp_path: Path) -> None:
+    # A single (over-large) region covering two columns must not interleave them.
+    texts = [Text(72, 700, "left one"), Text(72, 686, "left two"),
+             Text(330, 700, "right one"), Text(330, 686, "right two")]
+    _, block = _paragraph_doc(tmp_path, texts)
+    assert block.raw_text == "left one left two right one right two"
 
 
 def test_layout_config_is_tunable() -> None:

@@ -368,17 +368,55 @@ def _fallback_regions(tokens: list[_Token]) -> list[_Region]:
     return out
 
 
-def _ordered_tokens(tokens: list[_Token]) -> list[_Token]:
-    sources = {t.source for t in tokens}
-    if len(sources) == 1:
-        return sorted(tokens, key=lambda t: t.order)
-    heights = sorted(t.bbox[3] - t.bbox[1] for t in tokens)
-    band = max(heights[len(heights) // 2] * 0.6, 1e-4)
-    return sorted(tokens, key=lambda t: (round(((t.bbox[1] + t.bbox[3]) / 2) / band), t.bbox[0]))
+def _visual_lines(tokens: list[_Token]) -> list[list[_Token]]:
+    """Cluster tokens into visual lines (top to bottom), each sorted left to right.
+
+    A token joins the line whose vertical span overlaps it by at least half of
+    the smaller height, so superscripts and mixed font sizes stay on their line.
+    Content-stream order is deliberately NOT used: PDFs often draw text out of
+    visual order, and this text is what speech reads aloud.
+    """
+    lines: list[list[_Token]] = []
+    spans: list[list[float]] = []  # [top, bottom] per line
+    for token in sorted(tokens, key=lambda t: ((t.bbox[1] + t.bbox[3]) / 2, t.bbox[0])):
+        top, bottom = token.bbox[1], token.bbox[3]
+        best, best_overlap = None, 0.0
+        for i, (lt, lb) in enumerate(spans):
+            overlap = min(bottom, lb) - max(top, lt)
+            if overlap >= 0.5 * min(bottom - top, lb - lt) and overlap > best_overlap:
+                best, best_overlap = i, overlap
+        if best is None:
+            lines.append([token])
+            spans.append([top, bottom])
+        else:
+            lines[best].append(token)
+            spans[best] = [min(spans[best][0], top), max(spans[best][1], bottom)]
+    order = sorted(range(len(lines)), key=lambda i: spans[i][0])
+    return [sorted(lines[i], key=lambda t: t.bbox[0]) for i in order]
 
 
-def _text(tokens: list[_Token]) -> str:
-    return " ".join(t.text for t in _ordered_tokens(tokens))
+def _ordered_tokens(tokens: list[_Token], *, allow_columns: bool = True) -> list[_Token]:
+    """Visual reading order of the words inside one region.
+
+    If the region itself contains side-by-side text columns (an over-large
+    region), each column is read completely before the next. Tables pass
+    ``allow_columns=False`` so a structureless table still reads row by row.
+    """
+    if allow_columns and len(tokens) > 1:
+        gutters = _find_gutters([t.bbox for t in tokens], min_gutter=0.03)
+        if gutters:
+            def column(t: _Token) -> int:
+                return sum(1 for g in gutters if (t.bbox[0] + t.bbox[2]) / 2 > g)
+
+            by_column: dict[int, list[_Token]] = defaultdict(list)
+            for t in tokens:
+                by_column[column(t)].append(t)
+            return [t for c in sorted(by_column) for line in _visual_lines(by_column[c]) for t in line]
+    return [t for line in _visual_lines(tokens) for t in line]
+
+
+def _text(tokens: list[_Token], *, allow_columns: bool = True) -> str:
+    return " ".join(t.text for t in _ordered_tokens(tokens, allow_columns=allow_columns))
 
 
 def _block_language(tokens: list[_Token]) -> str:
@@ -706,7 +744,7 @@ def _region_to_blocks(region: _Region, position: int, page_id: Any, provenance: 
                       m: Any) -> tuple[Any, list[Any], list[Any]]:
     block_type = m.BlockType(_block_type(region.kind))
     tokens = region.tokens
-    text = _text(tokens) if tokens else None
+    text = _text(tokens, allow_columns=region.kind is not RegionKind.TABLE) if tokens else None
     language = m.Language(_block_language(tokens))
     prov = provenance.model_copy(update={"parameters": {
         **provenance.parameters,
@@ -779,7 +817,7 @@ def _table_blocks(region: _Region, common: dict[str, Any], text: str | None, pro
             cell_text = c.engine_text
         else:
             cell_flags |= geo
-            cell_text = _text(toks) if toks else ""
+            cell_text = _text(toks, allow_columns=False) if toks else ""
         if not cell_text:
             cell_flags.add("empty_text")
         headers: list[int] = []
@@ -802,7 +840,7 @@ def _table_blocks(region: _Region, common: dict[str, Any], text: str | None, pro
             edges.append(m.Edge(edge_type=m.EdgeType.HEADER_FOR, source_id=cell_ids[h], target_id=cell_ids[i],
                                 provenance=prov))
     extra = {"table_structure_uncertain"} if stray else set()
-    stray_text = _text(stray) if stray else None
+    stray_text = _text(stray, allow_columns=False) if stray else None
     table = m.Block(id=table_id, block_type=m.BlockType.TABLE, raw_text=stray_text, current_text=stray_text,
                     quality_flags=_flags(region, stray, None, m, extra),
                     table=m.TableMeta(row_count=candidate.rows, column_count=candidate.cols, cell_ids=cell_ids),
