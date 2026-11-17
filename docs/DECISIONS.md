@@ -56,3 +56,12 @@
 - Rights notes are required. The immutable original keeps its metadata; only a verified working PNG has metadata stripped. Sources are not silently rewritten.
 - With no institutional project-end date supplied yet, retention is conservatively upload time plus RETENTION_DAYS_AFTER_END. Final policy/project-end configuration is deferred to P13 and institutional review.
 - Failed uploads before job creation remove their temporary/source files and rows, or leave an explicit failed state if physical cleanup itself fails.
+
+## P7
+
+- Attempts count executions started (increment on atomic claim), not an extra increment on reaping. Lease expiry visibly records lease_expired, queues another attempt, and fails permanently at the configured maximum.
+- The deployment worker is one parent process with at most one job child at a time. The parent heartbeats the SQLite lease and kills the child tree on timeout/cancellation. In-process execution is an integration-test helper, not the hard-timeout deployment path.
+- Extraction is page-by-page and imported once in one transaction. IDs/mappings and import receipts make retries idempotent. Review-required extraction is a successful terminal review state, not failed processing.
+- P7 build_audio/build_index handlers deliberately complete with an explicit unavailable-handler/text-fallback message and produce no pretend artifacts. P9/P10 replace them. Other unimplemented handlers fail visibly; delete is not exposed until P13.
+
+- Tests clone a pristine migrated SQLite template via the SQLite backup API into separate per-test databases. Migration behavior is still tested on fresh databases; this reduces repeated schema setup without sharing mutable state. Crash tests explicitly expire the abandoned lease after killing the worker, rather than relying on a two-second wall-clock window under load.

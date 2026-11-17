@@ -10,6 +10,7 @@ from app.db.repos import documents, extraction
 from app.errors import Problem
 from app.schemas.content import ExtractionResult, parse_extraction
 from app.services.auth import now_utc
+from app.services.jobs import LeaseLost
 
 
 @dataclass(frozen=True)
@@ -19,13 +20,27 @@ class ImportResult:
 
 
 def import_extraction(
-    database: Database, document_id: str, result: ExtractionResult | dict[str, Any]
+    database: Database,
+    document_id: str,
+    result: ExtractionResult | dict[str, Any],
+    *,
+    lease: tuple[str, str] | None = None,
 ) -> ImportResult:
     validated = parse_extraction(result)
     encoded = json.dumps(validated.model_dump(mode="json"), sort_keys=True, separators=(",", ":"))
     digest = hashlib.sha256(encoded.encode()).hexdigest()
     try:
         with database.write_tx() as connection:
+            if lease is not None:
+                active = connection.execute(
+                    "SELECT * FROM jobs WHERE id=? AND lease_owner=?", lease
+                ).fetchone()
+                if (
+                    active is None
+                    or active["state"] not in {"extracting", "building"}
+                    or active["lease_expires_at"] <= now_utc()
+                ):
+                    raise LeaseLost()
             document = documents.get_document(connection, document_id)
             if document is None or document["state"] in {"deleting", "deleted"}:
                 raise Problem(404, "document_not_found", "This document is unavailable.")

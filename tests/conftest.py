@@ -4,10 +4,21 @@ from app.db.connection import Database
 from app.db.migrate import migrate
 
 
+@pytest.fixture(scope="session")
+def database_template(tmp_path_factory):
+    template = Database(tmp_path_factory.mktemp("database-template") / "template.sqlite3")
+    migrate(template)
+    return template
+
+
 @pytest.fixture
-def database(tmp_path):
+def database(tmp_path, database_template):
+    import sqlite3
+
     db = Database(tmp_path / "db.sqlite3")
-    migrate(db)
+    with database_template.read_conn() as source:
+        with sqlite3.connect(db.path) as target:
+            source.backup(target)
     return db
 
 

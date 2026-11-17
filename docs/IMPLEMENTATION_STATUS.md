@@ -14,3 +14,5 @@ Next manual gate: approve the extraction/speech/identifier contracts with teamma
 - P5 complete: 84 tests passed; strict types/lint/format passed; database coverage 96%; JSON Schemas and OpenAPI deterministic/current. User deferred teammate approval; continue P6 with draft v1.0.0. Linux namespace execution still needs host smoke-testing.
 
 - P6 complete: 98 tests passed; strict types/lint/format passed; DB coverage 95%. Upload, listing and metadata APIs include rights notes, magic/type checks, PDF/password/page/pixel limits, source deduplication, private storage, metadata-free working images and request-body limits.
+
+- P7 complete: 104-test full regression passed with 96% database coverage; a subsequent cancellation-race guard passed its targeted test plus lint/type checks. Durable claims, leases, heartbeat, visible retries, cancellation, process timeout and real crash/restart are implemented. P8 full checks will include the new guard.
