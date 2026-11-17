@@ -360,7 +360,8 @@ def test_ocr_merges_into_phase1_document(tmp_path: Path) -> None:
 
     page0 = [b for b in document.blocks if b.page_id == document.pages[0].id]
     assert [b.raw_text for b in page0] == ["Native text line", "स्कैन", "faint"]
-    assert any("overlaps native text" in n for n in notes)
+    assert any("duplicates native text; not added" in n for n in notes)
+    assert QualityFlag.DUPLICATE_CONTENT in page0[0].quality_flags  # native kept, duplication recorded
     ocr_blocks = [b for b in document.blocks if b.provenance.method.value == "ocr"]
     assert {b.language for b in ocr_blocks} == {Language.HINDI, Language.ENGLISH}
     for block in ocr_blocks:
@@ -374,6 +375,112 @@ def test_ocr_merges_into_phase1_document(tmp_path: Path) -> None:
     payload = json.loads(document.model_dump_json())
     jsonschema.Draft202012Validator(build_json_schema(), format_checker=jsonschema.FormatChecker()).validate(payload)
     assert Document.model_validate(payload) == document
+
+
+# ------------------------------------------------- merge policy (audit C2)
+
+
+def _native_line_pdf(tmp_path: Path) -> tuple[Path, Any, Any]:
+    path = write_pdf(tmp_path / "n.pdf", [PageSpec(texts=[Text(72, 700, "Garbled native line here", 14),
+                                                          Text(72, 600, "Untouched native line", 14)])])
+    ex = extract_native_pdf(path)
+    return path, ex, ex.pages[0].lines[0].bbox
+
+
+def _words_over(box: Any, texts: list[str], start: float = 0.0, span: float = 1.0) -> Any:
+    def words(img: Image.Image) -> list[W]:
+        w, h = img.size
+        x0, y0, x1, y1 = box
+        width = (x1 - x0) * span / len(texts)
+        return [W(t, (x0 + (x1 - x0) * start + i * width) * w, y0 * h, width * w * 0.9, (y1 - y0) * h)
+                for i, t in enumerate(texts)]
+    return words
+
+
+def _merge(path: Path, ex: Any, words: Any, *, flag_native: bool = False, use_extraction: Any = None) -> Any:
+    run = ocr_pdf_pages(path, ex, engine=FakeEngine(words), config=NO_PREP, dpi=72, force_pages=[0])
+    base = to_contract_document(ex, source_uri="asset://m")
+    if flag_native:
+        first = base.blocks[0]
+        base = base.model_copy(update={"blocks": [first.model_copy(update={
+            "quality_flags": [*first.quality_flags, QualityFlag.POSSIBLE_OCR_ERROR]}), *base.blocks[1:]]})
+    return merge_ocr_into_document(base, run.results, extraction=use_extraction)
+
+
+def test_reliable_ocr_replaces_garbled_native_block(tmp_path: Path) -> None:
+    path, ex, box = _native_line_pdf(tmp_path)
+    doc, notes = _merge(path, ex, _words_over(box, ["Clean", "OCR", "text"]), flag_native=True)
+    texts = [b.raw_text for b in sorted(doc.blocks, key=lambda b: b.reading_order)]
+    assert texts == ["Clean OCR text", "Untouched native line"]  # replaced in place, order kept
+    ocr_block = next(b for b in doc.blocks if b.provenance.method.value == "ocr")
+    assert QualityFlag.DUPLICATE_CONTENT in ocr_block.quality_flags
+    assert any("replaces unreliable native text" in n for n in notes)
+
+
+def test_phase2_ocr_required_page_prefers_ocr(tmp_path: Path) -> None:
+    import dataclasses
+
+    from pathya_document_ai.quality import OcrAssessment, OcrDecision, OcrReason
+
+    path, ex, box = _native_line_pdf(tmp_path)
+    page = ex.pages[0]
+    forced = dataclasses.replace(page, ocr=OcrAssessment(OcrDecision.OCR_REQUIRED, (OcrReason.UNMAPPED_GLYPHS,),
+                                                         page.ocr.metrics))
+    doc, _ = _merge(path, ex, _words_over(box, ["Clean", "OCR"]),
+                    use_extraction=dataclasses.replace(ex, pages=(forced,)))
+    assert "Clean OCR" in [b.raw_text for b in doc.blocks]
+    assert "Garbled native line here" not in [b.raw_text for b in doc.blocks]
+
+
+def test_full_duplicate_of_reliable_native_text_is_not_added(tmp_path: Path) -> None:
+    path, ex, box = _native_line_pdf(tmp_path)
+    doc, notes = _merge(path, ex, _words_over(box, ["Garbled", "native", "line", "here"]))
+    assert [b.raw_text for b in doc.blocks] == ["Garbled native line here", "Untouched native line"]
+    assert QualityFlag.DUPLICATE_CONTENT in doc.blocks[0].quality_flags
+    assert QualityFlag.DUPLICATE_CONTENT not in doc.blocks[1].quality_flags
+    assert any("duplicates native text; not added" in n for n in notes)
+
+
+def test_partial_overlap_is_added_and_flagged_not_silently_duplicated(tmp_path: Path) -> None:
+    path, ex, box = _native_line_pdf(tmp_path)
+    # 1 of 3 OCR words falls on the native line; the rest is outside it.
+    doc, notes = _merge(path, ex, _words_over(box, ["here", "extra", "words"], start=0.8, span=0.6))
+    added = next(b for b in doc.blocks if b.provenance.method.value == "ocr")
+    assert added.raw_text == "here extra words"
+    assert QualityFlag.DUPLICATE_CONTENT in added.quality_flags
+    assert any("partly overlaps native text" in n for n in notes)
+
+
+def test_ocr_without_overlap_is_added_unflagged(tmp_path: Path) -> None:
+    path, ex, _ = _native_line_pdf(tmp_path)
+    doc, notes = _merge(path, ex, _words_over((0.1, 0.5, 0.6, 0.53), ["Margin", "note"]))
+    added = next(b for b in doc.blocks if b.provenance.method.value == "ocr")
+    assert added.raw_text == "Margin note" and QualityFlag.DUPLICATE_CONTENT not in added.quality_flags
+    assert notes == []
+    assert doc.schema_version == "1.1.0"
+
+
+def test_merge_and_layout_paths_agree_on_unreliable_native_text(tmp_path: Path) -> None:
+    """Both entry points must keep OCR (not garbled native text) on an ocr_required page."""
+    import dataclasses
+
+    from pathya_document_ai.layout import LayoutPage, LayoutRegion, LayoutStatus, RegionKind, build_layout_document
+    from pathya_document_ai.quality import OcrAssessment, OcrDecision, OcrReason
+
+    path, ex, box = _native_line_pdf(tmp_path)
+    page = ex.pages[0]
+    ex = dataclasses.replace(ex, pages=(dataclasses.replace(page, ocr=OcrAssessment(
+        OcrDecision.OCR_REQUIRED, (OcrReason.UNMAPPED_GLYPHS,), page.ocr.metrics)),))
+    words = _words_over(box, ["Clean", "OCR"])
+    run = ocr_pdf_pages(path, ex, engine=FakeEngine(words), config=NO_PREP, dpi=72, force_pages=[0])
+    merged, _ = merge_ocr_into_document(to_contract_document(ex, source_uri="asset://m"), run.results,
+                                        extraction=ex)
+    region = LayoutRegion(0, RegionKind.TEXT, "text", (box[0] - 0.01, box[1] - 0.01, box[2] + 0.01, box[3] + 0.01), 0.9)
+    layout = LayoutPage(0, LayoutStatus.OK, "mock", (region,), "mock", "0", None, {}, 0.0)
+    laid_out = build_layout_document(ex, {0: layout}, {0: run.results[0]}, source_uri="asset://m").document
+    first_layout = next(b for b in laid_out.blocks if b.reading_order == 0)
+    first_merge = next(b for b in merged.blocks if b.reading_order == 0)
+    assert first_layout.raw_text == first_merge.raw_text == "Clean OCR"
 
 
 def test_null_confidence_line_converts_to_not_available() -> None:

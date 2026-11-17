@@ -57,15 +57,26 @@ warning.
 
 ## Text, languages and duplicates
 
+Words inside a block are read in **visual** order: clustered into lines, lines
+top to bottom, words left to right. They are not read in PDF content-stream
+order, which often differs from what is on the page. An over-large region that
+contains two text columns is read column by column. Tables always read row by
+row.
+
 - Block text always comes from Phase 2 native words or Phase 3 OCR words whose
   centres fall in a region. Docling's own text is never used, except as the
   text of a table cell that has no geometry (flagged `missing_geometry`).
   This keeps raw text, list markers, `hi`/`en`/`mul` tags and OCR confidence
   and provenance. OCR engine and version and language data are stored in
   `provenance.parameters`.
-- Native and OCR words that overlap (IoU above 0.5) are used once. Native wins,
-  unless Phase 2 said `ocr_required` (for example, unmapped glyphs). The block
-  is flagged `duplicate_content`, and the count appears in the report.
+- Native and OCR words covering the same text are used once, following the
+  shared policy in `docs/ocr.md`:
+  - Unreliable native words covered by an OCR line are replaced by the OCR.
+    Native text is unreliable on `ocr_required` pages and on lines with
+    undecodable glyphs.
+  - OCR words covered by a reliable native line are dropped.
+  - Each block that lost a duplicate is flagged `duplicate_content`, and the
+    count appears in the report.
 - Words outside every region become paragraphs flagged
   `block_type_uncertain`, one per source line, placed by geometry. Nothing is
   dropped.

@@ -59,7 +59,7 @@ connected components (matras, dots, danda) from the Hindi fixture.
 | `select_ocr_pages(extraction, force_pages=, include_recommended=False)` | Pages the caller forces, plus pages Phase 2 marked `ocr_required` |
 | `ocr_pdf_pages(path, extraction, engine=, ...)` | Renders and OCRs pages one at a time; returns `OcrRun` (results and skipped pages with reasons) |
 | `to_contract_blocks(result, page_id)` | Converts to Phase 1 blocks |
-| `merge_ocr_into_document(document, results)` | Adds OCR blocks to a Phase 2 `Document`. OCR lines that overlap native text by more than 50% are not added, and each skip is reported. |
+| `merge_ocr_into_document(document, results, extraction=)` | Adds OCR lines to a Phase 2 (line-level) `Document` using the shared native/OCR policy below. Every decision is reported in `notes`. |
 
 **`OcrPageResult`.** It records:
 - the page index, original image size, DPI and Phase 2 transform
@@ -96,6 +96,37 @@ No text is translated.
   `language_uncertain` where they apply
 - provenance `ocr`/`tesseract`/version, with the language-data fingerprint as
   `model_version`
+
+## Native/OCR merge policy (shared by `merge_ocr_into_document` and layout)
+
+This policy was fixed after the pre-Phase-5 audit. Before the fix, good OCR was
+discarded on pages whose native text was garbled, and partly overlapping OCR
+was added as unflagged duplicate text.
+
+**When native text is unreliable.** Native text counts as unreliable for:
+- a whole page, when Phase 2 decided `ocr_required` for it (pass
+  `extraction=` to the merge function)
+- a single line or block containing undecodable glyphs, which is flagged
+  `possible_ocr_error`
+
+**Coverage.** An OCR word is *covered* when its centre lies inside a native
+line or block.
+
+**What happens to each OCR line:**
+
+| Situation | Result |
+|---|---|
+| No covered words | Added as new content, unflagged |
+| Covers only unreliable native text | OCR **replaces** that native block at the same reading position, flagged `duplicate_content`. The native text stays in `PdfExtraction`. |
+| At least 50% of its words cover reliable native text | Not added. The native block gets `duplicate_content`. |
+| Partly covers reliable native text | Added and flagged `duplicate_content` for review. It is never added silently. |
+
+**Layout path.** `build_layout_document` applies the same rule word by word.
+It drops unreliable native words covered by an OCR line, and OCR words covered
+by a reliable native line. A test checks that both paths produce the same text.
+
+**Version.** A document that receives `duplicate_content` is upgraded to schema
+1.1.0, and the upgrade is reported in `notes`.
 
 ## Safety
 

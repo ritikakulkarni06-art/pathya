@@ -488,45 +488,118 @@ def to_contract_blocks(result: OcrPageResult, page_id: Any, *, start_order: int 
     return blocks
 
 
-def merge_ocr_into_document(document: Any, results: Iterable[OcrPageResult], *,
-                            overlap_threshold: float = 0.5, low_confidence: float = 0.60) -> tuple[Any, list[str]]:
-    """Add OCR line blocks to a Phase 2 ``Document``; return ``(document, notes)``.
+def merge_ocr_into_document(
+    document: Any,
+    results: Iterable[OcrPageResult],
+    *,
+    extraction: Any = None,
+    duplicate_word_fraction: float = 0.5,
+    low_confidence: float = 0.60,
+) -> tuple[Any, list[str]]:
+    """Add OCR line blocks to a Phase 2 (line-level) ``Document``; return ``(document, notes)``.
 
-    OCR lines overlapping existing native-text blocks on the same page by more
-    than ``overlap_threshold`` of their area are not added (the native text is
-    kept as the source); each such skip is reported in ``notes``.
+    Merge policy, shared with ``layout._collect_tokens`` (see docs/ocr.md):
+
+    * Native text is **unreliable** for a page when Phase 2 decided
+      ``ocr_required`` for it (needs ``extraction``), and for an individual native
+      block flagged ``possible_ocr_error`` (e.g. unmapped glyphs).
+    * An OCR word is *covered* when its centre lies inside a native block.
+    * OCR line with no covered words: added as new content.
+    * OCR line covering unreliable native blocks: OCR **replaces** those blocks
+      at their reading position (the native text remains in ``PdfExtraction``);
+      the OCR block is flagged ``duplicate_content``.
+    * OCR line covering reliable native text with at least
+      ``duplicate_word_fraction`` of its words: not added; the native block is
+      flagged ``duplicate_content``.
+    * OCR line only partly covering reliable native text: added and flagged
+      ``duplicate_content`` (possible partial duplicate for review).
+
+    Every decision is listed in ``notes``. Only page-level (top-level) native
+    blocks are compared; use ``layout.build_layout_document`` for layout output.
     """
     from pathya_document_ai import models as m
+    from pathya_document_ai.quality import OcrDecision
 
+    unreliable_pages = set()
+    if extraction is not None:
+        unreliable_pages = {p.page_index for p in extraction.pages if p.ocr.decision is OcrDecision.OCR_REQUIRED}
     pages = {p.page_index: p for p in document.pages}
     blocks = list(document.blocks)
     notes: list[str] = []
+    dup = m.QualityFlag.DUPLICATE_CONTENT
     for result in results:
         if result.page_index is None or result.page_index not in pages:
             raise ValueError(f"OCR result page {result.page_index} is not in the document")
         page = pages[result.page_index]
-        existing = [b for b in blocks if b.page_id == page.id]
-        start = max((b.reading_order for b in existing if b.parent_id is None), default=-1) + 1
-        candidates = to_contract_blocks(result, page.id, start_order=start, low_confidence=low_confidence)
-        kept = []
-        for block in candidates:
-            if any(_overlap_fraction(block.bbox, b.bbox) > overlap_threshold for b in existing):
-                notes.append(f"page {result.page_index}: OCR line {block.raw_text!r} overlaps native text; not added")
-                continue
-            kept.append(block)
-        for offset, block in enumerate(kept):
-            blocks.append(block.model_copy(update={"reading_order": start + offset}))
+        tag = f"page {result.page_index}"
+        natives = [b for b in blocks if b.page_id == page.id and b.parent_id is None
+                   and b.provenance.method is m.ExtractionMethod.NATIVE_PDF_TEXT]
+
+        def unreliable(block: Any) -> bool:
+            return result.page_index in unreliable_pages or m.QualityFlag.POSSIBLE_OCR_ERROR in block.quality_flags
+
+        lines = [line for line in result.lines if line.bbox is not None]
+        candidates = to_contract_blocks(result, page.id, low_confidence=low_confidence)
+        replaced: dict[Any, list[Any]] = {}  # native block id -> OCR blocks replacing it
+        flag_native: set[Any] = set()
+        additions: list[Any] = []
+        for line, block in zip(lines, candidates):
+            boxes = [result.words[i].bbox for i in line.word_indices if result.words[i].bbox is not None]
+            covering = [[n for n in natives if _center_inside(b, n.bbox)] for b in boxes]
+            hit = {n.id: n for group in covering for n in group}
+            covered = sum(1 for group in covering if group) / len(boxes) if boxes else 0.0
+            if not hit:
+                additions.append(block)
+            elif all(unreliable(n) for n in hit.values()):
+                flagged = block.model_copy(update={"quality_flags": [*block.quality_flags, dup]})
+                anchor = min(hit.values(), key=lambda n: n.reading_order)
+                replaced.setdefault(anchor.id, []).append(flagged)
+                for n in hit.values():
+                    replaced.setdefault(n.id, [])
+                notes.append(f"{tag}: OCR line {block.raw_text!r} replaces unreliable native text "
+                             f"{[n.raw_text for n in hit.values()]!r}")
+            elif covered >= duplicate_word_fraction:
+                flag_native.update(n.id for n in hit.values() if not unreliable(n))
+                notes.append(f"{tag}: OCR line {block.raw_text!r} duplicates native text; not added")
+            else:
+                additions.append(block.model_copy(update={"quality_flags": [*block.quality_flags, dup]}))
+                notes.append(f"{tag}: OCR line {block.raw_text!r} partly overlaps native text "
+                             f"({covered:.0%} of words); added and flagged duplicate_content")
+
+        # Rebuild this page's top-level order: native blocks (or their OCR replacements) in
+        # their original order, then genuinely new OCR lines.
+        page_top = sorted((b for b in blocks if b.page_id == page.id and b.parent_id is None),
+                          key=lambda b: b.reading_order)
+        ordered: list[Any] = []
+        for b in page_top:
+            if b.id in replaced:
+                ordered += replaced[b.id]
+            elif b.id in flag_native and dup not in b.quality_flags:
+                ordered.append(b.model_copy(update={"quality_flags": [*b.quality_flags, dup]}))
+            else:
+                ordered.append(b)
+        ordered += additions
+        renumbered = [b.model_copy(update={"reading_order": i}) for i, b in enumerate(ordered)]
+        removed = set(replaced)
+        blocks = [b for b in blocks if not (b.page_id == page.id and b.parent_id is None)] + renumbered
+        blocks = [b for b in blocks if b.id not in removed]
+    kept_ids = {b.id for b in blocks}
+    edges = [e for e in document.edges if e.source_id in kept_ids and e.target_id in kept_ids]
+    if len(edges) != len(document.edges):
+        notes.append(f"{len(document.edges) - len(edges)} edges to replaced native blocks were removed")
     languages = sorted({b.language for b in blocks} - {m.Language.UNDETERMINED}) or [m.Language.UNDETERMINED]
     data = document.model_dump()
-    data.update(blocks=[b.model_dump() for b in blocks], languages=languages)
+    data.update(blocks=[b.model_dump() for b in blocks], edges=[e.model_dump() for e in edges],
+                languages=languages)
+    if any(dup in b.quality_flags for b in blocks) and data["schema_version"] == "1.0.0":
+        data["schema_version"] = m.SCHEMA_VERSION  # new content uses a 1.1.0 flag; not a silent relabel
+        notes.append("document upgraded to schema 1.1.0 because duplicate_content flags were added")
     return m.Document.model_validate(data), notes
 
 
-def _overlap_fraction(a: Box, b: Box) -> float:
-    w = min(a[2], b[2]) - max(a[0], b[0])
-    h = min(a[3], b[3]) - max(a[1], b[1])
-    area = (a[2] - a[0]) * (a[3] - a[1])
-    return (w * h) / area if w > 0 and h > 0 and area > 0 else 0.0
+def _center_inside(box: Box, region: Box, pad: float = 0.002) -> bool:
+    cx, cy = (box[0] + box[2]) / 2, (box[1] + box[3]) / 2
+    return region[0] - pad <= cx <= region[2] + pad and region[1] - pad <= cy <= region[3] + pad
 
 
 __all__ = [

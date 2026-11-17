@@ -107,7 +107,6 @@ class LayoutConfig:
     duplicate_iou: float = 0.7  # same-type predictions above this are merged
     conflict_iou: float = 0.5  # different-type predictions above this conflict
     overlap_fraction: float = 0.3  # of the smaller region -> overlapping_regions
-    token_dedupe_iou: float = 0.5  # native vs OCR word duplicates
     full_width: float = 0.6  # regions wider than this span columns
     min_gutter: float = 0.015
 
@@ -231,8 +230,8 @@ def _language(text: str, languages: tuple[str, ...]) -> str:
     return language_for(classify_script(text), languages)
 
 
-def _collect_tokens(page: Any, ocr: Any, config: LayoutConfig) -> tuple[list[_Token], int, list[str]]:
-    """Native + OCR tokens with duplicates removed. Returns (tokens, duplicate_count, warnings)."""
+def _collect_tokens(page: Any, ocr: Any, config: LayoutConfig) -> tuple[list[_Token], list[Box], list[str]]:
+    """Native + OCR tokens with duplicates removed. Returns (tokens, dropped_boxes, warnings)."""
     from pathya_document_ai.quality import OcrDecision
 
     warnings: list[str] = []
@@ -256,21 +255,40 @@ def _collect_tokens(page: Any, ocr: Any, config: LayoutConfig) -> tuple[list[_To
         if missing:
             warnings.append(f"{missing} OCR words without geometry were not placed in layout")
     if not native or not ocr_tokens:
-        return native + ocr_tokens, 0, warnings
+        return native + ocr_tokens, [], warnings
 
-    prefer_ocr = page.ocr.decision is OcrDecision.OCR_REQUIRED  # e.g. unmapped native glyphs
-    keep, drop = (ocr_tokens, native) if prefer_ocr else (native, ocr_tokens)
-    survivors = []
-    duplicates = 0
-    for token in drop:
-        if any(iou(token.bbox, k.bbox) > config.token_dedupe_iou for k in keep):
-            duplicates += 1
+    # Shared native/OCR policy (same as ocr.merge_ocr_into_document, docs/ocr.md):
+    # a native line is unreliable when Phase 2 said ocr_required for the page or the
+    # line contains undecodable glyphs. Unreliable native words covered by an OCR
+    # line are dropped; OCR words covered by a reliable native line are dropped.
+    from pathya_document_ai.quality import is_unmapped_char
+
+    page_unreliable = page.ocr.decision is OcrDecision.OCR_REQUIRED
+    unreliable_lines = {line.index for line in page.lines
+                        if page_unreliable or any(is_unmapped_char(ch) for ch in line.text)}
+    reliable_native_boxes = [line.bbox for line in page.lines
+                             if line.bbox is not None and line.index not in unreliable_lines]
+    ocr_line_boxes = [line.bbox for line in ocr.lines if line.bbox is not None]
+    kept: list[_Token] = []
+    dropped: list[Box] = []
+    dropped_native = dropped_ocr = 0
+    for token in native:
+        if token.line[1] in unreliable_lines and any(_center_in(token.bbox, b) for b in ocr_line_boxes):
+            dropped_native += 1
+            dropped.append(token.bbox)
             continue
-        survivors.append(token)
-    if duplicates:
-        warnings.append(f"{duplicates} {'native' if prefer_ocr else 'OCR'} words duplicated "
-                        f"{'OCR' if prefer_ocr else 'native'} text and were not used")
-    return keep + survivors, duplicates, warnings
+        kept.append(token)
+    for token in ocr_tokens:
+        if any(_center_in(token.bbox, b) for b in reliable_native_boxes):
+            dropped_ocr += 1
+            dropped.append(token.bbox)
+            continue
+        kept.append(token)
+    if dropped_native:
+        warnings.append(f"{dropped_native} unreliable native words were replaced by OCR text")
+    if dropped_ocr:
+        warnings.append(f"{dropped_ocr} OCR words duplicated reliable native text and were not used")
+    return kept, dropped, warnings
 
 
 # ------------------------------------------------------------- regions
@@ -631,16 +649,16 @@ def build_layout_document(
 
 def _build_page(page: Any, layout: LayoutPage, ocr: Any, page_id: Any, extraction: Any,
                 config: LayoutConfig, m: Any) -> tuple[list[Any], list[Any], PageLayoutReport]:
-    tokens, duplicates, warnings = _collect_tokens(page, ocr, config)
+    tokens, dropped_boxes, warnings = _collect_tokens(page, ocr, config)
+    duplicates = len(dropped_boxes)
     warnings = list(layout.warnings) + warnings
     regions, merged, rejected = _postprocess(layout.regions, config)
     unassigned = _assign_tokens(regions, tokens)
     regions = _drop_empty_containers(regions, merged)
     _flag_overlaps(regions, config)
-    if duplicates:
-        for r in regions:
-            if _had_duplicates(r, ocr, page, config):
-                r.flags.add("duplicate_content")
+    for r in regions:  # a region that lost a duplicate word carries the evidence
+        if any(_center_in(b, r.bbox) for b in dropped_boxes):
+            r.flags.add("duplicate_content")
     fallback = _fallback_regions(unassigned)
     if unassigned:
         warnings.append(f"{len(unassigned)} words were outside every layout region; kept as uncertain paragraphs")
@@ -696,13 +714,6 @@ def _build_page(page: Any, layout: LayoutPage, ocr: Any, page_id: Any, extractio
         elapsed_s=layout.elapsed_s, warnings=tuple(warnings + rejected))
     return blocks, edges, report
 
-
-def _had_duplicates(region: _Region, ocr: Any, page: Any, config: LayoutConfig) -> bool:
-    if ocr is None:
-        return False
-    native_boxes = [w.bbox for w in page.words if w.bbox is not None and _center_in(w.bbox, region.bbox)]
-    ocr_boxes = [w.bbox for w in ocr.words if w.bbox is not None and _center_in(w.bbox, region.bbox)]
-    return any(iou(a, b) > config.token_dedupe_iou for a in native_boxes for b in ocr_boxes)
 
 
 def _provenance(layout: LayoutPage, extraction: Any, ocr: Any, m: Any, now: datetime) -> Any:
