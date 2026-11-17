@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Literal, Self
 
-from pydantic import Field, SecretStr, model_validator
+from pydantic import Field, SecretStr, ValidationError, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -15,6 +15,13 @@ class Settings(BaseSettings):
     max_upload_mb: int = Field(default=25, ge=1, le=250)
     max_pages: int = Field(default=60, ge=1)
     max_pixels: int = Field(default=40_000_000, ge=1)
+    max_json_body_bytes: int = Field(default=262144, ge=1024, le=1048576)
+    request_rate_window_seconds: int = Field(default=60, ge=1)
+    upload_rate_limit: int = Field(default=30, ge=1)
+    question_rate_limit: int = Field(default=60, ge=1)
+    correction_rate_limit: int = Field(default=120, ge=1)
+    max_concurrent_uploads: int = Field(default=2, ge=1, le=20)
+    daily_page_quota: int = Field(default=120, ge=1)
     job_timeout_seconds: int = Field(default=300, ge=1)
     job_lease_seconds: int = Field(default=30, ge=2)
     job_max_attempts: int = Field(default=3, ge=1, le=10)
@@ -79,3 +86,13 @@ class Settings(BaseSettings):
         ):
             raise ValueError("EMBEDDING_MODEL_PATH must be an existing local model directory.")
         return self
+
+
+def load_settings() -> Settings:
+    try:
+        return Settings()
+    except ValidationError:
+        # Pydantic's default error repr can include raw environment inputs.
+        raise ValueError(
+            "Configuration is invalid. Check environment variable types, allowed values and required secrets in app/config.py."
+        ) from None

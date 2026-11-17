@@ -1,7 +1,7 @@
 import argparse
 from pathlib import Path
 
-from app.config import Settings
+from app.config import load_settings
 from app.services.backups import create_backup, restore_backup
 
 
@@ -18,7 +18,7 @@ def main() -> None:
         restore_backup(args.restore, args.destination)
         print("Restore completed. Reconcile deletion receipts before allowing access.")
     else:
-        print(create_backup(Settings()))
+        print(create_backup(load_settings()))
 
 
 if __name__ == "__main__":

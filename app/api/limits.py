@@ -21,7 +21,7 @@ class BodyLimitMiddleware:
         maximum = (
             self.settings.max_upload_mb * 1024 * 1024 + 65536
             if scope["path"] == "/documents" and scope["method"] == "POST"
-            else 262144
+            else self.settings.max_json_body_bytes
         )
 
         async def reject() -> None:

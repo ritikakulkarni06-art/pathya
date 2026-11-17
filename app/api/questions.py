@@ -5,13 +5,17 @@ from fastapi import APIRouter, Depends, Request
 from app.schemas.answers import QuestionRequest
 from app.services.answers import ask, get_answer
 from app.services.auth import current_user, require_doc_access
+from app.services.limits import rate_limit
 
 router = APIRouter()
 
 
 @router.post("/questions")
 def question(
-    payload: QuestionRequest, request: Request, user: dict[str, Any] = Depends(current_user)
+    payload: QuestionRequest,
+    request: Request,
+    user: dict[str, Any] = Depends(current_user),
+    limited: None = Depends(rate_limit("question")),
 ) -> dict[str, Any]:
     return ask(
         request.app.state.database,

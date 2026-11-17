@@ -10,6 +10,7 @@ from app.clock import now_utc
 from app.db.repos import jobs
 from app.errors import Problem
 from app.schemas.speech import AudioRequest, GlossaryRequest
+from app.services.access import check_document
 from app.services.auth import current_user, require_doc_access
 from app.services.manifests import artifact_current
 from app.services.packages import build_package
@@ -147,6 +148,7 @@ def request_audio(
     user: dict[str, Any] = Depends(current_user),
 ) -> dict[str, str]:
     with request.app.state.database.write_tx() as connection:
+        check_document(connection, document["id"], user["id"])
         job_id = jobs.enqueue(
             connection,
             document["id"],

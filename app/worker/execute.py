@@ -1,13 +1,13 @@
 import sys
 
-from app.config import Settings
+from app.config import load_settings
 from app.db.connection import Database
 from app.db.repos.jobs import get_job
 from app.worker.runner import execute_claimed
 
 
 def main() -> None:
-    settings = Settings()
+    settings = load_settings()
     assert settings.pathya_db_path is not None
     database = Database(settings.pathya_db_path)
     with database.read_conn() as connection:

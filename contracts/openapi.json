@@ -685,6 +685,66 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/admin/jobs": {
+      "get": {
+        "operationId": "jobs_admin_jobs_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Jobs Admin Jobs Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Jobs"
+      }
+    },
+    "/admin/metrics": {
+      "get": {
+        "operationId": "counters_admin_metrics_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Counters Admin Metrics Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Counters"
+      }
+    },
+    "/admin/storage": {
+      "get": {
+        "operationId": "storage_admin_storage_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Storage Admin Storage Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Storage"
+      }
+    },
     "/admin/usage": {
       "get": {
         "operationId": "usage_admin_usage_get",

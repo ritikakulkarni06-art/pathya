@@ -6,12 +6,14 @@ from app.errors import Problem
 from app.services.backups import prune_backups
 from app.services.deletions import purge_document, sweep_retention
 from app.services.jobs import finish
+from app.services.operations import prune_metrics
 
 
 def handle(database: Database, settings: Settings, job: dict[str, Any]) -> None:
     if job["kind"] == "retention_sweep":
         count = sweep_retention(database, settings)
         pruned = prune_backups(settings)
+        prune_metrics(database)
         message = (
             "Expired documents scheduled for deletion: "
             + str(count)

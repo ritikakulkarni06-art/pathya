@@ -1,4 +1,5 @@
 import os
+import sqlite3
 import time
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
@@ -19,19 +20,21 @@ from app.api.deletions import router as deletions_router
 from app.api.documents import router as documents_router
 from app.api.jobs import router as jobs_router
 from app.api.limits import BodyLimitMiddleware
+from app.api.operations import router as operations_router
 from app.api.questions import router as questions_router
 from app.api.search import router as search_router
 from app.api.speech import router as speech_router
-from app.config import Settings
+from app.config import Settings, load_settings
 from app.db.connection import Database
 from app.db.migrate import migrate
 from app.errors import Problem
 from app.logging import configure_logging, log_event
 from app.services.auth import LoginLimiter, seed_local
+from app.services.limits import ActionLimiter
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
-    config = settings or Settings()
+    config = settings or load_settings()
     configure_logging()
 
     @asynccontextmanager
@@ -57,8 +60,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     application.state.login_limiter = LoginLimiter(
         config.login_rate_limit, config.login_window_seconds
     )
+    application.state.action_limiter = ActionLimiter(config)
     application.include_router(auth_router)
     application.include_router(admin_router)
+    application.include_router(operations_router)
     application.include_router(documents_router)
     application.include_router(jobs_router)
     application.include_router(content_router)
@@ -138,13 +143,27 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             )
             response.headers["content-length"] = str(len(response.body))
         if exc.status == 429:
-            response.headers["Retry-After"] = str(config.login_window_seconds)
+            response.headers["Retry-After"] = str(
+                exc.extra.get("retry_after", config.login_window_seconds)
+            )
         return response
 
     @application.exception_handler(RequestValidationError)
     async def handle_validation(request: Request, exc: RequestValidationError) -> JSONResponse:
         return problem_response(
             422, "invalid_request", "Some fields are invalid. Please check the request format."
+        )
+
+    @application.exception_handler(sqlite3.OperationalError)
+    async def handle_database_busy(request: Request, exc: sqlite3.OperationalError) -> JSONResponse:
+        if getattr(exc, "sqlite_errorcode", None) in {sqlite3.SQLITE_BUSY, sqlite3.SQLITE_LOCKED}:
+            response = problem_response(
+                503, "storage_busy", "Storage is busy. Please try again shortly."
+            )
+            response.headers["Retry-After"] = "1"
+            return response
+        return problem_response(
+            500, "internal_error", "The request could not be completed. Please try again."
         )
 
     @application.exception_handler(HTTPException)

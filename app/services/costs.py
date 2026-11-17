@@ -137,7 +137,7 @@ def settle(
     state: str,
     input_tokens: int | None = None,
     output_tokens: int | None = None,
-) -> None:
+) -> int:
     """Unknown outcomes retain their full reservation, including after process death."""
     with database.write_tx() as connection:
         row = connection.execute("SELECT * FROM usage_events WHERE id=?", (event_id,)).fetchone()
@@ -146,7 +146,7 @@ def settle(
         meta = json.loads(row["meta_json"])
         if meta["state"] != "reserved":
             raise ValueError("Usage reservation is already settled.")
-        amount = row["cost_inr_micro"]
+        amount = int(row["cost_inr_micro"])
         if input_tokens is not None and output_tokens is not None:
             amount = cost_micro(price, input_tokens, output_tokens)
         meta["state"] = state
@@ -156,6 +156,7 @@ def settle(
             "UPDATE usage_events SET input_units=?,output_units=?,cost_inr_micro=?,meta_json=? WHERE id=?",
             (input_tokens or 0, output_tokens or 0, amount, json.dumps(meta), event_id),
         )
+    return amount
 
 
 def usage_summary(database: Database) -> dict[str, Any]:

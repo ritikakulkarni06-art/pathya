@@ -13,6 +13,7 @@ from app.config import Settings
 from app.db.repos import audit, documents, jobs
 from app.errors import Problem
 from app.services.auth import current_user, now_utc, require_doc_access
+from app.services.limits import rate_limit, reserve_upload
 from app.services.storage import FileStore
 from app.services.uploads import inspect_upload
 
@@ -46,6 +47,7 @@ async def upload_document(
     languages: str = Form(default="en,hi", max_length=16),
     rights_note: str | None = Form(default=None, max_length=2000),
     user: dict[str, Any] = Depends(current_user),
+    limited: None = Depends(rate_limit("upload")),
 ) -> JSONResponse:
     settings: Settings = request.app.state.settings
     if not rights_note or not rights_note.strip():
@@ -102,6 +104,7 @@ async def upload_document(
                 )
             document_id = str(uuid4())
             now = now_utc()
+            reserve_upload(connection, settings, user["id"], inspected.pages, now)
             retention = (
                 datetime.now(UTC) + timedelta(days=settings.retention_days_after_end)
             ).isoformat()

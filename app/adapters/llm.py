@@ -213,7 +213,7 @@ class GeminiClient:
                     # Timeouts/transport failures are ambiguous: no retry and keep worst cost.
                     retryable = False
                 usage = usage_counts(body)
-                settle(
+                charged = settle(
                     self.database,
                     event_id,
                     price,
@@ -227,6 +227,9 @@ class GeminiClient:
                     attempt=attempt,
                     status=status,
                     usage_known=usage is not None,
+                    input_units=usage.input_tokens if usage else None,
+                    output_units=usage.output_tokens if usage else None,
+                    cost_inr_micro=charged,
                 )
                 if status == 200 and body:
                     try:

@@ -16,6 +16,7 @@ from app.db.repos import jobs
 from app.errors import Problem
 from app.services.deletions import schedule_daily_sweep
 from app.services.jobs import LeaseLost, claim_next, fail, finish, heartbeat
+from app.services.operations import record_job_metric
 from app.worker.handlers.audio import handle as audio
 from app.worker.handlers.delete import handle as delete
 from app.worker.handlers.extract import handle as extract
@@ -24,6 +25,7 @@ from app.worker.handlers.rebuild import handle as rebuild
 
 
 def execute_claimed(database: Database, settings: Settings, job: dict[str, Any]) -> None:
+    started = time.monotonic()
     try:
         if job["kind"] == "extract":
             extract(database, settings, job)
@@ -63,6 +65,8 @@ def execute_claimed(database: Database, settings: Settings, job: dict[str, Any])
             "processing_failed",
             "Processing could not finish. Check the adapter and retry limit.",
         )
+    finally:
+        record_job_metric(database, job, round((time.monotonic() - started) * 1000))
 
 
 def renew_lease(database: Database, job: dict[str, Any], settings: Settings) -> bool | None:

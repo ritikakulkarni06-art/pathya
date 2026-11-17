@@ -153,3 +153,15 @@ request temporaries, prune only marked confined snapshot children, and restore
 only into a new nonoverlapping destination with sessions cleared. Old backups
 require deletion reconciliation before access is restored. Policy numbers remain
 proposals pending institutional review. No new dependency is added.
+
+### P14 hardening and operations
+
+Use bounded single-process request windows per action, user and IP. Reserve daily
+page quota and allocated-upload slots in the same SQLite transaction as document
+creation; duplicate uploads do not consume pages and deletion does not refund
+quota. This allocation limit is not a connection-level DoS defense. Runtime config
+loaders suppress Pydantic raw-input error reprs to prevent secret disclosure.
+Grant/audio scheduling writes recheck authorization in their write transaction.
+Admin metrics contain identifiers/counts only; stage timing is observed attempts,
+not an assertion that killed processes recorded a final duration. No extra service
+or dependency is added. Synthetic seed/reset scripts use only fixed local adapters.

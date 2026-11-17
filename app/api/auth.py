@@ -10,6 +10,7 @@ from app.config import Settings
 from app.db.repos import audit, grants, sessions, users
 from app.errors import Problem
 from app.schemas.auth import Credentials, GrantRequest, UserView
+from app.services.access import check_document
 from app.services.auth import (
     CSRF_COOKIE,
     DUMMY_HASH,
@@ -134,6 +135,7 @@ def grant(
     user: dict[str, Any] = Depends(current_user),
 ) -> None:
     with request.app.state.database.write_tx() as connection:
+        check_document(connection, document_id, user["id"], "owner")
         if users.get_user(connection, payload.user_id) is None:
             raise Problem(404, "user_not_found", "The requested account is unavailable.")
         grants.put(connection, document_id, payload.user_id, payload.role, user["id"], now_utc())
@@ -157,5 +159,6 @@ def revoke_grant(
     user: dict[str, Any] = Depends(current_user),
 ) -> None:
     with request.app.state.database.write_tx() as connection:
+        check_document(connection, document_id, user["id"], "owner")
         grants.remove(connection, document_id, user_id)
         audit.record(connection, user["id"], "revoke_grant", document_id, user_id, now_utc(), {})

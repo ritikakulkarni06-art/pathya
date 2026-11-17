@@ -9,6 +9,7 @@ from app.errors import Problem
 from app.schemas.corrections import CorrectionRequest
 from app.services.access import check_document
 from app.services.auth import current_user, now_utc, require_doc_access
+from app.services.limits import rate_limit
 from app.services.manifests import artifact_current
 from app.services.revisions import correct_block
 from app.services.storage import FileStore
@@ -84,6 +85,7 @@ def patch_block(
     request: Request,
     document: dict[str, Any] = Depends(require_doc_access("reviewer")),
     user: dict[str, Any] = Depends(current_user),
+    limited: None = Depends(rate_limit("correction")),
 ) -> dict[str, Any]:
     return correct_block(
         request.app.state.database, request.app.state.settings, block_id, user["id"], payload

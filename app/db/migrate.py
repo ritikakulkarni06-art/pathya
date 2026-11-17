@@ -2,7 +2,7 @@ import hashlib
 import sqlite3
 from pathlib import Path
 
-from app.config import Settings
+from app.config import load_settings
 from app.db.connection import Database
 
 MIGRATIONS = Path(__file__).parent / "migrations"
@@ -51,7 +51,7 @@ def migrate(database: Database, directory: Path = MIGRATIONS, *, apply: bool = T
 
 
 def main() -> None:
-    settings = Settings()
+    settings = load_settings()
     assert settings.pathya_db_path is not None
     migrate(Database(settings.pathya_db_path))
     print("Migrations are current.")
