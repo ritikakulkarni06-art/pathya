@@ -130,7 +130,10 @@ def fail(database: Database, job_id: str, owner: str, code: str, message: str) -
         job = jobs.get_job(connection, job_id)
         if job is None or job["lease_owner"] != owner or job["state"] not in ACTIVE:
             return
-        terminal = job["attempts"] >= job["max_attempts"]
+        terminal = job["attempts"] >= job["max_attempts"] or code in {
+            "budget_exhausted",
+            "pricing_unverified",
+        }
         connection.execute(
             "UPDATE jobs SET state=?,lease_owner=NULL,lease_expires_at=NULL,error_code=?,error_message=?,updated_at=? WHERE id=?",
             ("failed" if terminal else "queued", code, message, now_utc(), job_id),

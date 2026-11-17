@@ -17,6 +17,7 @@ from app.api.content import router as content_router
 from app.api.documents import router as documents_router
 from app.api.jobs import router as jobs_router
 from app.api.limits import BodyLimitMiddleware
+from app.api.speech import router as speech_router
 from app.config import Settings
 from app.db.connection import Database
 from app.db.migrate import migrate
@@ -56,6 +57,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     application.include_router(documents_router)
     application.include_router(jobs_router)
     application.include_router(content_router)
+    application.include_router(speech_router)
     application.add_middleware(
         CORSMiddleware,
         allow_origins=config.cors_origins,

@@ -4,11 +4,11 @@ Pathya is a proposed accessible English/Hindi textbook reader. This repository c
 
 ## Current implementation
 
-P1-P8 of the [backend playbook](docs/PLAYBOOK.md): FastAPI configuration/health/errors, content-safe logs, transactional SQLite migrations and immutable history, private file storage, local/session authentication, CSRF and document roles, versioned extraction schemas, adapters and atomic initial import; durable worker leases, cancellation/recovery; atomic corrections and conflicts; immutable manifests, review queues and separate re-extraction candidates.
+P1-P9 of the [backend playbook](docs/PLAYBOOK.md): FastAPI configuration/health/errors, content-safe logs, transactional SQLite migrations and immutable history, private file storage, local/session authentication, CSRF and document roles, versioned extraction schemas, adapters and atomic initial import; durable worker leases, cancellation/recovery; atomic corrections and conflicts; immutable manifests, review queues and separate re-extraction candidates.
 
-The extraction contract is **draft v1.0.0**; the user authorized deferring teammate approval while implementation continues with fixtures. Speech adapters, the full retrieval index, grounded answers, packages and deletion workflows remain in P9-P16. LLM calls remain disabled. This is not a production-ready service or a measured accessibility/accuracy result.
+The extraction contract is **draft v1.0.0**; the user authorized deferring teammate approval while implementation continues with fixtures. Speech scheduling, scoped pronunciation overrides, synthetic audio fixtures and immutable offline download plans are implemented. Full retrieval, grounded answers and deletion workflows remain in P10-P16. LLM calls remain disabled. This is not a production-ready service or a measured accessibility/accuracy result.
 
-## Quick start ? Python 3.12
+## Quick start - Python 3.12
 
 ```bash
 python -m venv .venv
@@ -31,7 +31,7 @@ On systems with GNU Make, `make check`, `make dev`, `make contracts` and `make o
 | `main` | Shared | Integrated project baseline |
 | `person-1` | Person 1 | Document AI, OCR, structured content |
 | `person-2` | Person 2 | Accessible reader, speech, offline experience |
-| `person-3` | Person 3 ? Ritika | Backend, revision consistency, grounded AI |
+| `person-3` | Person 3 - Ritika | Backend, revision consistency, grounded AI |
 
 Backend code uses `app/`, shared schemas use `contracts/`, and tests use `tests/`. Existing `document-ai/`, `frontend/` and `shared/` folders remain available for teammates. [CONTRIBUTING.md](CONTRIBUTING.md) describes the PR workflow. Only person-3 contains the implementation until a reviewed integration PR is merged.
 

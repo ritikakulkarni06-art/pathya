@@ -36,6 +36,7 @@ def public_block(row: dict[str, Any]) -> dict[str, Any]:
     body["critical_flag"] = bool(row["critical_flag"])
     body["historical"] = bool(body["successor_ids"])
     body["origin"] = "source_text"
+    body["synthetic"] = str(body["provenance"].get("parser", "")).startswith("synthetic")
     return body
 
 
@@ -167,15 +168,24 @@ def download_asset(
         ).fetchone()
         if asset is None:
             raise Problem(404, "asset_not_found", "This file is unavailable.")
-        if asset["kind"] == "audio":
+        if asset["kind"] in {"audio", "package"}:
             linked = connection.execute(
-                "SELECT * FROM artifacts WHERE asset_id=?", (asset_id,)
+                "SELECT * FROM artifacts WHERE asset_id=? OR id IN (SELECT artifact_id FROM artifact_clips WHERE asset_id=?)",
+                (asset_id, asset_id),
             ).fetchall()
-            if not any(artifact_current(connection, item) for item in linked):
+            allowed = [
+                item
+                for item in linked
+                if item["scope_user_id"] is None
+                or item["scope_user_id"] == document["_access_user_id"]
+            ]
+            if not allowed:
+                raise Problem(404, "asset_not_found", "This file is unavailable.")
+            if not any(artifact_current(connection, item) for item in allowed):
                 raise Problem(
                     409,
-                    "audio_stale",
-                    "This audio is outdated or unavailable. Read the current text while it rebuilds.",
+                    "package_stale" if asset["kind"] == "package" else "audio_stale",
+                    "This output is outdated. Request a current version or continue reading the text.",
                 )
     store = FileStore(
         request.app.state.settings.pathya_data_dir, request.app.state.database, min_free_bytes=0

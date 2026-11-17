@@ -34,6 +34,13 @@ class Settings(BaseSettings):
     session_ttl_seconds: int = Field(default=86400, ge=60)
     login_rate_limit: int = Field(default=5, ge=1)
     login_window_seconds: int = Field(default=60, ge=1)
+    speech_provider: str = "disabled"
+    speech_voice: str = "default"
+    speech_engine_version: str = ""
+    segmenter: str = ""
+    segmenter_version: str = "demo-regex-v1"
+    max_audio_clip_mb: int = Field(default=10, ge=1)
+    package_max_mb: int = Field(default=50, ge=1)
     extraction_adapter: str = "fixture"
     extraction_command: list[str] = Field(default_factory=list)
     extraction_fixture_path: Path = Path("tests/fixtures/chapter_demo.json")

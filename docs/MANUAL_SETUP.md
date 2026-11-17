@@ -1,6 +1,6 @@
 # Manual steps and handoff gates
 
-## Needed now to continue past P5
+## Pending teammate integration
 
 1. Send Person 1 `docs/CONTRACTS.md`, `contracts/extraction_output.schema.json`, the synthetic fixture and `docs/HANDOFF_FOR_EXTRACTION.md`. Get their written acceptance or requested changes. Share their reply with Codex; it will be recorded in `docs/CONTRACT_APPROVALS.md`. The user explicitly deferred this gate on 16 November 2026; implementation may continue with the draft and synthetic adapter.
 2. Confirm the identifier/page-label rules and proposed speech-unit boundary with Person 2. Their actual speech adapter is not required until P9, but agreement is needed before integration.
@@ -8,7 +8,7 @@
 
 ## Already checked or handled
 
-Python 3.12, Git and SQLite FTS5 are available. A project-local .venv was installed. Use `python -m scripts.check` instead of GNU Make on Windows. No separate repository is needed; work stays on person-3 in pathya. No real API secret is present or required for P1?P5.
+Python 3.12, Git and SQLite FTS5 are available. A project-local .venv was installed. Use `python -m scripts.check` instead of GNU Make on Windows. No separate repository is needed; work stays on person-3 in pathya. No real API secret is present or required for P1-P9.
 
 ## Later, when the corresponding stages exist
 
@@ -20,3 +20,9 @@ Python 3.12, Git and SQLite FTS5 are available. A project-local .venv was instal
 - Deployment/release: run manual security/failure drills, restore a backup on a clean machine, review all licenses, send both handoffs and appoint a maintenance owner.
 
 The complete original checklist remains in docs/PLAYBOOK.md. No proposed accuracy, accessibility conformance or security-assessment result has been asserted.
+
+
+For speech integration, Person 2 must provide the import paths for their segmenter
+and speech provider, and confirm tested English/Hindi voices. See the P9 section
+in docs/CONTRACTS.md. The included WAV output is silence for development; it is
+not usable narration. No live provider, voice or pricing has been verified.

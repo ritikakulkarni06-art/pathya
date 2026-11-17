@@ -74,3 +74,14 @@
 - Candidate re-extraction is separate from published revisions and never automatically replaces accepted text. Acceptance needs a reconciled review workflow rather than an unsafe implicit publish.
 - P8 supplies a minimal prose index and text-only speech fallback. Full chunking, multilingual ranking and speech adapters remain P9/P10.
 - UTC timestamp helpers now live outside authentication, avoiding unnecessary FastAPI/Argon2 initialization in worker children. Current content/manifest reads take a consistent snapshot and recheck access.
+
+
+### P9 speech boundary
+
+Keep source offsets in Unicode code points, apply whole-word aliases without
+changing displayed text, and keep personal audio private. Silent WAV clips are
+explicitly synthetic. Unsupported voices return text_only; no online fallback
+is attempted. Cache keys include source revision, engine, segmenter and relevant
+glossary hashes. Immutable package manifests describe downloads rather than
+producing a server-side ZIP. Paid providers fail closed pending verified pricing
+and budget reservation support in P11.

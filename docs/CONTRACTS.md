@@ -246,3 +246,24 @@ P9 proposes `SpeechUnit {unit_id, block_id, text, lang, offset_start, offset_end
 ## Written acceptance
 
 Person 1 should confirm the field/status/flag vocabulary, coordinate transform, ID stability, page labels, table headers and supported MathML/description subset. Record their actual reply in `docs/CONTRACT_APPROVALS.md`. Change `schema_version` if the agreed shape changes. Do not record an approval that has not happened.
+
+
+## Speech and offline packages (P9 draft)
+
+Person 2 supplies `SPEECH_PROVIDER=python:module:Class` and
+`SEGMENTER=python:module:function`. SpeechUnit uses Unicode code point offsets into
+the unchanged block text: unit_id, block_id, text, lang, offset_start, offset_end,
+alias_applied. SpeechClip supplies unit_id, audio_bytes, MIME and duration_ms.
+Offsets remain source offsets after a spoken alias is applied. No word timings
+are inferred. The development regex segmenter and silent WAV provider are
+synthetic test aids and are refused in production. Voices require real testing.
+
+Document glossary changes affect only matching block audio; personal overrides
+produce private artifacts excluded from shared manifests and packages. Phoneme
+input is currently unsupported. Paid synthesis is blocked until verified pricing
+and the shared budget ledger are configured.
+
+A package is an immutable JSON download plan, containing text/navigation and
+audio asset IDs, SHA-256 hashes and byte sizes. It is not a ZIP. The client
+downloads authorized assets, verifies hashes and manages its own offline cache.
+Model downloads are excluded from the package byte cap.
