@@ -1,6 +1,7 @@
 import json
 import os
 import signal
+import sqlite3
 import subprocess
 import sys
 import threading
@@ -15,6 +16,7 @@ from app.errors import Problem
 from app.services.jobs import LeaseLost, claim_next, fail, finish, heartbeat
 from app.worker.handlers.audio import handle as audio
 from app.worker.handlers.extract import handle as extract
+from app.worker.handlers.index import handle as index
 from app.worker.handlers.rebuild import handle as rebuild
 
 
@@ -27,13 +29,7 @@ def execute_claimed(database: Database, settings: Settings, job: dict[str, Any])
         elif job["kind"] == "build_audio":
             audio(database, settings, job)
         elif job["kind"] == "build_index":
-            finish(
-                database,
-                job["id"],
-                job["lease_owner"],
-                "ready",
-                "This derivative handler is not installed yet; source text remains the fallback.",
-            )
+            index(database, settings, job)
         else:
             raise Problem(
                 422, "handler_unavailable", "This processing stage is not implemented yet."
@@ -64,6 +60,16 @@ def execute_claimed(database: Database, settings: Settings, job: dict[str, Any])
         )
 
 
+def renew_lease(database: Database, job: dict[str, Any], settings: Settings) -> bool | None:
+    """A busy writer is not proof of lease loss; publication still validates ownership."""
+    try:
+        return heartbeat(database, job["id"], job["lease_owner"], settings.job_lease_seconds)
+    except sqlite3.OperationalError as error:
+        if getattr(error, "sqlite_errorcode", None) in {sqlite3.SQLITE_BUSY, sqlite3.SQLITE_LOCKED}:
+            return None
+        raise
+
+
 def run_once(database: Database, settings: Settings) -> bool:
     """In-process integration helper. The CLI uses a child process for hard timeout control."""
     job = claim_next(database, settings)
@@ -73,7 +79,7 @@ def run_once(database: Database, settings: Settings) -> bool:
 
     def keep_lease() -> None:
         while not stopped.wait(settings.job_lease_seconds / 3):
-            if not heartbeat(database, job["id"], job["lease_owner"], settings.job_lease_seconds):
+            if renew_lease(database, job, settings) is False:
                 break
 
     keeper = threading.Thread(target=keep_lease, daemon=True)
@@ -158,12 +164,12 @@ def run_worker(settings: Settings, *, once: bool = False) -> None:
                 )
                 break
             if instant - last_heartbeat >= settings.job_lease_seconds / 3:
-                if not heartbeat(
-                    database, job["id"], job["lease_owner"], settings.job_lease_seconds
-                ):
+                renewed = renew_lease(database, job, settings)
+                if renewed is False:
                     stop_process(process)
                     break
-                last_heartbeat = instant
+                if renewed is True:
+                    last_heartbeat = instant
             stopping.wait(0.05)
         with database.read_conn() as connection:
             remaining = jobs.get_job(connection, job["id"])

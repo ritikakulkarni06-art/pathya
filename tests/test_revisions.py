@@ -21,6 +21,11 @@ def chapter(worker_client):
     db = worker_client.app.state.database
     settings = worker_client.app.state.settings
     assert run_once(db, settings)
+    for _ in range(10):
+        if not run_once(db, settings):
+            break
+    else:
+        raise AssertionError("Initial derivative jobs did not drain")
     with db.read_conn() as connection:
         mapping = {
             row["external_id"]: row["internal_id"]

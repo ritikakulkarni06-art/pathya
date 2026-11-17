@@ -56,4 +56,20 @@ Resolved for Python 3.12. Versions are pinned in requirements.lock. License meta
 | watchfiles | 1.3.0 | MIT | Runtime, tooling or transitive dependency | Pending review |
 | websockets | 17.4 | BSD-3-Clause | Runtime, tooling or transitive dependency | Pending review |
 
-Python/SQLite use the standard library; SQLite is public domain. No E5 model, numpy, eSpeak, PDFium or PDF parser is included yet. No cloud API has been enabled.
+Python/SQLite use the standard library; SQLite is public domain. pypdf is used for
+upload inspection. No E5 model, numpy, eSpeak or PDFium is bundled in the default
+environment. No cloud API has been enabled.
+
+
+P10 optional extra (not installed in the default environment):
+
+| Component | Version | License | Purpose / redistribution |
+| --- | --- | --- | --- |
+| sentence-transformers | 6.3.0 | Apache-2.0 | Optional local E5 runner; not bundled |
+| numpy | 2.4.6 | BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0 | Optional CPU cosine; not bundled |
+| intfloat/multilingual-e5-small | local checksum required | MIT | Optional 384-dimensional model; user supplies files, not bundled |
+
+Optional transitive dependencies (including torch and transformers) must be locked
+and inventoried in the target environment before redistribution. This default
+lock does not install or redistribute them. Version metadata was checked on PyPI
+on 2026-11-17. The actual E5 model has not been downloaded or accuracy-tested.

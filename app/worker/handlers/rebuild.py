@@ -1,6 +1,5 @@
 import json
 from typing import Any
-from uuid import uuid4
 
 from app.clock import now_utc
 from app.config import Settings
@@ -51,38 +50,9 @@ def handle(database: Database, settings: Settings, job: dict[str, Any]) -> None:
                 (job["document_id"],),
             )
         )
-        connection.execute(
-            "UPDATE chunks SET status='stale',eligible=0 WHERE document_id=? AND revision<>?",
-            (job["document_id"], revision),
-        )
-        # P8 baseline indexes prose only. P10 replaces this with the full structured chunker.
-        for block in blocks:
-            if (
-                block["type"] in {"heading", "paragraph", "list_item", "caption"}
-                and block["status"] in {"ok", "corrected", "reviewed", "not_scored"}
-                and not block["critical_flag"]
-            ):
-                ids = json.dumps([block["id"]])
-                existing = connection.execute(
-                    "SELECT id FROM chunks WHERE document_id=? AND revision=? AND block_ids_json=? AND text=?",
-                    (job["document_id"], revision, ids, block["text_current"]),
-                ).fetchone()
-                if existing is None:
-                    connection.execute(
-                        "INSERT INTO chunks VALUES (?,?,?,?,?,?,?, ?,1,'current')",
-                        (
-                            str(uuid4()),
-                            job["document_id"],
-                            revision,
-                            ids,
-                            "",
-                            block["text_current"],
-                            max(1, len(block["text_current"].split())),
-                            json.dumps([block["page_id"]]),
-                        ),
-                    )
-            if payload.get("block_ids") and block["id"] not in payload["block_ids"]:
-                continue
+    from app.services.retrieval.index import build_index
+
+    build_index(database, settings, job["document_id"], lease=lease)
     from app.services.speech import build_block
 
     failure: Problem | None = None

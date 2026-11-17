@@ -123,26 +123,26 @@ def handle(database: Database, settings: Settings, job: dict[str, Any]) -> None:
     needs_review = any(
         block.critical_flag or block.status == "needs_review" for block in validated.blocks
     )
-    if not needs_review:
-        with database.write_tx() as connection:
-            owned = jobs.get_job(connection, job["id"])
-            if (
-                owned is None
-                or owned["lease_owner"] != owner
-                or owned["state"] != "building"
-                or owned["lease_expires_at"] <= now_utc()
-            ):
-                raise LeaseLost()
-            for kind in ("build_audio", "build_index"):
-                jobs.enqueue(
-                    connection,
-                    document_id,
-                    kind,
-                    {"revision": 1},
-                    settings.job_max_attempts,
-                    document_id + ":1:" + kind,
-                    now_utc(),
-                )
+    # Eligible passages remain searchable while flagged passages await review.
+    with database.write_tx() as connection:
+        owned = jobs.get_job(connection, job["id"])
+        if (
+            owned is None
+            or owned["lease_owner"] != owner
+            or owned["state"] != "building"
+            or owned["lease_expires_at"] <= now_utc()
+        ):
+            raise LeaseLost()
+        for kind in ("build_index",) if needs_review else ("build_audio", "build_index"):
+            jobs.enqueue(
+                connection,
+                document_id,
+                kind,
+                {"revision": 1},
+                settings.job_max_attempts,
+                document_id + ":1:" + kind,
+                now_utc(),
+            )
     finish(
         database,
         job["id"],
