@@ -483,6 +483,27 @@ def test_merge_and_layout_paths_agree_on_unreliable_native_text(tmp_path: Path) 
     assert first_layout.raw_text == first_merge.raw_text == "Clean OCR"
 
 
+def test_ocr_merge_updates_page_status(tmp_path: Path) -> None:
+    path = write_pdf(tmp_path / "s.pdf", [PageSpec(images=[PdfImage(0, 0, 612, 792)]),
+                                          PageSpec(images=[PdfImage(0, 0, 612, 792)])])
+    ex = extract_native_pdf(path)
+    base = to_contract_document(ex, source_uri="asset://s")
+    assert [p.status.value for p in base.pages] == ["needs_ocr", "needs_ocr"]
+
+    def words(img: Image.Image) -> list[W]:
+        return [W("scanned", 100, 100, 200, 40)]
+
+    run = ocr_pdf_pages(path, ex, engine=FakeEngine(words), config=NO_PREP, dpi=72, force_pages=[0])
+    merged, _ = merge_ocr_into_document(base, run.results[:1], extraction=ex)  # only page 0's OCR merged
+    assert [p.status.value for p in merged.pages] == ["ok", "needs_ocr"]  # page 1 still lacks OCR
+    assert [w.code for w in merged.pages[0].warnings][-1] == "ocr_applied"
+
+    empty = ocr_pdf_pages(path, ex, engine=FakeEngine([]), config=NO_PREP, dpi=72, force_pages=[1])
+    merged, _ = merge_ocr_into_document(base, empty.results, extraction=ex)
+    assert merged.pages[1].status.value == "blank"
+    assert "ocr_found_no_text" in [w.code for w in merged.pages[1].warnings]
+
+
 def test_null_confidence_line_converts_to_not_available() -> None:
     result = ocr_image(_page(), engine=FakeEngine([W("x", 100, 100, 50, 30, -1)]), config=NO_PREP)
     block = to_contract_blocks(result, page_id=Document.model_fields["id"].default_factory())[0]  # type: ignore[misc]

@@ -1,8 +1,15 @@
 # P1 content contract — version 1.1.0
 
-> **1.1.0 (Phase 4) is proposed and needs P2/P3 review.** It is purely
-> additive: every valid 1.0.0 document is still valid, and producers now emit
-> `"1.1.0"`. See [1.1.0 changes](#110-changes-proposed-in-phase-4).
+> **Status: 1.1.0 is PROPOSED, not approved. P2/P3 approval is pending.**
+>
+> 1.1.0 is **backward-compatible** (every valid 1.0.0 document is still
+> valid) but **not forward-compatible**: a consumer that only implements
+> 1.0.0 will reject 1.1.0 documents. See
+> [Compatibility policy](#compatibility-policy-110) and the change request
+> in `docs/contract_change_request_v1.1.0.md`.
+>
+> P3 has separately drafted its own extraction contract on the `person-3`
+> branch. The two drafts are not compatible; see the change request.
 
 This is the shared data structure P1 (document AI) produces and P2 (frontend,
 speech) and P3 (backend, storage, question answering) consume.
@@ -10,9 +17,11 @@ speech) and P3 (backend, storage, question answering) consume.
 | Artifact | Location |
 |---|---|
 | Pydantic models (source of truth) | `src/pathya_document_ai/models.py`, `geometry.py` |
-| JSON Schema (Draft 2020-12, generated) | `contract/pathya_content.schema.json` |
-| Bilingual sample document | `contract/samples/sample_document_en_hi.json` |
-| Schema export / staleness check | `scripts/export_schema.py [--check]` |
+| JSON Schema 1.1.0 (current, Draft 2020-12, generated) | `contract/schemas/pathya_content.v1.1.0.schema.json` (also `contract/pathya_content.schema.json`) |
+| JSON Schema 1.0.0 (frozen, reconstructed) | `contract/schemas/pathya_content.v1.0.0.schema.json` |
+| Conformance vectors (valid and invalid, with expected verdicts) | `contract/conformance/` |
+| Bilingual sample document (1.0.0) | `contract/samples/sample_document_en_hi.json` |
+| Regenerate or check | `scripts/export_schema.py [--check]`, `scripts/make_conformance.py [--check]` |
 
 **Status:** proposed by P1 in Phase 1. It is not yet the agreed integration contract.
 P2 and P3 must review the open decisions at the end of this document first.
@@ -21,13 +30,17 @@ format; it is not real extraction output.
 
 ## Two validation layers
 
-1. **JSON Schema** checks shapes, required fields, enums, numeric ranges, UUID
-   format and bbox length. Any language can use it.
+1. **JSON Schema** checks shapes, required fields (including every `id` in
+   1.1.0), enums, numeric ranges, UUID format, bbox length, table-count
+   nullability and the 1.0.0 restrictions. Any language can use it.
 2. **The Pydantic `Document` validator** also checks rules JSON Schema cannot
    express: cross-references, bbox ordering (`x0 < x1`), table spans,
    confidence consistency, revision rules and conservative equation rules.
    Treat this layer as authoritative. P3 should validate with it from Python,
-   or reproduce these rules in its own code.
+   or reproduce these rules in its own code. The rules are listed under
+   `x-pathya-invariants` in the schema. The `invalid_python_only_*`
+   conformance vectors are documents that pass JSON Schema but must be
+   rejected.
 
 All objects reject unknown fields (`extra = forbid`). Timestamps must include a
 timezone (ISO 8601, e.g. `2026-11-17T09:30:00Z`).
@@ -61,6 +74,18 @@ timezone (ISO 8601, e.g. `2026-11-17T09:30:00Z`).
 | `rotation` | Source rotation in degrees clockwise: 0, 90, 180 or 270 |
 | `source_asset_id` | Must equal `document.source_asset.id` |
 | `transform` | How normalized coordinates map back to the source (below) |
+| `status` (1.1.0) | `ok`, `blank`, `needs_ocr`, `partial` or `failed`. Required in 1.1.0; absent in 1.0.0. |
+| `warnings` (1.1.0) | List of `{stage, code, message}`. `stage` is `extraction`, `ocr`, `layout` or `merge`; `code` matches `^[a-z][a-z0-9_]{0,63}$`. |
+
+**What each page status means:**
+
+| `status` | Meaning | What consumers should do |
+|---|---|---|
+| `ok` | Content was extracted, natively and/or by OCR | Show normally |
+| `blank` | Nothing to extract. A blank page cannot have blocks. | Show as an empty page |
+| `needs_ocr` | Content is probably inside images, but OCR was not run | Do not treat the page as complete; queue OCR or review |
+| `partial` | A stage failed (for example layout). Text was kept, but its structure may be wrong. | Show, flagged for review |
+| `failed` | Extraction failed; the page's content is missing | Show the error; do not treat the page as blank |
 
 **Bounding-box convention.** `bbox = [x0, y0, x1, y1]`, normalized to `0..1`
 over the *displayed* page. "Displayed" means after rotation and within the
@@ -217,12 +242,14 @@ embeddings) belong to P3.
 
 ## Versioning
 
-- `schema_version` uses semantic versioning. v1 accepts exactly `"1.0.0"`.
+- `schema_version` uses semantic versioning. The Python validator accepts
+  `"1.0.0"` and `"1.1.0"`.
 - **Patch**: documentation or validation-message changes only; the data
   format is unchanged.
-- **Minor**: additive and optional (new optional field, new enum value).
-  Consumers must be ready for new enum values; producers must not send them
-  until consumers agree.
+- **Minor**: additive for readers that support the new version (new optional
+  field, new enum value). A minor version is backward-compatible, not
+  forward-compatible: readers that only know the older version reject it.
+  Producers must not send it until consumers confirm support.
 - **Major**: removals, renames, meaning changes or new required fields.
 - Each change updates `SCHEMA_VERSION`, regenerates the schema
   (`scripts/export_schema.py`), updates the sample and this document, and
@@ -259,7 +286,7 @@ embeddings) belong to P3.
 7. **Quality-flag thresholds**: the confidence threshold for `low_confidence`
    (Phase 5) and how P2 presents it.
 
-## 1.1.0 changes (proposed in Phase 4)
+## 1.1.0 changes (proposed in Phase 4, revised before Phase 5)
 
 **Why these are needed.** Layout analysis must report:
 - uncertain block types
@@ -278,13 +305,22 @@ least one cell in every table.
    `duplicate_content`.
 2. Uncertain table candidates (see Tables above).
 3. `schema_version` accepts `"1.0.0"` or `"1.1.0"`; P1 emits `"1.1.0"`.
+4. Page `status` and `warnings`, added in the pre-Phase-5 revision. Failed and
+   needs-OCR pages are now visible in the JSON, not only in Python report
+   objects.
+5. Stricter validation in 1.1.0:
+   - every `id` is required in serialized documents (before, a missing id was
+     silently replaced with a new random UUID)
+   - a child block must be on its parent's page
 
 **Compatibility rules (enforced and tested in
 `tests/unit/test_contract_versions.py`):**
 - A document labelled `"1.0.0"` is validated with 1.0.0 rules. Using a 1.1.0
   flag or an uncertain table inside it is rejected.
-- `models.upgrade_document_data()` migrates 1.0.0 → 1.1.0 losslessly (a relabel
-  only). Unknown versions are rejected.
+- `models.upgrade_document_data()` migrates 1.0.0 → 1.1.0 without losing
+  anything. It relabels the version and sets each page's status to `ok` with
+  no warnings, which is exactly what a 1.0.0 producer asserted by emitting the
+  page. Unknown versions are rejected.
 - The committed sample stays at 1.0.0 as the backward-compatibility fixture.
 
 **Impact on consumers:**
@@ -293,11 +329,32 @@ least one cell in every table.
 - **P3:** it must store and allow the new enum values, and accept null table
   counts.
 
-Neither change affects documents P1 produced earlier.
+Documents P1 produced earlier (1.0.0) are unaffected and still validate.
+
+## Compatibility policy (1.1.0)
+
+| Reader | Writer emits 1.0.0 | Writer emits 1.1.0 |
+|---|---|---|
+| 1.0.0-only reader (1.0.0 schema) | Accepted | **Rejected** (version, status, new flags, null table counts) |
+| 1.1.0 reader (1.1.0 schema or Python) | Accepted, with 1.0.0 rules applied | Accepted |
+
+**Rules:**
+- **Default output.** P1 emits 1.1.0 by default, because page status is
+  always present.
+- **Exporting 1.0.0.** `models.export_document_data(document, "1.0.0")`
+  produces a 1.0.0 document only when nothing would be lost: no 1.1.0 flags,
+  no uncertain tables, every page `ok`, and no warnings. Page status is then
+  omitted. Otherwise it raises `IncompatibleVersionError`. **Nothing is
+  silently downgraded or dropped.**
+- **Lowest version.** `models.required_version(document)` reports the lowest
+  version that can represent a document exactly.
+- **Cut-over.** Until P2 and P3 confirm 1.1.0 support, integration must either
+  use the 1.0.0 export (which fails loudly on pages it cannot represent), or
+  wait for that confirmation.
 
 ## Changelog
 
 | Version | Change | Consumer impact |
 |---|---|---|
 | 1.0.0 | Initial proposed contract | P2 and P3 to review |
-| 1.1.0 | Five new quality flags, and uncertain table candidates | Additive; P2 and P3 must accept the new values (see above) |
+| 1.1.0 | Five new quality flags, uncertain table candidates, page status and warnings, required ids, parent on the same page | Backward-compatible only; 1.0.0-only readers reject 1.1.0. **Approval pending** (see the change request). |

@@ -503,7 +503,10 @@ def _build_lines(geometric_words: list[NativeWord]) -> list[TextLine]:
         boxes = [w.bbox for w in group if w.bbox is not None]
         bbox = (min(b[0] for b in boxes), min(b[1] for b in boxes),
                 max(b[2] for b in boxes), max(b[3] for b in boxes)) if boxes else None
-        lines.append(TextLine(i, tuple(w.index for w in group), " ".join(w.text for w in group), bbox))
+        # Text of a visible line excludes words outside the crop (bleed/slug marks);
+        # they stay in ``words`` with the "outside_visible_area" note.
+        shown = [w for w in group if w.bbox is not None] or group
+        lines.append(TextLine(i, tuple(w.index for w in group), " ".join(w.text for w in shown), bbox))
     return lines
 
 
@@ -621,10 +624,12 @@ def _render_one(document: Any, index: int, dpi: float, grayscale: bool, limits: 
             raise PdfLimitError(
                 f"page {index} at {dpi} DPI needs {w_px}x{h_px} pixels; limit is {limits.max_render_pixels}")
         rotation = Rotation(page.get_rotation() % 360)
-        crop = page.get_cropbox()
+        crop, media = _ordered(list(page.get_cropbox())), _ordered(list(page.get_mediabox()))
+        # Same visible region as extraction (_page_geometry): CropBox ∩ MediaBox.
+        visible = (max(crop[0], media[0]), max(crop[1], media[1]), min(crop[2], media[2]), min(crop[3], media[3]))
         transform = CoordinateTransform(
             source_space=SourceCoordinateSpace.PDF_USER_SPACE,
-            crop_box=(min(crop[0], crop[2]), min(crop[1], crop[3]), max(crop[0], crop[2]), max(crop[1], crop[3])),
+            crop_box=visible,
             rotation_applied=rotation,
             render_dpi=float(dpi),
         )
@@ -643,6 +648,29 @@ def _render_one(document: Any, index: int, dpi: float, grayscale: bool, limits: 
 
 
 NATIVE_CONFIDENCE_REASON = "Native PDF text layer; pdfplumber reports no confidence."
+
+
+def page_status_from_extraction(pe: PageExtraction, m: Any) -> tuple[Any, list[Any]]:
+    """Contract page status and warnings for a Phase 2 page, before any OCR or layout."""
+    warnings = [m.PageWarning(stage=m.ProcessingStage.EXTRACTION, code=w.code, message=w.message)
+                for w in pe.warnings]
+    decision = pe.ocr.decision
+    reasons = ", ".join(r.value for r in pe.ocr.reasons)
+    has_text = any(line.bbox is not None for line in pe.lines)
+    if pe.status is PageStatus.TEXT_EXTRACTION_FAILED:
+        status = m.PageStatus.FAILED
+    elif decision is OcrDecision.OCR_REQUIRED or (decision is OcrDecision.OCR_RECOMMENDED and not has_text):
+        status = m.PageStatus.NEEDS_OCR
+        warnings.append(m.PageWarning(stage=m.ProcessingStage.EXTRACTION, code=f"ocr_{decision.value.split('_')[1]}",
+                                      message=f"OCR {decision.value.split('_')[1]} ({reasons}); not yet run"))
+    elif decision is OcrDecision.BLANK:
+        status = m.PageStatus.BLANK
+    else:
+        status = m.PageStatus.OK
+        if decision is OcrDecision.OCR_RECOMMENDED:
+            warnings.append(m.PageWarning(stage=m.ProcessingStage.EXTRACTION, code="ocr_recommended",
+                                          message=f"Images may contain text not in the native layer ({reasons})"))
+    return status, warnings
 
 
 def to_contract_document(
@@ -673,9 +701,10 @@ def to_contract_document(
                               created_at=extraction.created_at)
     pages, blocks = [], []
     for pe in extraction.pages:
+        status, warnings = page_status_from_extraction(pe, m)
         page = m.Page(document_id=doc_id, page_index=pe.page_index, page_label=pe.page_label,
                       width=pe.width, height=pe.height, units="pt", rotation=pe.rotation,
-                      source_asset_id=asset.id, transform=pe.transform)
+                      source_asset_id=asset.id, transform=pe.transform, status=status, warnings=warnings)
         pages.append(page)
         order = 0
         for line_index in pe.stream_order:

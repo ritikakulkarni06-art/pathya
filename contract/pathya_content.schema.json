@@ -177,7 +177,8 @@
         "bbox",
         "language",
         "confidence",
-        "provenance"
+        "provenance",
+        "id"
       ],
       "title": "Block",
       "type": "object"
@@ -410,7 +411,8 @@
         "block_id",
         "base_revision",
         "operation",
-        "created_at"
+        "created_at",
+        "id"
       ],
       "title": "Correction",
       "type": "object"
@@ -453,7 +455,8 @@
         "edge_type",
         "source_id",
         "target_id",
-        "provenance"
+        "provenance",
+        "id"
       ],
       "title": "Edge",
       "type": "object"
@@ -684,6 +687,18 @@
           "title": "Source Asset Id",
           "type": "string"
         },
+        "status": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PageStatus"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "1.1.0+: processing outcome. Null/absent only in 1.0.0 documents."
+        },
         "transform": {
           "$ref": "#/$defs/CoordinateTransform"
         },
@@ -694,6 +709,14 @@
           ],
           "title": "Units",
           "type": "string"
+        },
+        "warnings": {
+          "description": "1.1.0+: processing warnings.",
+          "items": {
+            "$ref": "#/$defs/PageWarning"
+          },
+          "title": "Warnings",
+          "type": "array"
         },
         "width": {
           "description": "Displayed width in source units.",
@@ -709,10 +732,59 @@
         "height",
         "units",
         "source_asset_id",
-        "transform"
+        "transform",
+        "id"
       ],
       "title": "Page",
       "type": "object"
+    },
+    "PageStatus": {
+      "description": "Added in 1.1.0: how completely a page was processed.",
+      "enum": [
+        "ok",
+        "blank",
+        "needs_ocr",
+        "partial",
+        "failed"
+      ],
+      "title": "PageStatus",
+      "type": "string"
+    },
+    "PageWarning": {
+      "additionalProperties": false,
+      "description": "Added in 1.1.0: a machine-readable processing warning carried in the contract.",
+      "properties": {
+        "code": {
+          "pattern": "^[a-z][a-z0-9_]{0,63}$",
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "minLength": 1,
+          "title": "Message",
+          "type": "string"
+        },
+        "stage": {
+          "$ref": "#/$defs/ProcessingStage"
+        }
+      },
+      "required": [
+        "stage",
+        "code",
+        "message"
+      ],
+      "title": "PageWarning",
+      "type": "object"
+    },
+    "ProcessingStage": {
+      "enum": [
+        "extraction",
+        "ocr",
+        "layout",
+        "merge"
+      ],
+      "title": "ProcessingStage",
+      "type": "string"
     },
     "Provenance": {
       "additionalProperties": false,
@@ -876,7 +948,8 @@
       "required": [
         "uri",
         "media_type",
-        "sha256"
+        "sha256",
+        "id"
       ],
       "title": "SourceAsset",
       "type": "object"
@@ -946,6 +1019,36 @@
     "TableMeta": {
       "additionalProperties": false,
       "description": "Attached to blocks of type ``table``.\n\nSince 1.1.0 a table whose structure could not be reconstructed is an\n*uncertain table candidate*: ``cell_ids`` is empty and both counts are\nnull (never guessed). Such a block must carry ``table_structure_uncertain``.",
+      "oneOf": [
+        {
+          "properties": {
+            "cell_ids": {
+              "minItems": 1
+            },
+            "column_count": {
+              "type": "integer"
+            },
+            "row_count": {
+              "type": "integer"
+            }
+          },
+          "title": "structured table"
+        },
+        {
+          "properties": {
+            "cell_ids": {
+              "maxItems": 0
+            },
+            "column_count": {
+              "type": "null"
+            },
+            "row_count": {
+              "type": "null"
+            }
+          },
+          "title": "uncertain table candidate (1.1.0)"
+        }
+      ],
       "properties": {
         "cell_ids": {
           "description": "IDs of this table's table_cell blocks.",
@@ -1017,6 +1120,89 @@
   "$id": "https://pathya.local/schemas/p1-content/1.1.0/document.schema.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
+  "allOf": [
+    {
+      "else": {
+        "properties": {
+          "pages": {
+            "items": {
+              "properties": {
+                "status": {
+                  "$ref": "#/$defs/PageStatus"
+                }
+              },
+              "required": [
+                "status",
+                "warnings"
+              ]
+            }
+          }
+        }
+      },
+      "if": {
+        "properties": {
+          "schema_version": {
+            "const": "1.0.0"
+          }
+        },
+        "required": [
+          "schema_version"
+        ]
+      },
+      "then": {
+        "properties": {
+          "blocks": {
+            "items": {
+              "properties": {
+                "quality_flags": {
+                  "items": {
+                    "enum": [
+                      "empty_text",
+                      "geometry_uncertain",
+                      "language_uncertain",
+                      "low_confidence",
+                      "math_needs_review",
+                      "mixed_script",
+                      "possible_ocr_error",
+                      "reading_order_uncertain",
+                      "table_structure_uncertain",
+                      "unsupported_content"
+                    ]
+                  }
+                },
+                "table": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "properties": {
+                        "cell_ids": {
+                          "minItems": 1
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "pages": {
+            "items": {
+              "properties": {
+                "status": {
+                  "type": "null"
+                },
+                "warnings": {
+                  "maxItems": 0
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
   "description": "Root of the contract. Cross-references are validated here.",
   "properties": {
     "blocks": {
@@ -1096,9 +1282,24 @@
     "languages",
     "source_asset",
     "pages",
-    "created_at"
+    "created_at",
+    "id"
   ],
   "title": "Document",
   "type": "object",
+  "x-pathya-invariants": [
+    "bbox: x0 < x1 and y0 < y1 (ranges 0..1 are in the schema).",
+    "Unique ids across pages, blocks, edges and corrections; unique page_index.",
+    "page.document_id equals document.id; page.source_asset_id equals source_asset.id.",
+    "block.page_id and block.parent_id reference existing pages/blocks; parent on the same page; no cycles.",
+    "reading_order is unique per (page_id, parent_id).",
+    "Table cells reference their table, appear in its cell_ids, fit within row/column counts, and header_cell_ids reference header cells of the same table.",
+    "An uncertain table (no cells) carries the table_structure_uncertain flag.",
+    "Edge endpoints exist; caption_of goes caption -> figure/table/equation; header_for goes header cell -> cell.",
+    "figure.caption_block_id references a caption block.",
+    "Revision 1 blocks have current_text == raw_text; correction base_revision < block revision.",
+    "A page with status 'blank' has no blocks.",
+    "Confidence: origin 'not_available' iff score is null; null score and heuristic origin need a reason."
+  ],
   "x-pathya-schema-version": "1.1.0"
 }

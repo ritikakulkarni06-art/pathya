@@ -418,3 +418,41 @@ def test_contract_conversion_keeps_confidence_null(tmp_path: Path) -> None:
     payload = json.loads(doc.model_dump_json())
     jsonschema.Draft202012Validator(build_json_schema(), format_checker=jsonschema.FormatChecker()).validate(payload)
     assert Document.model_validate(payload) == doc
+
+
+# ------------------------------------------- page status in the contract (audit M6)
+
+
+def test_contract_page_status_distinguishes_blank_scanned_and_text(tmp_path: Path) -> None:
+    pages = [_two_lines(), PageSpec(), PageSpec(images=[Image(0, 0, *LETTER)]),
+             PageSpec(texts=[Text(72, 760, "Fig")], images=[Image(36, 36, 540, 700)])]
+    doc = to_contract_document(extract_native_pdf(write_pdf(tmp_path / "s.pdf", pages)), source_uri="asset://s")
+    assert [p.status.value for p in doc.pages] == ["ok", "blank", "needs_ocr", "ok"]
+    assert [w.code for w in doc.pages[2].warnings] == ["ocr_required"]
+    assert [w.code for w in doc.pages[3].warnings] == ["ocr_recommended"]
+    assert doc.schema_version == "1.1.0"
+    payload = json.loads(doc.model_dump_json())
+    jsonschema.Draft202012Validator(build_json_schema("1.1.0"), format_checker=jsonschema.FormatChecker()).validate(payload)
+
+
+def test_extraction_warnings_reach_the_contract(tmp_path: Path) -> None:
+    spec = PageSpec(texts=[Text(72, 700, "Inside"), Text(72, 100, "Outside")], crop_box=(50, 400, 562, 750))
+    doc = to_contract_document(extract_native_pdf(write_pdf(tmp_path / "c.pdf", [spec])), source_uri="asset://c")
+    assert any(w.code == "words_outside_crop" and w.stage.value == "extraction" for w in doc.pages[0].warnings)
+
+
+def test_off_crop_words_on_a_visible_line_are_not_in_its_text(tmp_path: Path) -> None:
+    # "visible" ends near the crop edge (x~105.5, crop 112); "slug" starts at 116, fully outside the
+    # crop but close enough to join the same Phase 2 line.
+    spec = PageSpec(texts=[Text(72, 700, "visible"), Text(116, 700, "slug")], crop_box=(36, 400, 112, 750))
+    page = extract_native_pdf(write_pdf(tmp_path / "s.pdf", [spec])).pages[0]
+    line = next(line for line in page.lines if line.bbox is not None)
+    assert len(line.word_indices) == 2  # really the same line
+    assert line.text == "visible"
+    assert any(w.text == "slug" and w.bbox is None for w in page.words)  # still recorded
+
+
+def test_render_transform_uses_visible_region_like_extraction(tmp_path: Path) -> None:
+    spec = PageSpec(texts=[Text(72, 700, "x")], crop_box=(-50, -50, 700, 900))  # CropBox beyond MediaBox
+    path = write_pdf(tmp_path / "big.pdf", [spec])
+    assert render_page(path, 0, dpi=36).transform.crop_box == extract_native_pdf(path).pages[0].transform.crop_box

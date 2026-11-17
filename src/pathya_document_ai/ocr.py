@@ -532,6 +532,7 @@ def merge_ocr_into_document(
             raise ValueError(f"OCR result page {result.page_index} is not in the document")
         page = pages[result.page_index]
         tag = f"page {result.page_index}"
+        first_note = len(notes)
         natives = [b for b in blocks if b.page_id == page.id and b.parent_id is None
                    and b.provenance.method is m.ExtractionMethod.NATIVE_PDF_TEXT]
 
@@ -583,18 +584,48 @@ def merge_ocr_into_document(
         removed = set(replaced)
         blocks = [b for b in blocks if not (b.page_id == page.id and b.parent_id is None)] + renumbered
         blocks = [b for b in blocks if b.id not in removed]
+        has_blocks = any(b.page_id == page.id for b in blocks)
+        merge_warnings = [m.PageWarning(stage=m.ProcessingStage.MERGE, code="ocr_merge_decision", message=n)
+                          for n in notes[first_note:]]
+        pages[result.page_index] = apply_ocr_status(page, result, has_blocks, m, extra=merge_warnings)
     kept_ids = {b.id for b in blocks}
     edges = [e for e in document.edges if e.source_id in kept_ids and e.target_id in kept_ids]
     if len(edges) != len(document.edges):
         notes.append(f"{len(document.edges) - len(edges)} edges to replaced native blocks were removed")
     languages = sorted({b.language for b in blocks} - {m.Language.UNDETERMINED}) or [m.Language.UNDETERMINED]
     data = document.model_dump()
-    data.update(blocks=[b.model_dump() for b in blocks], edges=[e.model_dump() for e in edges],
+    if data["schema_version"] == "1.0.0":
+        # Merging adds 1.1.0 information (page status/warnings, duplicate_content); upgrade
+        # explicitly and report it rather than emitting an invalid 1.0.0 document.
+        data = m.upgrade_document_data(data)
+        notes.append("document upgraded from schema 1.0.0 to 1.1.0 to record OCR status and flags")
+    ordered_pages = [pages[p.page_index].model_dump() if p.page_index in pages else p.model_dump()
+                     for p in document.pages]
+    status_by_index = {p["page_index"]: p for p in data["pages"]}
+    for page_data in ordered_pages:
+        if page_data.get("status") is None:
+            page_data["status"] = status_by_index[page_data["page_index"]].get("status") or "ok"
+    data.update(pages=ordered_pages, blocks=[b.model_dump() for b in blocks], edges=[e.model_dump() for e in edges],
                 languages=languages)
-    if any(dup in b.quality_flags for b in blocks) and data["schema_version"] == "1.0.0":
-        data["schema_version"] = m.SCHEMA_VERSION  # new content uses a 1.1.0 flag; not a silent relabel
-        notes.append("document upgraded to schema 1.1.0 because duplicate_content flags were added")
     return m.Document.model_validate(data), notes
+
+
+def apply_ocr_status(page: Any, result: OcrPageResult, has_blocks: bool, m: Any, extra: list[Any] = ()) -> Any:  # type: ignore[assignment]
+    """Return ``page`` with status/warnings updated after OCR was run on it."""
+    warnings = list(page.warnings) + [m.PageWarning(
+        stage=m.ProcessingStage.OCR, code="ocr_applied",
+        message=f"Tesseract {result.engine_version} ({'+'.join(result.languages)}): "
+                f"{result.diagnostics.word_count} words, mean confidence "
+                f"{'n/a' if result.diagnostics.mean_confidence is None else round(result.diagnostics.mean_confidence, 3)}")]
+    warnings += [m.PageWarning(stage=m.ProcessingStage.OCR, code="ocr_warning", message=w) for w in result.warnings]
+    warnings += list(extra)
+    status = page.status
+    if status in (None, m.PageStatus.NEEDS_OCR, m.PageStatus.BLANK, m.PageStatus.OK):
+        status = m.PageStatus.OK if has_blocks else m.PageStatus.BLANK
+        if not has_blocks:
+            warnings.append(m.PageWarning(stage=m.ProcessingStage.OCR, code="ocr_found_no_text",
+                                          message="OCR ran and found no text on this page"))
+    return page.model_copy(update={"status": status, "warnings": warnings})
 
 
 def _center_inside(box: Box, region: Box, pad: float = 0.002) -> bool:

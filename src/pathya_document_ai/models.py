@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from collections import Counter
 from enum import StrEnum
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 from uuid import UUID, uuid4
 
 from pydantic import (
@@ -297,6 +297,31 @@ class FigureMeta(_Model):
 # --------------------------------------------------------------------- core models
 
 
+class PageStatus(StrEnum):
+    """Added in 1.1.0: how completely a page was processed."""
+
+    OK = "ok"  # content extracted (native and/or OCR)
+    BLANK = "blank"  # nothing to extract (no text, images or drawings that could hold text)
+    NEEDS_OCR = "needs_ocr"  # content is likely in images but OCR was not run: blocks may be missing
+    PARTIAL = "partial"  # a stage failed (e.g. layout); text kept, structure may be wrong
+    FAILED = "failed"  # extraction failed; the page's content is missing
+
+
+class ProcessingStage(StrEnum):
+    EXTRACTION = "extraction"
+    OCR = "ocr"
+    LAYOUT = "layout"
+    MERGE = "merge"
+
+
+class PageWarning(_Model):
+    """Added in 1.1.0: a machine-readable processing warning carried in the contract."""
+
+    stage: ProcessingStage
+    code: Annotated[str, StringConstraints(pattern=r"^[a-z][a-z0-9_]{0,63}$")]
+    message: NonEmptyStr
+
+
 class Page(_Model):
     id: UUID = Field(default_factory=new_id)
     document_id: UUID
@@ -308,6 +333,9 @@ class Page(_Model):
     rotation: Rotation = Rotation.R0
     source_asset_id: UUID
     transform: CoordinateTransform
+    status: PageStatus | None = Field(
+        default=None, description="1.1.0+: processing outcome. Null/absent only in 1.0.0 documents.")
+    warnings: list[PageWarning] = Field(default_factory=list, description="1.1.0+: processing warnings.")
 
 
 _META_FIELD_FOR_TYPE = {
@@ -422,6 +450,20 @@ class Document(_Model):
     corrections: list[Correction] = Field(default_factory=list, description="Applied correction history.")
     created_at: AwareDatetime
 
+    @model_validator(mode="before")
+    @classmethod
+    def _serialized_ids_required(cls, data: Any) -> Any:
+        """Serialized input must carry every ``id``; generating one would hide producer bugs.
+
+        Python code constructing models directly still gets fresh UUIDs from the
+        default factories; this check applies to mapping (JSON) input.
+        """
+        if isinstance(data, dict):
+            missing = _missing_ids(data)
+            if missing:
+                raise ValueError(f"serialized document is missing required id fields: {missing[:5]}")
+        return data
+
     @model_validator(mode="after")
     def _cross_references(self) -> "Document":
         _unique("page id", [p.id for p in self.pages])
@@ -443,6 +485,8 @@ class Document(_Model):
                 raise ValueError(f"block {block.id} references unknown page {block.page_id}")
             if block.parent_id is not None and block.parent_id not in blocks:
                 raise ValueError(f"block {block.id} references unknown parent {block.parent_id}")
+            if block.parent_id is not None and blocks[block.parent_id].page_id != block.page_id:
+                raise ValueError(f"block {block.id} is on a different page from its parent {block.parent_id}")
         _check_acyclic(blocks)
         _unique("reading_order within (page_id, parent_id)",
                 [(b.page_id, b.parent_id, b.reading_order) for b in self.blocks])
@@ -450,6 +494,19 @@ class Document(_Model):
         _check_tables(blocks)
         if self.schema_version == "1.0.0":
             _check_v1_0_compatible(self.blocks)
+            for page in self.pages:
+                if page.status is not None or page.warnings:
+                    raise ValueError(f"page {page.id} uses 1.1.0 status/warnings in a 1.0.0 document")
+        else:
+            for page in self.pages:
+                if page.status is None:
+                    raise ValueError(f"page {page.id} requires a status in a {self.schema_version} document")
+        blocks_per_page = {p.id: 0 for p in self.pages}
+        for block in self.blocks:
+            blocks_per_page[block.page_id] += 1
+        for page in self.pages:
+            if page.status is PageStatus.BLANK and blocks_per_page[page.id]:
+                raise ValueError(f"page {page.id} is marked blank but has blocks")
         for block in self.blocks:
             if block.table is not None and block.table.is_uncertain_candidate \
                     and QualityFlag.TABLE_STRUCTURE_UNCERTAIN not in block.quality_flags:
@@ -496,6 +553,66 @@ def _check_v1_0_compatible(blocks: list[Block]) -> None:
             raise ValueError(f"block {block.id} is an uncertain table candidate, which requires 1.1.0")
 
 
+def _missing_ids(data: dict) -> list[str]:  # type: ignore[type-arg]
+    missing = []
+    if "id" not in data:
+        missing.append("document.id")
+    asset = data.get("source_asset")
+    if isinstance(asset, dict) and "id" not in asset:
+        missing.append("source_asset.id")
+    for key in ("pages", "blocks", "edges", "corrections"):
+        for n, item in enumerate(data.get(key) or []):
+            if isinstance(item, dict) and "id" not in item:
+                missing.append(f"{key}[{n}].id")
+    return missing
+
+
+def required_version(document: "Document") -> str:
+    """Lowest contract version able to represent ``document`` exactly."""
+    uses_1_1 = any(QUALITY_FLAGS_ADDED_IN_1_1.intersection(b.quality_flags) for b in document.blocks)         or any(b.table is not None and b.table.is_uncertain_candidate for b in document.blocks)         or any(p.status is not None or p.warnings for p in document.pages)
+    return "1.1.0" if uses_1_1 else "1.0.0"
+
+
+class IncompatibleVersionError(ValueError):
+    """The document uses features the requested contract version cannot represent."""
+
+
+def export_document_data(document: "Document", target_version: str = SCHEMA_VERSION) -> dict:  # type: ignore[type-arg]
+    """Serialize ``document`` as JSON-compatible data for ``target_version``.
+
+    * ``1.1.0``: the full document.
+    * ``1.0.0``: only if the content needs nothing from 1.1.0 other than page
+      status, which is then **omitted** (it cannot be expressed in 1.0.0), and
+      only when every page is ``ok`` with no warnings. Otherwise
+      ``IncompatibleVersionError`` is raised: content, flags and failure
+      information are never silently dropped.
+    """
+    if target_version not in SUPPORTED_SCHEMA_VERSIONS:
+        raise ValueError(f"unsupported target version {target_version!r}")
+    data = document.model_dump(mode="json")
+    data["schema_version"] = target_version
+    if target_version == "1.1.0":
+        if any(p.status is None for p in document.pages):
+            raise IncompatibleVersionError("every page needs a status to be exported as 1.1.0; "
+                                           "upgrade with upgrade_document_data() and set page status")
+        return data
+    blockers = [
+        *(f"block {b.id} flags {sorted(QUALITY_FLAGS_ADDED_IN_1_1.intersection(b.quality_flags))}"
+          for b in document.blocks if QUALITY_FLAGS_ADDED_IN_1_1.intersection(b.quality_flags)),
+        *(f"block {b.id} is an uncertain table" for b in document.blocks
+          if b.table is not None and b.table.is_uncertain_candidate),
+        *(f"page {p.page_index} status {p.status.value}" for p in document.pages
+          if p.status not in (None, PageStatus.OK)),
+        *(f"page {p.page_index} has {len(p.warnings)} warnings" for p in document.pages if p.warnings),
+    ]
+    if blockers:
+        raise IncompatibleVersionError(f"document cannot be represented in 1.0.0: {blockers[:5]}")
+    for page in data["pages"]:
+        page.pop("status", None)
+        page.pop("warnings", None)
+    return data
+
+
 def upgrade_document_data(data: dict) -> dict:  # type: ignore[type-arg]
     """Migrate serialized contract data to the current version (1.0.0 -> 1.1.0 is a relabel).
 
@@ -506,6 +623,11 @@ def upgrade_document_data(data: dict) -> dict:  # type: ignore[type-arg]
     if version not in SUPPORTED_SCHEMA_VERSIONS:
         raise ValueError(f"unsupported schema_version {version!r}; supported: {SUPPORTED_SCHEMA_VERSIONS}")
     upgraded = dict(data)
+    if version == "1.0.0":
+        # 1.0.0 had no processing status; "ok" with no warnings is what a 1.0.0
+        # producer asserted by emitting the page. Nothing else changes.
+        upgraded["pages"] = [{**p, "status": p.get("status") or "ok", "warnings": p.get("warnings", [])}
+                             for p in data.get("pages", [])]
     upgraded["schema_version"] = SCHEMA_VERSION
     return upgraded
 

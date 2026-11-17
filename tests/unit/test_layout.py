@@ -418,6 +418,9 @@ def test_failed_layout_keeps_all_text(textbook: tuple[Path, Any]) -> None:
     assert sorted(" ".join(b.raw_text for b in blocks).split()) == sorted(native.split())
     assert blocks[0].provenance.method.value == "derived"
     assert "boom" in result.reports[0].warnings
+    page = result.document.pages[0]
+    assert page.status.value == "partial"  # text kept, structure missing: not "ok", not "blank"
+    assert any(w.code == "layout_failed" and "boom" in w.message for w in page.warnings)
 
 
 def test_adapter_failure_and_fallback(monkeypatch: pytest.MonkeyPatch, textbook: tuple[Path, Any]) -> None:

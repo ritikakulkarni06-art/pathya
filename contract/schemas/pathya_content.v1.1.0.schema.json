@@ -1,0 +1,1305 @@
+{
+  "$defs": {
+    "AnnotationOrigin": {
+      "enum": [
+        "source",
+        "human",
+        "model_generated"
+      ],
+      "title": "AnnotationOrigin",
+      "type": "string"
+    },
+    "Block": {
+      "additionalProperties": false,
+      "properties": {
+        "bbox": {
+          "description": "[x0, y0, x1, y1] normalized 0..1, top-left origin, y downward, displayed page.",
+          "maxItems": 4,
+          "minItems": 4,
+          "prefixItems": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            }
+          ],
+          "title": "Bbox",
+          "type": "array"
+        },
+        "block_type": {
+          "$ref": "#/$defs/BlockType"
+        },
+        "confidence": {
+          "$ref": "#/$defs/Confidence"
+        },
+        "current_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Text after content corrections.",
+          "title": "Current Text"
+        },
+        "equation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EquationMeta"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "figure": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FigureMeta"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "language": {
+          "$ref": "#/$defs/Language"
+        },
+        "page_id": {
+          "format": "uuid",
+          "title": "Page Id",
+          "type": "string"
+        },
+        "parent_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Parent Id"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "quality_flags": {
+          "items": {
+            "$ref": "#/$defs/QualityFlag"
+          },
+          "title": "Quality Flags",
+          "type": "array"
+        },
+        "raw_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Text as extracted; never edited.",
+          "title": "Raw Text"
+        },
+        "reading_order": {
+          "description": "Order among siblings (same page and parent).",
+          "minimum": 0,
+          "title": "Reading Order",
+          "type": "integer"
+        },
+        "review_status": {
+          "$ref": "#/$defs/ReviewStatus",
+          "default": "unreviewed"
+        },
+        "revision": {
+          "default": 1,
+          "minimum": 1,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "table": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TableMeta"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "table_cell": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TableCellMeta"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "page_id",
+        "block_type",
+        "reading_order",
+        "bbox",
+        "language",
+        "confidence",
+        "provenance",
+        "id"
+      ],
+      "title": "Block",
+      "type": "object"
+    },
+    "BlockType": {
+      "enum": [
+        "heading",
+        "paragraph",
+        "list_item",
+        "table",
+        "table_cell",
+        "equation",
+        "figure",
+        "caption"
+      ],
+      "title": "BlockType",
+      "type": "string"
+    },
+    "Confidence": {
+      "additionalProperties": false,
+      "description": "Optional quality score. ``score`` is null when no meaningful value exists.",
+      "properties": {
+        "origin": {
+          "$ref": "#/$defs/ConfidenceOrigin"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Why the score is absent or how it was derived.",
+          "title": "Reason"
+        },
+        "score": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Score"
+        }
+      },
+      "required": [
+        "origin"
+      ],
+      "title": "Confidence",
+      "type": "object"
+    },
+    "ConfidenceOrigin": {
+      "enum": [
+        "engine_reported",
+        "model_estimated",
+        "heuristic",
+        "not_available"
+      ],
+      "title": "ConfidenceOrigin",
+      "type": "string"
+    },
+    "CoordinateTransform": {
+      "additionalProperties": false,
+      "description": "How normalized boxes map back onto the original source coordinates.\n\nTo recover a source point: un-normalize against the displayed width/height,\nundo ``rotation`` and add the crop-box offset. For PDF sources the y axis\nmust also be flipped because PDF user space has a bottom-left origin.",
+      "properties": {
+        "crop_box": {
+          "description": "[x0, y0, x1, y1] of the visible region in source units (PDF CropBox or pixel crop).",
+          "maxItems": 4,
+          "minItems": 4,
+          "prefixItems": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "minimum": 0.0,
+              "type": "number"
+            }
+          ],
+          "title": "Crop Box",
+          "type": "array"
+        },
+        "normalized_origin": {
+          "const": "top_left",
+          "default": "top_left",
+          "title": "Normalized Origin",
+          "type": "string"
+        },
+        "render_dpi": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "DPI of the raster used, if any.",
+          "title": "Render Dpi"
+        },
+        "rotation_applied": {
+          "$ref": "#/$defs/Rotation",
+          "description": "Rotation already applied before normalization."
+        },
+        "source_space": {
+          "$ref": "#/$defs/SourceCoordinateSpace"
+        }
+      },
+      "required": [
+        "source_space",
+        "crop_box",
+        "rotation_applied"
+      ],
+      "title": "CoordinateTransform",
+      "type": "object"
+    },
+    "Correction": {
+      "additionalProperties": false,
+      "description": "A content-only correction request for one block, against a base revision.\n\nP1 validates and applies content; P3 owns persistence and transactions.",
+      "properties": {
+        "author_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Opaque reviewer reference from P3.",
+          "title": "Author Ref"
+        },
+        "base_revision": {
+          "description": "Block revision the correction was made against.",
+          "minimum": 1,
+          "title": "Base Revision",
+          "type": "integer"
+        },
+        "block_id": {
+          "format": "uuid",
+          "title": "Block Id",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "document_id": {
+          "format": "uuid",
+          "title": "Document Id",
+          "type": "string"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "new_language": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Language"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "new_review_status": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ReviewStatus"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "new_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "New Text"
+        },
+        "operation": {
+          "$ref": "#/$defs/CorrectionOperation"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        }
+      },
+      "required": [
+        "document_id",
+        "block_id",
+        "base_revision",
+        "operation",
+        "created_at",
+        "id"
+      ],
+      "title": "Correction",
+      "type": "object"
+    },
+    "CorrectionOperation": {
+      "enum": [
+        "replace_text",
+        "set_language",
+        "set_review_status"
+      ],
+      "title": "CorrectionOperation",
+      "type": "string"
+    },
+    "Edge": {
+      "additionalProperties": false,
+      "properties": {
+        "edge_type": {
+          "$ref": "#/$defs/EdgeType"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "source_id": {
+          "format": "uuid",
+          "title": "Source Id",
+          "type": "string"
+        },
+        "target_id": {
+          "format": "uuid",
+          "title": "Target Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "edge_type",
+        "source_id",
+        "target_id",
+        "provenance",
+        "id"
+      ],
+      "title": "Edge",
+      "type": "object"
+    },
+    "EdgeType": {
+      "enum": [
+        "contains",
+        "precedes",
+        "caption_of",
+        "refers_to",
+        "header_for",
+        "supersedes"
+      ],
+      "title": "EdgeType",
+      "type": "string"
+    },
+    "EquationMeta": {
+      "additionalProperties": false,
+      "description": "Conservative equation record. The source crop (block page + bbox) is canonical.\n\nMathML is only present after human approval; it is never machine-invented\ncontent presented as fact. ``spoken_fallback`` describes, not solves.",
+      "properties": {
+        "mathml": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mathml"
+        },
+        "mathml_review_status": {
+          "$ref": "#/$defs/ReviewStatus",
+          "default": "unreviewed"
+        },
+        "source_crop_uri": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional stored crop image reference.",
+          "title": "Source Crop Uri"
+        },
+        "source_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Text exactly as extracted, if any.",
+          "title": "Source Text"
+        },
+        "spoken_fallback": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Spoken Fallback"
+        },
+        "spoken_fallback_origin": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AnnotationOrigin"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "spoken_fallback_review_status": {
+          "$ref": "#/$defs/ReviewStatus",
+          "default": "unreviewed"
+        }
+      },
+      "title": "EquationMeta",
+      "type": "object"
+    },
+    "ExtractionMethod": {
+      "enum": [
+        "native_pdf_text",
+        "ocr",
+        "layout_model",
+        "human",
+        "derived"
+      ],
+      "title": "ExtractionMethod",
+      "type": "string"
+    },
+    "FigureMeta": {
+      "additionalProperties": false,
+      "description": "Figure accessibility text. Caption, alt text and long description stay separate.",
+      "properties": {
+        "alt_text": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TextAnnotation"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Short (one-sentence) description."
+        },
+        "caption_block_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The caption block, if extracted.",
+          "title": "Caption Block Id"
+        },
+        "extended_description": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TextAnnotation"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "source_caption": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Caption text as printed, if any.",
+          "title": "Source Caption"
+        }
+      },
+      "title": "FigureMeta",
+      "type": "object"
+    },
+    "Language": {
+      "description": "BCP 47 language tags supported by the contract.",
+      "enum": [
+        "en",
+        "hi",
+        "mul",
+        "und"
+      ],
+      "title": "Language",
+      "type": "string"
+    },
+    "MediaType": {
+      "enum": [
+        "application/pdf",
+        "image/png",
+        "image/jpeg",
+        "image/tiff"
+      ],
+      "title": "MediaType",
+      "type": "string"
+    },
+    "Page": {
+      "additionalProperties": false,
+      "properties": {
+        "document_id": {
+          "format": "uuid",
+          "title": "Document Id",
+          "type": "string"
+        },
+        "height": {
+          "description": "Displayed height in source units.",
+          "exclusiveMinimum": 0,
+          "title": "Height",
+          "type": "number"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "page_index": {
+          "description": "Zero-based physical index in the source file.",
+          "minimum": 0,
+          "title": "Page Index",
+          "type": "integer"
+        },
+        "page_label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Printed/logical label, e.g. 'iv' or '12'.",
+          "title": "Page Label"
+        },
+        "rotation": {
+          "$ref": "#/$defs/Rotation",
+          "default": 0
+        },
+        "source_asset_id": {
+          "format": "uuid",
+          "title": "Source Asset Id",
+          "type": "string"
+        },
+        "status": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PageStatus"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "1.1.0+: processing outcome. Null/absent only in 1.0.0 documents."
+        },
+        "transform": {
+          "$ref": "#/$defs/CoordinateTransform"
+        },
+        "units": {
+          "enum": [
+            "pt",
+            "px"
+          ],
+          "title": "Units",
+          "type": "string"
+        },
+        "warnings": {
+          "description": "1.1.0+: processing warnings.",
+          "items": {
+            "$ref": "#/$defs/PageWarning"
+          },
+          "title": "Warnings",
+          "type": "array"
+        },
+        "width": {
+          "description": "Displayed width in source units.",
+          "exclusiveMinimum": 0,
+          "title": "Width",
+          "type": "number"
+        }
+      },
+      "required": [
+        "document_id",
+        "page_index",
+        "width",
+        "height",
+        "units",
+        "source_asset_id",
+        "transform",
+        "id"
+      ],
+      "title": "Page",
+      "type": "object"
+    },
+    "PageStatus": {
+      "description": "Added in 1.1.0: how completely a page was processed.",
+      "enum": [
+        "ok",
+        "blank",
+        "needs_ocr",
+        "partial",
+        "failed"
+      ],
+      "title": "PageStatus",
+      "type": "string"
+    },
+    "PageWarning": {
+      "additionalProperties": false,
+      "description": "Added in 1.1.0: a machine-readable processing warning carried in the contract.",
+      "properties": {
+        "code": {
+          "pattern": "^[a-z][a-z0-9_]{0,63}$",
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "minLength": 1,
+          "title": "Message",
+          "type": "string"
+        },
+        "stage": {
+          "$ref": "#/$defs/ProcessingStage"
+        }
+      },
+      "required": [
+        "stage",
+        "code",
+        "message"
+      ],
+      "title": "PageWarning",
+      "type": "object"
+    },
+    "ProcessingStage": {
+      "enum": [
+        "extraction",
+        "ocr",
+        "layout",
+        "merge"
+      ],
+      "title": "ProcessingStage",
+      "type": "string"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "description": "Which method/engine/version produced a value, with its parameters.",
+      "properties": {
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "engine": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "e.g. 'tesseract', 'pdfplumber', 'docling'.",
+          "title": "Engine"
+        },
+        "engine_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Engine Version"
+        },
+        "method": {
+          "$ref": "#/$defs/ExtractionMethod"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Model or traineddata name, if any.",
+          "title": "Model"
+        },
+        "model_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Version"
+        },
+        "parameters": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": "Parameters",
+          "type": "object"
+        }
+      },
+      "required": [
+        "method",
+        "created_at"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "QualityFlag": {
+      "enum": [
+        "low_confidence",
+        "possible_ocr_error",
+        "mixed_script",
+        "language_uncertain",
+        "reading_order_uncertain",
+        "geometry_uncertain",
+        "table_structure_uncertain",
+        "math_needs_review",
+        "unsupported_content",
+        "empty_text",
+        "block_type_uncertain",
+        "missing_geometry",
+        "overlapping_regions",
+        "orphan_caption",
+        "duplicate_content"
+      ],
+      "title": "QualityFlag",
+      "type": "string"
+    },
+    "ReviewStatus": {
+      "enum": [
+        "unreviewed",
+        "needs_review",
+        "approved",
+        "rejected"
+      ],
+      "title": "ReviewStatus",
+      "type": "string"
+    },
+    "Rotation": {
+      "description": "Clockwise display rotation in degrees, as declared by the source.",
+      "enum": [
+        0,
+        90,
+        180,
+        270
+      ],
+      "title": "Rotation",
+      "type": "integer"
+    },
+    "SourceAsset": {
+      "additionalProperties": false,
+      "description": "Original uploaded file, referenced by ID and hash rather than embedded.",
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "media_type": {
+          "$ref": "#/$defs/MediaType"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "uri": {
+          "description": "Opaque storage reference assigned by P3.",
+          "minLength": 1,
+          "title": "Uri",
+          "type": "string"
+        }
+      },
+      "required": [
+        "uri",
+        "media_type",
+        "sha256",
+        "id"
+      ],
+      "title": "SourceAsset",
+      "type": "object"
+    },
+    "SourceCoordinateSpace": {
+      "enum": [
+        "pdf_user_space",
+        "image_pixels"
+      ],
+      "title": "SourceCoordinateSpace",
+      "type": "string"
+    },
+    "TableCellMeta": {
+      "additionalProperties": false,
+      "description": "Attached to blocks of type ``table_cell``. Indices are zero-based.",
+      "properties": {
+        "column_index": {
+          "minimum": 0,
+          "title": "Column Index",
+          "type": "integer"
+        },
+        "column_span": {
+          "default": 1,
+          "minimum": 1,
+          "title": "Column Span",
+          "type": "integer"
+        },
+        "header_cell_ids": {
+          "description": "Header cells that label this cell.",
+          "items": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "title": "Header Cell Ids",
+          "type": "array"
+        },
+        "is_header": {
+          "default": false,
+          "title": "Is Header",
+          "type": "boolean"
+        },
+        "row_index": {
+          "minimum": 0,
+          "title": "Row Index",
+          "type": "integer"
+        },
+        "row_span": {
+          "default": 1,
+          "minimum": 1,
+          "title": "Row Span",
+          "type": "integer"
+        },
+        "table_id": {
+          "format": "uuid",
+          "title": "Table Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "table_id",
+        "row_index",
+        "column_index"
+      ],
+      "title": "TableCellMeta",
+      "type": "object"
+    },
+    "TableMeta": {
+      "additionalProperties": false,
+      "description": "Attached to blocks of type ``table``.\n\nSince 1.1.0 a table whose structure could not be reconstructed is an\n*uncertain table candidate*: ``cell_ids`` is empty and both counts are\nnull (never guessed). Such a block must carry ``table_structure_uncertain``.",
+      "oneOf": [
+        {
+          "properties": {
+            "cell_ids": {
+              "minItems": 1
+            },
+            "column_count": {
+              "type": "integer"
+            },
+            "row_count": {
+              "type": "integer"
+            }
+          },
+          "title": "structured table"
+        },
+        {
+          "properties": {
+            "cell_ids": {
+              "maxItems": 0
+            },
+            "column_count": {
+              "type": "null"
+            },
+            "row_count": {
+              "type": "null"
+            }
+          },
+          "title": "uncertain table candidate (1.1.0)"
+        }
+      ],
+      "properties": {
+        "cell_ids": {
+          "description": "IDs of this table's table_cell blocks.",
+          "items": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "title": "Cell Ids",
+          "type": "array"
+        },
+        "column_count": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Column Count"
+        },
+        "row_count": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Row Count"
+        }
+      },
+      "title": "TableMeta",
+      "type": "object"
+    },
+    "TextAnnotation": {
+      "additionalProperties": false,
+      "properties": {
+        "language": {
+          "$ref": "#/$defs/Language"
+        },
+        "origin": {
+          "$ref": "#/$defs/AnnotationOrigin"
+        },
+        "review_status": {
+          "$ref": "#/$defs/ReviewStatus",
+          "default": "unreviewed"
+        },
+        "text": {
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text",
+        "language",
+        "origin"
+      ],
+      "title": "TextAnnotation",
+      "type": "object"
+    }
+  },
+  "$id": "https://pathya.local/schemas/p1-content/1.1.0/document.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "else": {
+        "properties": {
+          "pages": {
+            "items": {
+              "properties": {
+                "status": {
+                  "$ref": "#/$defs/PageStatus"
+                }
+              },
+              "required": [
+                "status",
+                "warnings"
+              ]
+            }
+          }
+        }
+      },
+      "if": {
+        "properties": {
+          "schema_version": {
+            "const": "1.0.0"
+          }
+        },
+        "required": [
+          "schema_version"
+        ]
+      },
+      "then": {
+        "properties": {
+          "blocks": {
+            "items": {
+              "properties": {
+                "quality_flags": {
+                  "items": {
+                    "enum": [
+                      "empty_text",
+                      "geometry_uncertain",
+                      "language_uncertain",
+                      "low_confidence",
+                      "math_needs_review",
+                      "mixed_script",
+                      "possible_ocr_error",
+                      "reading_order_uncertain",
+                      "table_structure_uncertain",
+                      "unsupported_content"
+                    ]
+                  }
+                },
+                "table": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "properties": {
+                        "cell_ids": {
+                          "minItems": 1
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "pages": {
+            "items": {
+              "properties": {
+                "status": {
+                  "type": "null"
+                },
+                "warnings": {
+                  "maxItems": 0
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "description": "Root of the contract. Cross-references are validated here.",
+  "properties": {
+    "blocks": {
+      "items": {
+        "$ref": "#/$defs/Block"
+      },
+      "title": "Blocks",
+      "type": "array"
+    },
+    "corrections": {
+      "description": "Applied correction history.",
+      "items": {
+        "$ref": "#/$defs/Correction"
+      },
+      "title": "Corrections",
+      "type": "array"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "edges": {
+      "items": {
+        "$ref": "#/$defs/Edge"
+      },
+      "title": "Edges",
+      "type": "array"
+    },
+    "id": {
+      "format": "uuid",
+      "title": "Id",
+      "type": "string"
+    },
+    "languages": {
+      "items": {
+        "$ref": "#/$defs/Language"
+      },
+      "minItems": 1,
+      "title": "Languages",
+      "type": "array"
+    },
+    "pages": {
+      "items": {
+        "$ref": "#/$defs/Page"
+      },
+      "minItems": 1,
+      "title": "Pages",
+      "type": "array"
+    },
+    "schema_version": {
+      "default": "1.1.0",
+      "enum": [
+        "1.0.0",
+        "1.1.0"
+      ],
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "source_asset": {
+      "$ref": "#/$defs/SourceAsset"
+    },
+    "title": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Title"
+    }
+  },
+  "required": [
+    "languages",
+    "source_asset",
+    "pages",
+    "created_at",
+    "id"
+  ],
+  "title": "Document",
+  "type": "object",
+  "x-pathya-invariants": [
+    "bbox: x0 < x1 and y0 < y1 (ranges 0..1 are in the schema).",
+    "Unique ids across pages, blocks, edges and corrections; unique page_index.",
+    "page.document_id equals document.id; page.source_asset_id equals source_asset.id.",
+    "block.page_id and block.parent_id reference existing pages/blocks; parent on the same page; no cycles.",
+    "reading_order is unique per (page_id, parent_id).",
+    "Table cells reference their table, appear in its cell_ids, fit within row/column counts, and header_cell_ids reference header cells of the same table.",
+    "An uncertain table (no cells) carries the table_structure_uncertain flag.",
+    "Edge endpoints exist; caption_of goes caption -> figure/table/equation; header_for goes header cell -> cell.",
+    "figure.caption_block_id references a caption block.",
+    "Revision 1 blocks have current_text == raw_text; correction base_revision < block revision.",
+    "A page with status 'blank' has no blocks.",
+    "Confidence: origin 'not_available' iff score is null; null score and heuristic origin need a reason."
+  ],
+  "x-pathya-schema-version": "1.1.0"
+}

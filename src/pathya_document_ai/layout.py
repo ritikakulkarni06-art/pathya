@@ -626,6 +626,7 @@ def build_layout_document(
     ocr_results = ocr_results or {}
     base = to_contract_document(extraction, source_uri=source_uri, title=title)
     page_ids = {p.page_index: p.id for p in base.pages}
+    contract_pages = {p.page_index: p for p in base.pages}
     blocks: list[Any] = []
     edges: list[Any] = []
     reports: list[PageLayoutReport] = []
@@ -640,11 +641,45 @@ def build_layout_document(
         edges += page_edges
         reports.append(PageLayoutReport(**{**report.__dict__, "elapsed_s": round(
             report.elapsed_s + time.monotonic() - started, 3)}))
+        contract_pages[page.page_index] = _page_status_after_layout(
+            contract_pages[page.page_index], layout, ocr_results.get(page.page_index), report,
+            bool(page_blocks), m)
     languages = sorted({b.language for b in blocks} - {m.Language.UNDETERMINED}) or [m.Language.UNDETERMINED]
     data = base.model_dump()
-    data.update(blocks=[b.model_dump() for b in blocks], edges=[e.model_dump() for e in edges],
+    data.update(pages=[contract_pages[p.page_index].model_dump() for p in base.pages],
+                blocks=[b.model_dump() for b in blocks], edges=[e.model_dump() for e in edges],
                 languages=languages)
     return LayoutDocumentResult(m.Document.model_validate(data), tuple(reports))
+
+
+def _page_status_after_layout(page: Any, layout: LayoutPage, ocr: Any, report: PageLayoutReport,
+                              has_blocks: bool, m: Any) -> Any:
+    """Carry OCR and layout outcomes into the contract page status and warnings."""
+    from pathya_document_ai.ocr import apply_ocr_status
+
+    if ocr is not None:
+        page = apply_ocr_status(page, ocr, has_blocks, m)
+    warnings = list(page.warnings)
+    status = page.status
+    layout_stage = m.ProcessingStage.LAYOUT
+    if layout.status is LayoutStatus.FAILED:
+        warnings.append(m.PageWarning(stage=layout_stage, code="layout_failed",
+                                      message="; ".join(layout.warnings) or "layout analysis failed"))
+        if status is m.PageStatus.OK:
+            status = m.PageStatus.PARTIAL  # text kept as uncertain paragraphs; structure missing
+    else:
+        warnings += [m.PageWarning(stage=layout_stage, code="layout_note", message=w) for w in layout.warnings]
+    warnings += [m.PageWarning(stage=layout_stage, code="region_rejected", message=r)
+                 for r in report.rejected_regions]
+    if report.order.ambiguous:
+        warnings.append(m.PageWarning(stage=layout_stage, code="reading_order_ambiguous",
+                                      message=f"selected {report.order.selected}; "
+                                              f"disagreements {report.order.discordant_pairs}"))
+    if status is m.PageStatus.BLANK and has_blocks:
+        status = m.PageStatus.OK
+        warnings.append(m.PageWarning(stage=layout_stage, code="regions_on_blank_page",
+                                      message="layout found regions on a page Phase 2 judged blank"))
+    return page.model_copy(update={"status": status, "warnings": warnings})
 
 
 def _build_page(page: Any, layout: LayoutPage, ocr: Any, page_id: Any, extraction: Any,
