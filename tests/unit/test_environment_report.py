@@ -49,9 +49,45 @@ def test_tesseract_timeout_is_an_explicit_failure(monkeypatch: pytest.MonkeyPatc
 
 
 def test_native_readiness_is_separate_from_python_readiness(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(environment, "inspect_tesseract", lambda _: {"status": "unavailable"})
+    monkeypatch.setattr(environment, "inspect_tesseract", lambda *_: {"status": "unavailable"})
     assert environment.inspect_environment()["ok"] is True
     strict = environment.inspect_environment(require_tesseract=True)
     assert strict["ok"] is False
     assert any("Native OCR prerequisite" in message for message in strict["errors"])
+
+
+def test_custom_tessdata_dir_with_spaces_is_passed_as_one_argument(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path,
+) -> None:
+    spaced = tmp_path / "tess data"
+    spaced.mkdir()
+    seen: list[list[str]] = []
+
+    def fake_run(command: list[str], **kwargs: Any) -> subprocess.CompletedProcess[str]:
+        seen.append(command)
+        output = "tesseract 5.4.0\n" if command[-1] == "--version" else "List:\neng\nhin\n"
+        return subprocess.CompletedProcess(command, 0, output, "")
+
+    monkeypatch.setattr(environment.subprocess, "run", fake_run)
+    report = environment.inspect_tesseract("test-tesseract", str(spaced))
+    assert report["status"] == "ready"
+    assert seen[1][-2:] == ["--tessdata-dir", str(spaced.resolve())]  # one argument, not split on the space
+
+
+def test_missing_tessdata_dir_is_reported() -> None:
+    report = environment.inspect_tesseract("test-tesseract", "C:/definitely/not/here")
+    assert report["status"] == "unavailable" and "tessdata" in report["reason"]
+
+
+def test_docling_models_are_checked_against_the_manifest(tmp_path: Path) -> None:
+    assert environment.inspect_docling_models(None)["status"] == "unavailable"
+    report = environment.inspect_docling_models(str(tmp_path))
+    assert report["status"] == "invalid" and report["problems"]
+    assert all(len(rev) == 40 for rev in report["pinned"].values())  # full commit hashes are pinned
+
+
+def test_require_docling_turns_missing_models_into_an_error(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(environment, "inspect_tesseract", lambda *_: {"status": "unavailable"})
+    report = environment.inspect_environment(require_docling=True, docling_artifacts=None)
+    assert report["ok"] is False and any("Docling model" in e for e in report["errors"])
 

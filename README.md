@@ -15,42 +15,89 @@ No P2 or P3 implementation is included.
 
 ## Python and installation
 
-Use **CPython 3.12.x, Windows x86-64** for the initial verified environment.
-The machine's default `python` is 3.14; do not use it for this package.
+Use **CPython 3.12.x**. Both lockfiles are hash-locked (`--require-hashes`).
 
-From the repository root in PowerShell (the first path is the verified local
-interpreter; use your own Python 3.12 executable on another machine):
+| Platform | Lockfile | Notes |
+|---|---|---|
+| Windows x86-64 | `requirements/py312-windows.lock` | Verified on the development machine (fresh install). CI installs from it. |
+| Linux x86-64 | `requirements/py312-linux.lock` | Generated with `pip-compile` on Ubuntu 24.04 (WSL) with the CPU-only PyTorch index. CI installs from it. |
+| macOS | none | Not resolved or tested |
 
-```powershell
-& 'C:\Users\gunda\AppData\Local\Programs\Python\Python312\python.exe' -m venv .venv
-& .\.venv\Scripts\python.exe -m pip install -r requirements\py312-windows.lock
-& .\.venv\Scripts\python.exe -m pip install --no-deps --no-build-isolation -e .
-& .\.venv\Scripts\python.exe -m pip check
-& .\.venv\Scripts\python.exe -m pytest
-& .\.venv\Scripts\python.exe scripts\check_environment.py
-```
-
-The lockfile is generated and validated during Phase 0. It records this
-platform's dependency resolution, not universal Linux/macOS compatibility.
-Other platforms need their own resolution and tests. No global packages are
-changed. Installing Docling/PyTorch can require substantial disk/download space;
-installation does not establish model quality or download inference weights.
-
-## Native Tesseract prerequisite
-
-`pytesseract` is a wrapper; the native Tesseract executable and `eng` / `hin`
-language files are separate prerequisites. They are not bundled in this repo.
-The environment checker reports their actual availability, and strict OCR
-readiness can be checked with:
+Windows (PowerShell):
 
 ```powershell
-& .\.venv\Scripts\python.exe scripts\check_environment.py --require-tesseract
+py -3.12 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install --require-hashes -r requirements\py312-windows.lock
+.\.venv\Scripts\python.exe -m pip install --no-deps --no-build-isolation -e .
+.\.venv\Scripts\python.exe -m pip check
 ```
 
-If Tesseract is installed outside PATH, pass `--tesseract-cmd` with its full
-executable path. Missing languages must be installed from an authorized
-distribution before Phase 3 live OCR verification. No guessed confidence or
-mocked OCR is considered a successful native-engine check.
+Linux:
+
+```bash
+python3.12 -m venv .venv
+.venv/bin/python -m pip install --require-hashes -r requirements/py312-linux.lock
+.venv/bin/python -m pip install --no-deps --no-build-isolation -e .
+.venv/bin/python -m pip check
+```
+
+## Native engines and pinned models (optional for unit tests)
+
+These are only needed for real OCR and layout and their integration tests.
+They are not stored in git.
+
+1. **Tesseract 5.** Windows: `winget install UB-Mannheim.TesseractOCR`.
+   Debian/Ubuntu: `apt install tesseract-ocr`. The executable is found on
+   `PATH`, at the standard Windows location, or via `PATHYA_TESSERACT_CMD`.
+2. **Pinned model files** (eng/hin/osd tessdata and Docling layout and
+   TableFormer weights):
+   ```
+   python scripts/fetch_models.py --download   # pinned commits, SHA-256 verified, safetensors only
+   python scripts/fetch_models.py --verify
+   ```
+   The files go to `local/` (git-ignored). Override with
+   `PATHYA_TESSDATA_DIR` and `PATHYA_DOCLING_ARTIFACTS`. Paths with spaces
+   are supported. Exact revisions and hashes are in
+   `requirements/models.lock.json`.
+3. **Check the setup:**
+   ```
+   python scripts/check_environment.py --require-tesseract --require-docling --verify-hashes
+   ```
+
+## Tests
+
+| Command | What runs |
+|---|---|
+| `pytest tests/unit` | Everything that needs no native engine: mocked OCR and layout, contract, conformance vectors, geometry |
+| `pytest` | Unit tests plus real-engine integration tests. Real-engine tests **skip** when Tesseract or the models are missing. |
+| `PATHYA_REQUIRE_REAL_ENGINES=1 pytest tests/integration` | Missing engines **fail** instead of skipping (used in CI) |
+
+**CI** (`.github/workflows/p1-document-ai.yml`) has three jobs:
+- unit tests on Windows and Linux, installed from the lockfiles
+- a check that the schemas and conformance vectors are current
+- a real-engine job on Windows that installs Tesseract, fetches the pinned
+  models (cached) and requires the integration tests to run
+
+**Evaluation:** `scripts/evaluate.py`; see `docs/evaluation.md`. Real-textbook
+evaluation is pending.
+
+## Security notes
+
+- **Untrusted PDFs:** handled with file-size, page, character, pixel, DPI and
+  time limits. PDFium runs without forms or JavaScript, and nothing is
+  fetched from links inside documents.
+- **Model weights:** loaded as **safetensors** only. Docling's TableFormer
+  inference uses `safetensors.load_model`. Its `torch.load` path exists only
+  for training checkpoints (`*.check`), and `fetch_models.py` refuses
+  pickle-format files.
+- **Downloads:** happen only when `fetch_models.py --download` is run
+  explicitly, from pinned commits, and each file is verified before use. At
+  runtime Docling reads the local folder only; remote services are disabled.
+- **Remaining risks:**
+  - The pinned upstream repositories are trusted.
+  - Docling's C++ PDF parser (docling-parse) and PDFium parse untrusted input
+    in-process. There is no OS-level sandbox; P3's subprocess sandbox would
+    provide one.
 
 ## Repository layout
 

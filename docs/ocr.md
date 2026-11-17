@@ -22,8 +22,14 @@ Docling, layout, table, equation or figure handling yet.
 - **Configuration:**
   - `TesseractConfig(executable=..., tessdata_dir=...)`, or the environment
     variables `PATHYA_TESSERACT_CMD` and `PATHYA_TESSDATA_DIR`.
-  - The tessdata path must not contain whitespace, because pytesseract keeps
-    quote characters on Windows.
+  - The tessdata path may contain spaces. It is passed to Tesseract through
+    `TESSDATA_PREFIX`, set only for each call under a lock and then restored,
+    rather than on the command line, where pytesseract on Windows would keep
+    the quote characters. A real-engine test covers this.
+  - The pinned source is `tessdata_fast` commit
+    `87416418657359cb625c412a48b6e1d6d41c29bd`
+    (`requirements/models.lock.json`). Get it with
+    `scripts/fetch_models.py --download`.
   - The default languages are `("hin", "eng")`. If any are missing,
     `TesseractLanguageError` is raised. There is **no** automatic fallback to
     English only; English-only OCR happens only when the caller configures

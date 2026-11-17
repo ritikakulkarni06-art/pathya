@@ -28,6 +28,9 @@ EXPECTED = json.loads((FIXTURES / "expected.json").read_text(encoding="utf-8"))
 sys.path.insert(0, str(ROOT / "tests" / "unit"))
 from _pdf_factory import PageSpec, upright_text, write_pdf  # noqa: E402
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _engines import unavailable  # noqa: E402
+
 pytestmark = pytest.mark.integration
 
 
@@ -43,7 +46,7 @@ def _engine_or_skip() -> TesseractEngine:
     try:
         return TesseractEngine(TesseractConfig(tessdata_dir=_tessdata()))
     except OcrError as exc:
-        pytest.skip(f"REAL TESSERACT UNAVAILABLE (eng+hin required): {exc}")
+        unavailable(f"REAL TESSERACT UNAVAILABLE (eng+hin required): {exc}")
 
 
 @pytest.fixture(scope="module")
@@ -61,12 +64,29 @@ def test_real_engine_version_and_languages(engine: TesseractEngine) -> None:
     assert "hin:" in engine.info.language_fingerprint(("hin", "eng"))
 
 
-def test_default_tessdata_without_hindi_is_rejected(engine: TesseractEngine) -> None:
+def test_default_tessdata_without_hindi_is_rejected(engine: TesseractEngine, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("PATHYA_TESSDATA_DIR", raising=False)  # look at Tesseract's own default folder
     default = detect_tesseract(TesseractConfig(executable=engine.info.executable), require_languages=False)
     if "hin" in default.available_languages:
         pytest.skip("default tessdata already includes hin")
     with pytest.raises(TesseractLanguageError, match="hin"):
         detect_tesseract(TesseractConfig(executable=engine.info.executable))
+
+
+def test_real_tessdata_path_with_spaces(engine: TesseractEngine, tmp_path: Path) -> None:
+    import shutil
+
+    if engine.info.tessdata_dir is None:
+        pytest.skip("engine uses Tesseract's default tessdata; nothing to copy")
+    spaced = tmp_path / "tess data with spaces"
+    spaced.mkdir()
+    for lang in ("eng", "hin"):
+        shutil.copy2(engine.info.tessdata_dir / f"{lang}.traineddata", spaced)
+    spaced_engine = TesseractEngine(TesseractConfig(executable=engine.info.executable, tessdata_dir=spaced))
+    before = os.environ.get("TESSDATA_PREFIX")
+    result = ocr_image(Image.open(FIXTURES / "hindi.png"), engine=spaced_engine)
+    assert _nfc(result.lines[0].text) == _nfc(EXPECTED["hindi"][0])
+    assert os.environ.get("TESSDATA_PREFIX") == before  # environment restored
 
 
 def test_real_english_ocr_keeps_decimals_and_minus(engine: TesseractEngine) -> None:

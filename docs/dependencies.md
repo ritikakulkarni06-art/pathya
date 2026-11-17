@@ -89,3 +89,43 @@ dependencies or committed binaries. Report detection failures explicitly.
 Docling weights are neither downloaded nor validated in Phase 0; Phase 4 must
 record the selected model artifacts/versions and test offline execution.
 
+
+## Linux lockfile (added before Phase 5)
+
+`requirements/py312-linux.lock` was generated on Ubuntu 24.04 (WSL, CPython
+3.12.3) with pip-tools 7.5.1, using the same constraints as the Windows lock
+plus the CPU-only PyTorch index:
+
+```bash
+python -m piptools compile --resolver=backtracking --extra dev --extra lock \
+  --constraint requirements/constraints.txt \
+  --extra-index-url https://download.pytorch.org/whl/cpu \
+  --allow-unsafe --generate-hashes --strip-extras \
+  --output-file requirements/py312-linux.lock pyproject.toml
+```
+
+**Why the Linux lock differs from the Windows one:**
+- **CPU-only torch.** The default PyPI torch 2.7.1 Linux wheel depends on
+  the CUDA runtime packages (several GB), which a CPU-only extraction service
+  and CI do not need. So the lock pins `torch==2.7.1+cpu` and
+  `torchvision==0.22.1+cpu`.
+- **Same direct pins.** Every direct pin in `pyproject.toml` is identical in
+  both lockfiles, and `tests/unit/test_foundation.py` checks this.
+- **Different transitive packages.** Some differ by platform. Docling, Pydantic,
+  NumPy, OpenCV and pdf libraries are at the same versions.
+
+macOS has no lockfile.
+
+## Model files
+
+Model weights are not Python packages. They are pinned to exact upstream
+commits with per-file SHA-256 in `requirements/models.lock.json`:
+
+| Model | Revision |
+|---|---|
+| `docling-project/docling-layout-heron` | `8f39ad3c0b4c58e9c2d2c84a38465abf757272d8` |
+| `docling-project/docling-models` (TableFormer) | `fc0f2d45e2218ea24bce5045f58a389aed16dc23` |
+| `tesseract-ocr/tessdata_fast` | `87416418657359cb625c412a48b6e1d6d41c29bd` |
+
+`scripts/fetch_models.py` downloads and verifies them. All Docling weights are
+safetensors.

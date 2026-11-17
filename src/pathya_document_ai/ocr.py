@@ -13,12 +13,15 @@ divided by 100, or null when Tesseract reports none (-1) or an invalid value.
 from __future__ import annotations
 
 from collections import Counter
-from collections.abc import Iterable
+from collections.abc import Iterable, Iterator
+import contextlib
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import StrEnum
 import math
+import os
 from pathlib import Path
+import threading
 import time
 from typing import Any, Protocol
 import unicodedata
@@ -40,7 +43,6 @@ from pathya_document_ai.tesseract import (
     TesseractInfo,
     check_languages,
     detect_tesseract,
-    tessdata_arg,
 )
 
 
@@ -82,18 +84,15 @@ class TesseractEngine:
         args = [f"--oem {oem}", f"--psm {psm}"]
         if dpi:
             args.append(f"--dpi {dpi}")
-        if self.info.tessdata_dir is not None:
-            flag, path = tessdata_arg(self.info.tessdata_dir)
-            if any(ch.isspace() for ch in path):
-                # pytesseract splits config with shlex(posix=False) on Windows, which keeps
-                # quote characters, so a quoted path would be passed literally.
-                raise OcrEngineError(f"tessdata directory path must not contain whitespace: {path}")
-            args.append(f"{flag} {path}")
-        # pytesseract keeps the executable in a module global; set it for this call.
-        pytesseract.pytesseract.tesseract_cmd = str(self.info.executable)
+        # The tessdata directory is passed via TESSDATA_PREFIX, not --tessdata-dir: pytesseract
+        # splits the config string with shlex(posix=False) on Windows, which keeps quote
+        # characters, so paths with spaces cannot be passed on the command line.
         try:
-            return pytesseract.image_to_data(image, lang="+".join(languages), config=" ".join(args),
-                                             timeout=timeout_s, output_type=pytesseract.Output.DICT)
+            with _PYTESSERACT_LOCK, _environment(TESSDATA_PREFIX=_tessdata_prefix(self.info.tessdata_dir)):
+                # pytesseract keeps the executable in a module global; set it for this call.
+                pytesseract.pytesseract.tesseract_cmd = str(self.info.executable)
+                return pytesseract.image_to_data(image, lang="+".join(languages), config=" ".join(args),
+                                                 timeout=timeout_s, output_type=pytesseract.Output.DICT)
         except RuntimeError as exc:
             if "timeout" in str(exc).lower():
                 raise OcrTimeoutError(f"Tesseract exceeded {timeout_s}s") from exc
@@ -102,6 +101,32 @@ class TesseractEngine:
             raise OcrEngineError(f"Tesseract failed: {exc}") from exc
         except pytesseract.TesseractNotFoundError as exc:
             raise OcrEngineError(f"Tesseract executable could not be started: {exc}") from exc
+
+
+_PYTESSERACT_LOCK = threading.Lock()  # pytesseract uses a module-global executable path
+
+
+def _tessdata_prefix(tessdata_dir: Path | None) -> str | None:
+    if tessdata_dir is None:
+        return None
+    return str(tessdata_dir.resolve()) + os.sep  # Tesseract 5 accepts the tessdata dir itself
+
+
+@contextlib.contextmanager
+def _environment(**values: str | None) -> Iterator[None]:
+    """Temporarily set (or leave unset when None) environment variables; always restored."""
+    saved = {k: os.environ.get(k) for k in values}
+    try:
+        for key, value in values.items():
+            if value is not None:
+                os.environ[key] = value
+        yield
+    finally:
+        for key, value in saved.items():
+            if value is None:
+                os.environ.pop(key, None)
+            else:
+                os.environ[key] = value
 
 
 # --------------------------------------------------------------------- config

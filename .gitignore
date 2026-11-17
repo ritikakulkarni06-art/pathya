@@ -20,3 +20,7 @@ dist/
 
 # Preserve the existing research reports in output/pdf/.
 
+
+# Evaluation data: authorized textbook samples and raw results stay local
+/evaluation/private/
+/evaluation/results/

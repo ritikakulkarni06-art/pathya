@@ -31,6 +31,9 @@ from pathya_document_ai.layout_docling import (  # noqa: E402
 from pathya_document_ai.models import BlockType, EdgeType, Language, QualityFlag  # noqa: E402
 from pathya_document_ai.pdf import extract_native_pdf  # noqa: E402
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _engines import unavailable  # noqa: E402
+
 pytestmark = pytest.mark.integration
 
 
@@ -44,7 +47,7 @@ def engine() -> DoclingLayoutEngine:
     try:
         return DoclingLayoutEngine(DoclingConfig(artifacts_path=_artifacts()))
     except DoclingUnavailableError as exc:
-        pytest.skip(f"REAL DOCLING UNAVAILABLE: {exc}")
+        unavailable(f"REAL DOCLING UNAVAILABLE: {exc}")
 
 
 @pytest.fixture(scope="module")
@@ -147,7 +150,7 @@ def test_real_scanned_hindi_and_mixed_with_ocr(engine: DoclingLayoutEngine, tmp_
     try:
         ocr_engine = TesseractEngine(TesseractConfig(tessdata_dir=tessdata if tessdata.is_dir() else None))
     except OcrError as exc:
-        pytest.skip(f"REAL TESSERACT UNAVAILABLE: {exc}")
+        unavailable(f"REAL TESSERACT UNAVAILABLE: {exc}")
 
     def gray(name: str) -> tuple[int, int, bytes]:
         img = Image.open(ROOT / "tests" / "fixtures" / "ocr" / f"{name}.png").convert("L")

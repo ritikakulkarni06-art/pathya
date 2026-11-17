@@ -8,6 +8,8 @@ import subprocess
 import sys
 import tomllib
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -36,9 +38,10 @@ def test_packaging_limits_discovery_to_application_and_pytest_to_tests() -> None
     assert "scripts" not in config["project"]  # No premature extraction CLI.
 
 
-def test_lock_contains_all_direct_runtime_and_dev_pins() -> None:
+@pytest.mark.parametrize("lockfile", ["py312-windows.lock", "py312-linux.lock"])
+def test_lock_contains_all_direct_runtime_and_dev_pins(lockfile: str) -> None:
     config = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
-    lock = (ROOT / "requirements" / "py312-windows.lock").read_text(encoding="utf-8")
+    lock = (ROOT / "requirements" / lockfile).read_text(encoding="utf-8")
     locked = {
         line.strip().removesuffix("\\").strip().lower().replace("_", "-")
         for line in lock.splitlines()
