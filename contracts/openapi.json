@@ -619,6 +619,26 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/admin/usage": {
+      "get": {
+        "operationId": "usage_admin_usage_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Usage Admin Usage Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Usage"
+      }
+    },
     "/artifacts/{artifact_id}": {
       "get": {
         "operationId": "artifact_download_artifacts__artifact_id__get",

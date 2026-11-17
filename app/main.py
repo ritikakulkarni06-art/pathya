@@ -12,6 +12,7 @@ from starlette.exceptions import HTTPException
 from starlette.middleware.base import RequestResponseEndpoint
 from starlette.responses import Response
 
+from app.api.admin import router as admin_router
 from app.api.auth import router as auth_router
 from app.api.content import router as content_router
 from app.api.documents import router as documents_router
@@ -55,6 +56,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         config.login_rate_limit, config.login_window_seconds
     )
     application.include_router(auth_router)
+    application.include_router(admin_router)
     application.include_router(documents_router)
     application.include_router(jobs_router)
     application.include_router(content_router)

@@ -26,7 +26,12 @@ class Settings(BaseSettings):
     gemini_api_key: SecretStr = SecretStr("")
     llm_max_input_tokens: int = Field(default=4096, ge=1)
     llm_max_output_tokens: int = Field(default=512, ge=1)
-    api_budget_inr_hard_cap: float = Field(default=0, ge=0)
+    llm_timeout_seconds: float = Field(default=30, gt=0, le=120)
+    llm_max_retries: int = Field(default=2, ge=0, le=2)
+    llm_prices_path: Path = Path("config/prices.json")
+    llm_price_max_age_days: int = Field(default=30, ge=1)
+    api_budget_inr_hard_cap: float = Field(default=0, ge=0, allow_inf_nan=False)
+    document_budget_inr_hard_cap: float = Field(default=0, ge=0, allow_inf_nan=False)
     embeddings_enabled: bool = False
     embedding_model_path: Path | None = None
     cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:5173"])

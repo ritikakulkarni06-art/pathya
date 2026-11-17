@@ -107,3 +107,18 @@ prefixes and float32 384-dimensional BLOBs. Inputs beyond 512 model tokens are
 refused explicitly. No downloads occur at runtime. See the
 [model card](https://huggingface.co/intfloat/multilingual-e5-small) and
 [local loader API](https://sbert.net/docs/package_reference/sentence_transformer/model.html).
+
+### P11 optional generation and budgeting
+
+Use stateless Gemini generateContent through httpx, with no default model and no
+real calls in tests. Strict excerpt-only payloads exclude application metadata.
+The input bound counts UTF-8 bytes plus framing rather than inventing a model
+tokenizer; oversize requests are refused without dropping evidence.
+
+Global and per-document lifetime caps both default to zero. Each attempt makes a
+durable worst-case reservation in usage_events before network I/O. Unknown costs
+keep their reservation, including process crashes. Explicit 429/5xx responses
+alone allow at most two retries; each retry is independently reserved and visible.
+Timeouts are not retried. Placeholder/free/expired tariffs block paid calls.
+No dependency is added. See docs/LLM_AND_BUDGET.md for accounting limits and the
+manual price/model/provider checks.
