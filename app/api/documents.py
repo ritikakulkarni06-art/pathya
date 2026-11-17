@@ -129,6 +129,9 @@ async def upload_document(
                     "image/png",
                 )
             with request.app.state.database.write_tx() as connection:
+                current = documents.get_document(connection, document_id)
+                if current is None or current["state"] in {"deleting", "deleted"}:
+                    raise Problem(404, "document_not_found", "This document is unavailable.")
                 job_id = jobs.enqueue(
                     connection,
                     document_id,
@@ -151,7 +154,11 @@ async def upload_document(
         except BaseException:
             removed = store.secure_delete_document(document_id)
             with request.app.state.database.write_tx() as connection:
-                if not removed.failures:
+                current = documents.get_document(connection, document_id)
+                if current and current["state"] in {"deleting", "deleted"}:
+                    # The deletion receipt/worker owns row cleanup after revocation.
+                    pass
+                elif not removed.failures:
                     connection.execute("DELETE FROM assets WHERE document_id=?", (document_id,))
                     connection.execute("DELETE FROM documents WHERE id=?", (document_id,))
                 else:

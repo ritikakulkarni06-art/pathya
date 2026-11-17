@@ -20,6 +20,9 @@ class Settings(BaseSettings):
     job_max_attempts: int = Field(default=3, ge=1, le=10)
     retention_days_after_end: int = Field(default=30, ge=1)
     deletion_sla_days: int = Field(default=7, ge=1, le=7)
+    retention_extension_max_days: int = Field(default=365, ge=1)
+    backup_days: int = Field(default=30, ge=1, le=365)
+    backup_dir: Path | None = None
     llm_enabled: bool = False
     llm_provider: Literal["none", "gemini"] = "none"
     llm_model_id: str = ""
@@ -57,6 +60,8 @@ class Settings(BaseSettings):
     def validate_settings(self) -> Self:
         if self.pathya_db_path is None:
             self.pathya_db_path = self.pathya_data_dir / "pathya.sqlite3"
+        if self.backup_dir is None:
+            self.backup_dir = self.pathya_data_dir.parent / "backups"
         if self.auth_mode == "session" and len(self.session_secret.get_secret_value()) < 32:
             raise ValueError("SESSION_SECRET must contain at least 32 characters in session mode.")
         if self.pathya_env == "prod" and self.auth_mode == "local":

@@ -134,3 +134,22 @@ conflict signal. All such checks are heuristics, not entailment proof.
 Recheck document access/current revision in the answer write transaction after
 generation, and discard stale claims/cards. Reviewed media evidence uses reviewed
 source metadata. No generated text is indexed. See docs/GROUNDING.md.
+
+### P13 deletion and backups
+
+Immediate access revocation precedes physical removal. Owners retain a private
+receipt while ordinary document routes deny access; owner manifests return a 410
+purge flag and former grantees receive 404. History deletion requires a guard
+inserted only for a deleting document inside the purge transaction. Guards do not
+relax history updates and are removed before commit. Failed filesystem removal
+keeps the receipt visibly failed and the document inaccessible until an explicit
+retry or the worker's visible attempt policy succeeds.
+
+Staging-file prefixes use a fixed SHA-256 of the document ID to prevent prefix
+collisions. Keep only scrubbed document tombstones and content-free audit/cost
+metadata. SQLite secure_delete and FTS rebuild support logical purge; no forensic
+erasure claim is made. Consistent backups hold a write/publication lock, exclude
+request temporaries, prune only marked confined snapshot children, and restore
+only into a new nonoverlapping destination with sessions cleared. Old backups
+require deletion reconciliation before access is restored. Policy numbers remain
+proposals pending institutional review. No new dependency is added.

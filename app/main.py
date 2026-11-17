@@ -15,6 +15,7 @@ from starlette.responses import Response
 from app.api.admin import router as admin_router
 from app.api.auth import router as auth_router
 from app.api.content import router as content_router
+from app.api.deletions import router as deletions_router
 from app.api.documents import router as documents_router
 from app.api.jobs import router as jobs_router
 from app.api.limits import BodyLimitMiddleware
@@ -61,6 +62,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     application.include_router(documents_router)
     application.include_router(jobs_router)
     application.include_router(content_router)
+    application.include_router(deletions_router)
     application.include_router(speech_router)
     application.include_router(search_router)
     application.include_router(questions_router)

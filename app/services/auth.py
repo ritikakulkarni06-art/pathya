@@ -144,6 +144,22 @@ def require_doc_access(
                     document_id = resource["document_id"]
             if document_id is None:
                 raise Problem(404, "document_not_found", "This document is unavailable.")
+        if request.url.path.endswith("/manifest"):
+            with request.app.state.database.read_conn() as connection:
+                removed = connection.execute(
+                    "SELECT owner_id,state FROM documents WHERE id=?", (str(document_id),)
+                ).fetchone()
+                if (
+                    removed
+                    and removed["owner_id"] == user["id"]
+                    and removed["state"] in {"deleting", "deleted"}
+                ):
+                    raise Problem(
+                        410,
+                        "document_deleted",
+                        "This document was removed. Delete its offline copies.",
+                        extra={"purge_local_copy": True},
+                    )
         document = require_document(
             request.app.state.database, str(document_id), user["id"], minimum
         )

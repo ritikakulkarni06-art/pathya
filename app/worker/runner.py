@@ -8,13 +8,16 @@ import threading
 import time
 from typing import Any
 
+from app.clock import now_utc
 from app.config import Settings
 from app.db.connection import Database
 from app.db.migrate import migrate
 from app.db.repos import jobs
 from app.errors import Problem
+from app.services.deletions import schedule_daily_sweep
 from app.services.jobs import LeaseLost, claim_next, fail, finish, heartbeat
 from app.worker.handlers.audio import handle as audio
+from app.worker.handlers.delete import handle as delete
 from app.worker.handlers.extract import handle as extract
 from app.worker.handlers.index import handle as index
 from app.worker.handlers.rebuild import handle as rebuild
@@ -30,6 +33,8 @@ def execute_claimed(database: Database, settings: Settings, job: dict[str, Any])
             audio(database, settings, job)
         elif job["kind"] == "build_index":
             index(database, settings, job)
+        elif job["kind"] in {"delete", "retention_sweep"}:
+            delete(database, settings, job)
         else:
             raise Problem(
                 422, "handler_unavailable", "This processing stage is not implemented yet."
@@ -133,7 +138,12 @@ def run_worker(settings: Settings, *, once: bool = False) -> None:
 
     signal.signal(signal.SIGTERM, shutdown)
     signal.signal(signal.SIGINT, shutdown)
+    last_sweep_day = ""
     while not stopping.is_set():
+        day = now_utc()[:10]
+        if day != last_sweep_day:
+            schedule_daily_sweep(database, settings)
+            last_sweep_day = day
         job = claim_next(database, settings)
         if job is None:
             if once:

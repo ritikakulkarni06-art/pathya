@@ -97,7 +97,11 @@ class FileStore:
         try:
             digest = hashlib.sha256()
             count = 0
-            with tempfile.NamedTemporaryFile(dir=temporary_dir, delete=False) as destination:
+            with tempfile.NamedTemporaryFile(
+                dir=temporary_dir,
+                prefix=hashlib.sha256(document_id.encode()).hexdigest() + "-",
+                delete=False,
+            ) as destination:
                 temporary = Path(destination.name)
                 while True:
                     part = stream.read(min(65536, max_bytes - count + 1))
@@ -188,6 +192,23 @@ class FileStore:
 
     def secure_delete_document(self, document_id: str) -> DeletionResult:
         result = DeletionResult()
+        self.safe_path("sources", document_id)
+        for path in self.safe_path("tmp").glob(
+            hashlib.sha256(document_id.encode()).hexdigest() + "-*"
+        ):
+            try:
+                if path.is_symlink():
+                    path.unlink()
+                elif path.is_file():
+                    size = path.stat().st_size
+                    path.chmod(stat.S_IWRITE | stat.S_IREAD)
+                    path.unlink()
+                    result.files_removed += 1
+                    result.bytes_removed += size
+                else:
+                    result.failures.append("temporary_removal_failed")
+            except OSError:
+                result.failures.append("temporary_removal_failed")
         for section in ("sources", "derived"):
             directory = self.safe_path(section, document_id)
             if not directory.exists():

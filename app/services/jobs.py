@@ -43,6 +43,11 @@ def reap_expired(database: Database) -> int:
                     "UPDATE documents SET state='failed',updated_at=? WHERE id=? AND state NOT IN ('deleting','deleted')",
                     (now, job["document_id"]),
                 )
+            if failed and job["kind"] == "delete":
+                connection.execute(
+                    "UPDATE deletion_receipts SET status='failed',error_code='lease_expired' WHERE document_id=? AND status<>'complete'",
+                    (job["document_id"],),
+                )
     return len(expired)
 
 
@@ -142,6 +147,11 @@ def fail(database: Database, job_id: str, owner: str, code: str, message: str) -
             connection.execute(
                 "UPDATE documents SET state='failed',updated_at=? WHERE id=? AND state NOT IN ('deleting','deleted')",
                 (now_utc(), job["document_id"]),
+            )
+        if terminal and job["kind"] == "delete":
+            connection.execute(
+                "UPDATE deletion_receipts SET status='failed',error_code=? WHERE document_id=? AND status<>'complete'",
+                (code, job["document_id"]),
             )
 
 
