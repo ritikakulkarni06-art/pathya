@@ -14,17 +14,19 @@ from starlette.responses import Response
 
 from app.api.auth import router as auth_router
 from app.api.documents import router as documents_router
+from app.api.jobs import router as jobs_router
 from app.api.limits import BodyLimitMiddleware
 from app.config import Settings
 from app.db.connection import Database
 from app.db.migrate import migrate
 from app.errors import Problem
-from app.logging import log_event
+from app.logging import configure_logging, log_event
 from app.services.auth import LoginLimiter, seed_local
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
     config = settings or Settings()
+    configure_logging()
 
     @asynccontextmanager
     async def lifespan(application: FastAPI) -> AsyncIterator[None]:
@@ -51,6 +53,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     application.include_router(auth_router)
     application.include_router(documents_router)
+    application.include_router(jobs_router)
     application.add_middleware(
         CORSMiddleware,
         allow_origins=config.cors_origins,

@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     max_pages: int = Field(default=60, ge=1)
     max_pixels: int = Field(default=40_000_000, ge=1)
     job_timeout_seconds: int = Field(default=300, ge=1)
+    job_lease_seconds: int = Field(default=30, ge=2)
     job_max_attempts: int = Field(default=3, ge=1, le=10)
     retention_days_after_end: int = Field(default=30, ge=1)
     deletion_sla_days: int = Field(default=7, ge=1, le=7)

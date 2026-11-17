@@ -4,7 +4,7 @@ import secrets
 import threading
 import time
 from collections import deque
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from datetime import UTC, datetime
 from typing import Any
 
@@ -14,7 +14,7 @@ from fastapi import Depends, Request
 
 from app.config import Settings
 from app.db.connection import Database
-from app.db.repos import sessions, users
+from app.db.repos import answers, assets, content, jobs, sessions, users
 from app.errors import Problem
 from app.services.access import DocumentRole, require_document
 
@@ -121,13 +121,33 @@ def current_user(request: Request) -> dict[str, Any]:
     return user
 
 
-def require_doc_access(minimum: DocumentRole = "reader") -> Callable[..., dict[str, Any]]:
-    def dependency(
+def require_doc_access(
+    minimum: DocumentRole = "reader",
+) -> Callable[..., Awaitable[dict[str, Any]]]:
+    async def dependency(
         request: Request, user: dict[str, Any] = Depends(current_user)
     ) -> dict[str, Any]:
         document_id = request.path_params.get("document_id")
         if document_id is None:
-            raise Problem(500, "access_configuration", "Document access could not be checked.")
+            with request.app.state.database.read_conn() as connection:
+                resource = None
+                if "job_id" in request.path_params:
+                    resource = jobs.get_job(connection, str(request.path_params["job_id"]))
+                elif "block_id" in request.path_params:
+                    resource = content.get_block(connection, str(request.path_params["block_id"]))
+                elif "artifact_id" in request.path_params:
+                    resource = connection.execute(
+                        "SELECT * FROM artifacts WHERE id=?",
+                        (str(request.path_params["artifact_id"]),),
+                    ).fetchone()
+                elif "asset_id" in request.path_params:
+                    resource = assets.get_asset(connection, str(request.path_params["asset_id"]))
+                elif "answer_id" in request.path_params:
+                    resource = answers.get_answer(connection, str(request.path_params["answer_id"]))
+                if resource is not None:
+                    document_id = resource["document_id"]
+            if document_id is None:
+                raise Problem(404, "document_not_found", "This document is unavailable.")
         return require_document(request.app.state.database, str(document_id), user["id"], minimum)
 
     return dependency

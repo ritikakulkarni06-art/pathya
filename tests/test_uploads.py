@@ -32,13 +32,14 @@ def image_bytes(size=(10, 10), exif=False):
 
 
 @pytest.fixture
-def upload_client(tmp_path):
+def upload_client(tmp_path, database):
     with TestClient(
         create_app(
             Settings(
                 _env_file=None,
                 pathya_env="test",
                 pathya_data_dir=tmp_path,
+                pathya_db_path=database.path,
                 storage_min_free_bytes=0,
                 max_upload_mb=1,
                 max_pages=2,
