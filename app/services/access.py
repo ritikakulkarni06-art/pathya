@@ -32,4 +32,5 @@ def check_document(
         raise Problem(
             403, "insufficient_role", "Ask the document owner for the required permission."
         )
+    document["_access_user_id"] = user_id
     return document

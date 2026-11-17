@@ -13,6 +13,7 @@ from app.db.migrate import migrate
 from app.db.repos import jobs
 from app.errors import Problem
 from app.services.jobs import LeaseLost, claim_next, fail, finish, heartbeat
+from app.worker.handlers.audio import handle as audio
 from app.worker.handlers.extract import handle as extract
 from app.worker.handlers.rebuild import handle as rebuild
 
@@ -23,7 +24,9 @@ def execute_claimed(database: Database, settings: Settings, job: dict[str, Any])
             extract(database, settings, job)
         elif job["kind"] == "rebuild":
             rebuild(database, settings, job)
-        elif job["kind"] in {"build_audio", "build_index"}:
+        elif job["kind"] == "build_audio":
+            audio(database, settings, job)
+        elif job["kind"] == "build_index":
             finish(
                 database,
                 job["id"],

@@ -44,7 +44,7 @@ def _audio_entry(
     connection: sqlite3.Connection, store: FileStore, block: dict[str, Any]
 ) -> dict[str, Any]:
     entries = connection.execute(
-        "SELECT * FROM artifacts WHERE document_id=? AND block_id=? AND kind='audio_block' ORDER BY updated_at DESC,id DESC",
+        "SELECT * FROM artifacts WHERE document_id=? AND block_id=? AND kind='audio_block' AND scope_user_id IS NULL ORDER BY updated_at DESC,id DESC",
         (block["document_id"], block["id"]),
     ).fetchall()
     for artifact in entries:
@@ -74,6 +74,39 @@ def _audio_entry(
                     "manifest_asset_invalid",
                     "An audio checksum is invalid. Rebuild it; chapter text remains available.",
                 )
+            sentence_manifest = connection.execute(
+                "SELECT body_json FROM audio_manifests WHERE artifact_id=?", (artifact["id"],)
+            ).fetchone()
+            if sentence_manifest is not None:
+                for unit in json.loads(sentence_manifest["body_json"])["units"]:
+                    clip = connection.execute(
+                        "SELECT * FROM assets WHERE id=? AND document_id=? AND deleted_at IS NULL",
+                        (unit["clip_asset_id"], block["document_id"]),
+                    ).fetchone()
+                    if (
+                        clip is None
+                        or clip["bytes"] != unit["bytes"]
+                        or clip["sha256"] != unit["hash"]
+                    ):
+                        raise Problem(
+                            409,
+                            "manifest_asset_invalid",
+                            "An audio clip could not be verified. Request a rebuild; text remains available.",
+                        )
+                    clip_path = store.safe_path(*clip["private_path"].split("/"))
+                    if not clip_path.is_file() or clip_path.stat().st_size != clip["bytes"]:
+                        raise Problem(
+                            409,
+                            "manifest_asset_invalid",
+                            "An audio clip is missing. Request a rebuild; text remains available.",
+                        )
+                    with clip_path.open("rb") as clip_stream:
+                        if hashlib.file_digest(clip_stream, "sha256").hexdigest() != clip["sha256"]:
+                            raise Problem(
+                                409,
+                                "manifest_asset_invalid",
+                                "An audio clip could not be verified. Request a rebuild; text remains available.",
+                            )
             return {
                 "block_id": block["id"],
                 "artifact_id": artifact["id"],
@@ -81,6 +114,9 @@ def _audio_entry(
                 "hash": digest,
                 "bytes": asset["bytes"],
                 "status": "ready",
+                "voice": artifact["voice"],
+                "engine_version": artifact["engine_version"],
+                "synthetic": str(artifact["engine_version"] or "").startswith("stub-"),
             }
     failed = next(
         (
@@ -171,7 +207,17 @@ def publish_manifest(
             )
             if edge["from_id"] in ids and edge["to_id"] in ids
         ]
+        import_metadata = connection.execute(
+            "SELECT metadata_json FROM extraction_imports WHERE document_id=?", (document_id,)
+        ).fetchone()
+        quality = (
+            json.loads(import_metadata["metadata_json"]).get("quality_flags", [])
+            if import_metadata
+            else []
+        )
         body = {
+            "demo_mode": "synthetic_demo_only" in quality,
+            "import_quality_flags": quality,
             "document_id": document_id,
             "revision": revision,
             "pages": list(

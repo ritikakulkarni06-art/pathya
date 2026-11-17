@@ -1,4 +1,3 @@
-import hashlib
 import json
 from typing import Any
 from uuid import uuid4
@@ -6,8 +5,9 @@ from uuid import uuid4
 from app.clock import now_utc
 from app.config import Settings
 from app.db.connection import Database
+from app.errors import Problem
 from app.services.jobs import finish, progress
-from app.services.manifests import artifact_current, assert_job_lease, publish_manifest
+from app.services.manifests import assert_job_lease, publish_manifest
 
 
 def handle(database: Database, settings: Settings, job: dict[str, Any]) -> None:
@@ -83,31 +83,20 @@ def handle(database: Database, settings: Settings, job: dict[str, Any]) -> None:
                     )
             if payload.get("block_ids") and block["id"] not in payload["block_ids"]:
                 continue
-            audio = connection.execute(
-                "SELECT * FROM artifacts WHERE document_id=? AND block_id=? AND kind='audio_block'",
-                (job["document_id"], block["id"]),
-            ).fetchall()
-            if not any(artifact_current(connection, item) for item in audio) and not any(
-                item["status"] == "failed"
-                and json.loads(item["dependency_revisions_json"]).get(block["id"])
-                == block["revision"]
-                for item in audio
-            ):
-                now = now_utc()
-                connection.execute(
-                    "INSERT INTO artifacts(id,document_id,kind,block_id,dependency_revisions_json,content_hash,language,status,created_at,updated_at,stale_reason) VALUES (?,?,'audio_block',?,?,?,?,'failed',?,?,'speech_adapter_unavailable')",
-                    (
-                        str(uuid4()),
-                        job["document_id"],
-                        block["id"],
-                        json.dumps({block["id"]: block["revision"]}),
-                        hashlib.sha256(block["text_current"].encode()).hexdigest(),
-                        block["lang"],
-                        now,
-                        now,
-                    ),
-                )
+    from app.services.speech import build_block
+
+    failure: Problem | None = None
+    for block in blocks:
+        if payload.get("block_ids") and block["id"] not in payload["block_ids"]:
+            continue
+        try:
+            build_block(database, settings, block["id"], settings.speech_voice, lease=lease)
+        except Problem as error:
+            failure = error
+            break
     publish_manifest(database, settings.pathya_data_dir, job["document_id"], revision, lease=lease)
+    if failure is not None:
+        raise failure
     finish(
         database,
         *lease,
