@@ -1,0 +1,2831 @@
+{
+  "references": [
+    {
+      "n": 1,
+      "title": "W3C. Web Content Accessibility Guidelines (WCAG) 2.2",
+      "url": "https://www.w3.org/TR/WCAG22/",
+      "date": "12 December 2024",
+      "kind": "W3C Recommendation"
+    },
+    {
+      "n": 2,
+      "title": "W3C. EPUB Accessibility 1.1",
+      "url": "https://www.w3.org/TR/epub-a11y-11/",
+      "date": "17 October 2024",
+      "kind": "W3C Recommendation"
+    },
+    {
+      "n": 3,
+      "title": "W3C. MathML Core",
+      "url": "https://www.w3.org/TR/mathml-core/",
+      "date": "24 June 2025",
+      "kind": "Candidate Recommendation Snapshot"
+    },
+    {
+      "n": 4,
+      "title": "DAISY Consortium. DAISY Format",
+      "url": "https://daisy.org/activities/standards/daisy/",
+      "date": "n.d.; DAISY 3 released 2005",
+      "kind": "Official documentation"
+    },
+    {
+      "n": 5,
+      "title": "W3C WAI. Stories of Web Users",
+      "url": "https://www.w3.org/WAI/people-use-web/user-stories/",
+      "date": "n.d. (living documentation)",
+      "kind": "Official documentation"
+    },
+    {
+      "n": 6,
+      "title": "Microsoft. Languages and products supported by Immersive Reader",
+      "url": "https://support.microsoft.com/en-us/education/learning-accelerators/languages-and-products-supported-by-immersive-reader",
+      "date": "n.d. (living documentation)",
+      "kind": "Official documentation"
+    },
+    {
+      "n": 7,
+      "title": "Microsoft. Use Immersive Reader and reading mode in Microsoft Edge",
+      "url": "https://support.microsoft.com/en-gb/education/learning-accelerators/use-immersive-reader-in-microsoft-edge-1",
+      "date": "n.d. (living documentation)",
+      "kind": "Official documentation"
+    },
+    {
+      "n": 8,
+      "title": "Microsoft. What is Azure AI Immersive Reader?",
+      "url": "https://learn.microsoft.com/en-us/azure/ai-services/immersive-reader/overview",
+      "date": "n.d. (living documentation)",
+      "kind": "Official documentation"
+    },
+    {
+      "n": 9,
+      "title": "Microsoft. Seeing AI: app description and version history",
+      "url": "https://apps.apple.com/us/app/seeing-ai/id999062298",
+      "date": "Living listing; document Q&A release notes 2024",
+      "kind": "Vendor app-store listing"
+    },
+    {
+      "n": 10,
+      "title": "Google. Use Lookout to explore your surroundings",
+      "url": "https://support.google.com/accessibility/android/answer/9031274?hl=en",
+      "date": "n.d. (living documentation)",
+      "kind": "Official documentation"
+    },
+    {
+      "n": 11,
+      "title": "Bookshare. Sign up around the world",
+      "url": "https://www.bookshare.org/sign-up-outside-the-us",
+      "date": "n.d. (living documentation)",
+      "kind": "Official documentation"
+    },
+    {
+      "n": 12,
+      "title": "Bookshare. Who qualifies for Bookshare?",
+      "url": "https://www.bookshare.org/help-and-learning-articles/who-qualifies-for-bookshare",
+      "date": "n.d. (living documentation)",
+      "kind": "Official documentation"
+    },
+    {
+      "n": 13,
+      "title": "Dolphin. EasyReader App",
+      "url": "https://yourdolphin.com/EasyReader",
+      "date": "n.d. (living documentation)",
+      "kind": "Official documentation"
+    },
+    {
+      "n": 14,
+      "title": "Dolphin. About EasyReader Premium and EasyReader Education",
+      "url": "https://yourdolphin.com/product-help/easyreader-app/361.htm?lid=1",
+      "date": "n.d. (living documentation)",
+      "kind": "Official documentation"
+    },
+    {
+      "n": 15,
+      "title": "Dolphin. EasyReader supported file formats",
+      "url": "https://yourdolphin.com/support/article?id=49&lid=1",
+      "date": "n.d. (living documentation)",
+      "kind": "Official documentation"
+    },
+    {
+      "n": 16,
+      "title": "Dolphin. EasyReader Android listing",
+      "url": "https://play.google.com/store/apps/details?hl=en-US&id=com.yourdolphin.easyreader",
+      "date": "Updated 28 August 2026 in reviewed listing",
+      "kind": "Vendor app-store listing"
+    },
+    {
+      "n": 17,
+      "title": "Kurzweil Education. Kurzweil 3000",
+      "url": "https://www.kurzweiledu.com/products/k3000.html",
+      "date": "n.d. (living documentation)",
+      "kind": "Official documentation"
+    },
+    {
+      "n": 18,
+      "title": "Kurzweil Education. Frequently asked questions",
+      "url": "https://www.kurzweiledu.com/help/frequently-asked-questions.html",
+      "date": "n.d. (living documentation)",
+      "kind": "Official documentation"
+    },
+    {
+      "n": 19,
+      "title": "Everway / Texthelp Academy. Read&Write for Education how-to articles",
+      "url": "https://academy.everway.com/read-and-write-education/howtos/",
+      "date": "n.d. (living documentation)",
+      "kind": "Official documentation"
+    },
+    {
+      "n": 20,
+      "title": "Speechify. Free and Premium plans",
+      "url": "https://speechify.com/pricing/",
+      "date": "n.d. (living documentation)",
+      "kind": "Official documentation"
+    },
+    {
+      "n": 21,
+      "title": "Speechify. iPhone and iPad application",
+      "url": "https://speechify.com/ios/",
+      "date": "n.d. (living documentation)",
+      "kind": "Official documentation"
+    },
+    {
+      "n": 22,
+      "title": "NaturalReader. Features of Personal Version",
+      "url": "https://help.naturalreaders.com/en/articles/8823808-what-features-are-available-in-naturalreader-ai-text-to-speech-personal-version",
+      "date": "n.d. (living documentation)",
+      "kind": "Official documentation"
+    },
+    {
+      "n": 23,
+      "title": "NaturalReader. Working with Text and Audio (Personal Version)",
+      "url": "https://help.naturalreaders.com/en/articles/11543218-working-with-text-and-audio-personal-version",
+      "date": "11 September 2025",
+      "kind": "Official documentation"
+    },
+    {
+      "n": 24,
+      "title": "NaturalReader. Plans and pricing (Personal Version)",
+      "url": "https://help.naturalreaders.com/en/articles/8854700-plans-pricing-personal-version",
+      "date": "n.d. (living documentation)",
+      "kind": "Official documentation"
+    },
+    {
+      "n": 25,
+      "title": "EDRLab. Thorium Reader",
+      "url": "https://www.edrlab.org/software/thorium-reader/",
+      "date": "n.d. (living documentation)",
+      "kind": "Official documentation"
+    },
+    {
+      "n": 26,
+      "title": "EDRLab. Thorium Desktop technical specification",
+      "url": "https://www.thoriumreader.com/en/legals/desktop/technical-spec/",
+      "date": "n.d. (living documentation)",
+      "kind": "Official documentation"
+    },
+    {
+      "n": 27,
+      "title": "Google. Gemini Notebook (formerly NotebookLM)",
+      "url": "https://workspace.google.com/products/gemini-notebook/",
+      "date": "n.d. (living documentation)",
+      "kind": "Official documentation"
+    },
+    {
+      "n": 28,
+      "title": "Google. NotebookLM goes global: source passages and citations",
+      "url": "https://blog.google/innovation-and-ai/products/notebooklm-goes-global-support-for-websites-slides-fact-check/",
+      "date": "6 June 2024",
+      "kind": "Vendor announcement"
+    },
+    {
+      "n": 29,
+      "title": "Wood, S. G., Moxley, J. H., Tighe, E. L., & Wagner, R. K. Does Use of Text-to-Speech and Related Read-Aloud Tools Improve Reading Comprehension for Students with Reading Disabilities? A Meta-Analysis",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5494021/",
+      "date": "Online 23 January 2017; journal issue January-February 2018",
+      "kind": "Peer-reviewed; J. Learning Disabilities 51(1), 73-84"
+    },
+    {
+      "n": 30,
+      "title": "Kuster, S. M., van Weerdenburg, M., Gompel, M., & Bosman, A. M. T. Dyslexie font does not benefit reading in children with or without dyslexia",
+      "url": "https://link.springer.com/article/10.1007/s11881-017-0154-6",
+      "date": "Online 4 December 2017; volume 68, 2018",
+      "kind": "Peer-reviewed; Annals of Dyslexia, 25-42"
+    },
+    {
+      "n": 31,
+      "title": "Azzarello, C., Paek, S., Hodge, C., Jameson, M., & Lewis, J. Does font improve reading in dyslexic children?: meta-analysis of dyslexia-friendly fonts and dyslexic children's reading performance",
+      "url": "https://link.springer.com/article/10.1007/s11881-026-00389-8",
+      "date": "31 July 2026",
+      "kind": "Peer-reviewed; abstract reviewed, full text subscription restricted"
+    },
+    {
+      "n": 32,
+      "title": "Auer, C., et al. Docling Technical Report",
+      "url": "https://arxiv.org/abs/2408.09869",
+      "date": "19 August 2024; v5, 9 December 2024",
+      "kind": "Technical report; not treated as independent validation"
+    },
+    {
+      "n": 33,
+      "title": "Ouyang, L., et al. OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations",
+      "url": "https://openaccess.thecvf.com/content/CVPR2025/html/Ouyang_OmniDocBench_Benchmarking_Diverse_PDF_Document_Parsing_with_Comprehensive_Annotations_CVPR_2025_paper.html",
+      "date": "CVPR 2025",
+      "kind": "Peer-reviewed; proceedings metadata and repository reviewed; HTML fetch restricted"
+    },
+    {
+      "n": 34,
+      "title": "OpenDataLab. OmniDocBench repository and evaluation code",
+      "url": "https://github.com/opendatalab/OmniDocBench",
+      "date": "Living repository",
+      "kind": "Public code / benchmark documentation"
+    },
+    {
+      "n": 35,
+      "title": "Gao, T., Yen, H., Yu, J., & Chen, D. Enabling Large Language Models to Generate Text with Citations",
+      "url": "https://aclanthology.org/2023.emnlp-main.398/",
+      "date": "December 2023",
+      "kind": "Peer-reviewed; EMNLP, 6465-6488"
+    },
+    {
+      "n": 36,
+      "title": "Huh, M., et al. Long-Form Answers to Visual Questions from Blind and Low Vision People",
+      "url": "https://arxiv.org/abs/2408.06303",
+      "date": "12 August 2024; v2, 25 July 2025",
+      "kind": "Research paper; arXiv record reports COLM 2024"
+    },
+    {
+      "n": 37,
+      "title": "Hyeon, S., Jung, K., Kim, N.-J., Ryu, H. G., & Do, J. MathReader: Text-to-Speech for Mathematical Documents",
+      "url": "https://arxiv.org/abs/2501.07088",
+      "date": "13 January 2025; v2, 19 January 2025",
+      "kind": "Research paper; arXiv record reports ICASSP 2025 acceptance"
+    },
+    {
+      "n": 38,
+      "title": "DAISY. Image Descriptions, Accessible Publishing Knowledge Base",
+      "url": "https://kb.daisy.org/publishing/docs/html/images-desc.html",
+      "date": "n.d. (living documentation)",
+      "kind": "Official documentation"
+    },
+    {
+      "n": 39,
+      "title": "Docling project. Source, features and license",
+      "url": "https://github.com/docling-project/docling",
+      "date": "Living repository",
+      "kind": "Public code; MIT code license"
+    },
+    {
+      "n": 40,
+      "title": "Tesseract. Source and language data documentation",
+      "url": "https://github.com/tesseract-ocr/tesseract",
+      "date": "Living repository",
+      "kind": "Public code; Apache-2.0"
+    },
+    {
+      "n": 41,
+      "title": "Tesseract. Languages/scripts supported in different versions",
+      "url": "https://tesseract-ocr.github.io/tessdoc/Data-Files-in-different-versions.html",
+      "date": "n.d. (living documentation)",
+      "kind": "Official documentation"
+    },
+    {
+      "n": 42,
+      "title": "PaddlePaddle. PaddleOCR source and license",
+      "url": "https://github.com/PaddlePaddle/PaddleOCR",
+      "date": "Living repository",
+      "kind": "Public code; Apache-2.0 code license"
+    },
+    {
+      "n": 43,
+      "title": "DAISY. MathCAT source and license",
+      "url": "https://github.com/daisy/MathCAT",
+      "date": "Living repository",
+      "kind": "Public code; MIT"
+    },
+    {
+      "n": 44,
+      "title": "NV Access. NVDA User Guide",
+      "url": "https://api.nvaccess.org/documentation/userGuide.html",
+      "date": "Reviewed live guide identifies version 2026.3.1",
+      "kind": "Official documentation"
+    },
+    {
+      "n": 45,
+      "title": "eSpeak NG. Source, features and license",
+      "url": "https://github.com/espeak-ng/espeak-ng",
+      "date": "Living repository",
+      "kind": "Public code; GPL-3.0-or-later core"
+    },
+    {
+      "n": 46,
+      "title": "Mozilla. PDF.js source and license",
+      "url": "https://github.com/mozilla/pdf.js",
+      "date": "Living repository",
+      "kind": "Public code; Apache-2.0"
+    },
+    {
+      "n": 47,
+      "title": "jsvine. pdfplumber source and license",
+      "url": "https://github.com/jsvine/pdfplumber",
+      "date": "Living repository",
+      "kind": "Public code; MIT"
+    },
+    {
+      "n": 48,
+      "title": "intfloat. multilingual-e5-small model card",
+      "url": "https://huggingface.co/intfloat/multilingual-e5-small",
+      "date": "Living model card; linked technical report 2024",
+      "kind": "Model documentation; MIT"
+    },
+    {
+      "n": 49,
+      "title": "Google Cloud. Enterprise Document OCR",
+      "url": "https://docs.cloud.google.com/document-ai/docs/enterprise-document-ocr",
+      "date": "n.d. (living documentation)",
+      "kind": "Official documentation"
+    },
+    {
+      "n": 50,
+      "title": "Google Cloud. Gemini layout parser",
+      "url": "https://docs.cloud.google.com/document-ai/docs/layout-parse-chunk",
+      "date": "n.d. (living documentation)",
+      "kind": "Official documentation"
+    },
+    {
+      "n": 51,
+      "title": "Microsoft. Azure Speech languages and voices",
+      "url": "https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-support",
+      "date": "n.d. (living documentation)",
+      "kind": "Official documentation"
+    },
+    {
+      "n": 52,
+      "title": "Microsoft. SSML document structure and events",
+      "url": "https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/speech-synthesis-markup-structure",
+      "date": "n.d. (living documentation)",
+      "kind": "Official documentation"
+    },
+    {
+      "n": 53,
+      "title": "FastAPI. Documentation and license",
+      "url": "https://fastapi.tiangolo.com/",
+      "date": "n.d. (living documentation)",
+      "kind": "Official documentation"
+    },
+    {
+      "n": 54,
+      "title": "Deque. axe-core accessibility testing engine",
+      "url": "https://www.deque.com/axe/axe-core/",
+      "date": "n.d. (living documentation)",
+      "kind": "Official documentation"
+    },
+    {
+      "n": 55,
+      "title": "OpenStax. Physics preface and license",
+      "url": "https://openstax.org/books/physics/pages/preface",
+      "date": "Book published 2020; page is living",
+      "kind": "Official documentation"
+    },
+    {
+      "n": 56,
+      "title": "OpenStax. Licensing information for textbooks",
+      "url": "https://help.openstax.org/s/article/Licensing-information-of-OpenStax-textbooks",
+      "date": "Living help page; edition-specific check required",
+      "kind": "Official documentation"
+    },
+    {
+      "n": 57,
+      "title": "Pratham Books. StoryWeaver open content and licenses",
+      "url": "https://storyweaver.org.in/en/open-content",
+      "date": "n.d. (living documentation)",
+      "kind": "Official documentation"
+    },
+    {
+      "n": 58,
+      "title": "Pratham Books. StoryWeaver attribution guidelines",
+      "url": "https://storyweaver.org.in/en/attributions",
+      "date": "n.d. (living documentation)",
+      "kind": "Official documentation"
+    },
+    {
+      "n": 59,
+      "title": "NCERT. Textbooks and copyright notice",
+      "url": "https://ncert.nic.in/textbook.php",
+      "date": "n.d. (living documentation)",
+      "kind": "Official documentation"
+    },
+    {
+      "n": 60,
+      "title": "Google. Gemini 3.5 Flash-Lite model specification",
+      "url": "https://aistudio.google.com/docs/models/gemini-3.5-flash-lite",
+      "date": "Latest model update July 2026",
+      "kind": "Official model documentation; stable endpoint listed"
+    },
+    {
+      "n": 61,
+      "title": "Bookshare. What formats are available for Bookshare books?",
+      "url": "https://www.bookshare.org/help-and-learning-articles/what-format-are-bookshare-books-available-in",
+      "date": "n.d. (living documentation)",
+      "kind": "Official documentation"
+    },
+    {
+      "n": 62,
+      "title": "Everway. Read&Write education pricing and platform entitlements",
+      "url": "https://www.everway.com/products/read-and-write-education/pricing/",
+      "date": "n.d. (living documentation)",
+      "kind": "Official documentation"
+    },
+    {
+      "n": 63,
+      "title": "Microsoft. Seeing AI launches on Android",
+      "url": "https://blogs.microsoft.com/accessibility/seeing-ai-app-launches-on-android-including-new-and-updated-features-and-new-languages/",
+      "date": "4 December 2023",
+      "kind": "Vendor announcement"
+    }
+  ],
+  "pages": [
+    {
+      "part": "PART 1 - PROBLEM, EXISTING SOLUTIONS, AND VERIFIED GAPS",
+      "title": "Pathya: a repairable AI textbook reader",
+      "items": [
+        [
+          "small",
+          "IMPLEMENTATION-READY PROJECT REPORT | Research cut-off and access date: 16 November 2026"
+        ],
+        [
+          "h",
+          "Executive summary"
+        ],
+        [
+          "p",
+          "Build <b>Pathya</b> (working name; availability not checked): an accessible web reader that turns a limited set of English and Hindi textbook chapters into navigable, page-linked content. Its core contribution is a trustworthy study workflow: uncertain extraction can be inspected and corrected, and those corrections update narration, search and evidence used by the optional assistant."
+        ],
+        [
+          "p",
+          "A basic OCR + text-to-speech (TTS) reader is a useful baseline but a weak project differentiator. Immersive Reader, Kurzweil 3000, EasyReader, Speechify and NaturalReader already cover substantial reading support; Seeing AI already offers document questions. Source-linked answers also exist in Google's NotebookLM / Gemini Notebook documentation. The opportunity is a focused integration with measurable reliability, not a claim that these components are new. [6-9,13-24,27-28]"
+        ],
+        [
+          "box",
+          "<b>Recommended flagships:</b> (1) one structured, page-linked reading model; (2) confidence-aware review with revision-safe corrections; (3) evidence-linked study assistance that abstains when the chapter or its extraction cannot support an answer. Offline chapter reading and user-controlled accessibility settings are essential requirements."
+        ],
+        [
+          "h",
+          "Planning assumptions, not established facts"
+        ],
+        [
+          "table",
+          [
+            [
+              "Resource",
+              "Planning assumption"
+            ],
+            [
+              [
+                "Team and time",
+                "3 students, 14 weeks; approximately 12 focused hours per person per week (504 person-hours). Weeks 15-16 are contingency."
+              ],
+              [
+                "Equipment",
+                "An existing 4-core laptop with 16 GB RAM and 20 GB free space; an Android phone with 4 GB RAM; no dedicated GPU purchase."
+              ],
+              [
+                "Content and users",
+                "School / early college science prose, simple tables and a few teacher-verified equations. English and Hindi first; adults for initial user sessions."
+              ],
+              [
+                "Budget",
+                "INR 7,000 base cash envelope; up to INR 14,000 with participant and cloud contingencies. Borrowed hardware and student labor excluded."
+              ]
+            ],
+            [
+              0.23,
+              0.77
+            ]
+          ]
+        ],
+        [
+          "h",
+          "How to read this report"
+        ],
+        [
+          "p",
+          "Part 1 (pp. 1-8) establishes needs, compares 12 solution categories/systems and evaluates evidence. Part 2 (pp. 9-12) defines the product, ranking and evaluation. Part 3 (pp. 13-25) specifies implementation, delivery gates and a numbered bibliography. All numbered citations link to the bibliography; bibliography titles link to original sources."
+        ],
+        [
+          "small",
+          "Evidence labels: V = capability documented by its provider or standard, not independently tested here. R = research result, bounded by its study. I = inference from reviewed evidence. P = proposed implementation. T = proposed target. No software prototype or user study was carried out for this report."
+        ],
+        [
+          "small",
+          "Report quality note: the PDF is designed for readable visual review and includes linked citations and page numbers. It is not certified PDF/UA or claimed to be a fully tagged accessible PDF. The companion HTML carries the same report text, semantic headings and tables for reflow/screen-reader use. Both describe a proposal, not an implemented system."
+        ]
+      ]
+    },
+    {
+      "part": "PART 1 - PROBLEM, EXISTING SOLUTIONS, AND VERIFIED GAPS",
+      "title": "A. Different needs, different study journeys",
+      "items": [
+        [
+          "p",
+          "The following are design scenarios, not observations from recruited participants. WAI user stories illustrate why disability labels alone cannot determine an interface. People may have overlapping needs, different screen-reader skills and different preferred languages. Ask about tasks and preferences; do not require a diagnosis to select reader settings. [5]"
+        ],
+        [
+          "table",
+          [
+            [
+              "Student / task",
+              "Barrier in an ordinary workflow",
+              "Required response and limit"
+            ],
+            [
+              [
+                "Blind student: locate an exercise and compare two definitions",
+                "An image PDF has no usable text. A flat OCR transcript loses headings, columns, footnotes and the printed page cited by a teacher.",
+                "Heading / page / exercise navigation, stable source links, keyboard controls and screen-reader semantics. Audio alone cannot convey a whole page efficiently."
+              ],
+              [
+                "Low-vision student: examine a graph and continue reading",
+                "Zooming a fixed page causes repeated panning. Small labels, glare and weak contrast make crops difficult to inspect.",
+                "Reflow prose separately from a zoomable source; allow contrast, size and spacing changes, with a clear return point. Preserve magnification and focus."
+              ],
+              [
+                "Student with dyslexia: read, revisit a term and explain a concept",
+                "Decoding effort and losing one's place can slow study. Audio may help some tasks; long narration can also overload attention.",
+                "Optional sentence highlighting, short playback units, adjustable pace, bookmarks and concise source-linked explanation. Preferences are not treatment."
+              ]
+            ],
+            [
+              0.23,
+              0.35,
+              0.42
+            ]
+          ]
+        ],
+        [
+          "h",
+          "Where textbook structure creates failure"
+        ],
+        [
+          "p",
+          "Poor photographs introduce blur, shadows, skew and clipped lines. Scanned PDFs lack semantic order; even a selectable PDF may have a faulty text layer. Two-column prose, captions and sidebars can interleave. Tables lose header-to-cell relationships when flattened. Equations can lose a minus sign, fraction boundary or exponent while the surrounding paragraph remains fluent. Diagram meaning includes relationships, not just object names. These are engineering risks to test, rather than measured prevalence claims. Document-parsing benchmarks explicitly separate text, tables, formulae and reading order. [33-34]"
+        ],
+        [
+          "p",
+          "Multilingual chapters add script changes, English technical terms, abbreviations and numerals. Hindi OCR availability does not guarantee accurate conjuncts, correct language segmentation or intelligible narration. A translated explanation is not the original textbook. Keep source text, pronunciation hints and generated material in separate fields. [6,41,51]"
+        ],
+        [
+          "h",
+          "Access is necessary; comprehension is a separate outcome"
+        ],
+        [
+          "p",
+          "A student may successfully hear a paragraph yet fail to compare quantities or explain the principle. Test both access tasks (find, read, return, correct) and learning tasks (explain, infer, retrieve supporting evidence). A proposed journey is: import at college Wi-Fi, review flagged content with a teacher, download a chapter, study on the bus, and resume later. If the page is unreadable, request a better capture or authorized accessible edition instead of presenting guessed text as truth."
+        ]
+      ]
+    },
+    {
+      "part": "PART 1 - PROBLEM, EXISTING SOLUTIONS, AND VERIFIED GAPS",
+      "title": "B. Comparison matrix 1: users and ingestion",
+      "items": [
+        [
+          "small",
+          "Reviewed scope: 12 rows across four linked matrices (pp. 3-6). NV means not verified in reviewed sources, never proof of absence. Vendor documentation establishes advertised capability, not independent accuracy. Versions, platforms and subscriptions must be recorded during baseline testing."
+        ],
+        [
+          "table",
+          [
+            [
+              "System / evidence",
+              "Intended users and platforms",
+              "Inputs",
+              "OCR / reading order"
+            ],
+            [
+              [
+                "Immersive Reader [6-8]",
+                "Learning differences / language learners; Microsoft host apps; Azure SDK integration.",
+                "Host-provided text; Edge web reading and PDF Read Aloud are distinct contexts.",
+                "Azure reader receives content; it is not a complete textbook OCR pipeline. Order depends on host/input."
+              ],
+              [
+                "Seeing AI [9,63]",
+                "Blind / low vision; iOS and Android.",
+                "Camera documents, photos; multi-page scanning in release history.",
+                "Alignment guidance; recognizes document text and formatting (vendor claim). Complex textbook order NV."
+              ],
+              [
+                "Google Lookout [10]",
+                "Blind / low vision; Android 6+.",
+                "Camera; Documents mode for full pages; image modes.",
+                "Audio capture hints; text recognition. Multi-column order accuracy NV."
+              ],
+              [
+                "Bookshare [11-12,61]",
+                "People with qualifying print disabilities; compatible reading apps.",
+                "Library titles in formats such as DAISY, EPUB, BRF, Word and audio; title-dependent.",
+                "Structure depends on supplied edition and reader; extraction quality NV here."
+              ],
+              [
+                "DAISY readers [4]",
+                "Print-disabled readers; software and dedicated devices.",
+                "DAISY talking books: combinations of audio, text and images.",
+                "Format encodes navigation/synchronization; cannot repair an arbitrary scan by itself."
+              ],
+              [
+                "Dolphin EasyReader [13-16]",
+                "Print disabilities; Android, iOS and Windows reviewed.",
+                "DAISY, EPUB, DOCX, HTML, text; PDF documentation differs by source/version.",
+                "PDF listed in current app listing; older help restricts PDF to RNIB Bookshare. General OCR and order behavior NV."
+              ],
+              [
+                "Kurzweil 3000 [17-18]",
+                "Learning / literacy support; installed clients and web.",
+                "Scanned material, digital documents, web reading.",
+                "ABBYY OCR documented; vendor accuracy superlative is not adopted here."
+              ],
+              [
+                "Read&Write [19,62]",
+                "Windows, Mac, Chrome, Edge, iOS, Android; features vary.",
+                "Web / Google Docs; PDF and inaccessible image text via screenshot reader.",
+                "Screenshot Reader documented. Full textbook layout fidelity NV."
+              ],
+              [
+                "Speechify [20-21]",
+                "General / education listening; web, mobile and desktop offerings.",
+                "PDFs, documents, web and Scan & Listen.",
+                "OCR scanning advertised. Complex textbook order accuracy NV."
+              ],
+              [
+                "NaturalReader [22-24]",
+                "Personal / education reading; web and mobile.",
+                "Documents, scans and images; paid OCR.",
+                "OCR and PDF filtering advertised; filter is not verified structural repair."
+              ],
+              [
+                "Thorium Reader [25-26]",
+                "Accessible desktop reading; Windows, macOS, Linux.",
+                "EPUB, PDF, DAISY, audiobooks and other publishing formats.",
+                "Reads existing publications; arbitrary-scan OCR NV."
+              ],
+              [
+                "NotebookLM / Gemini Notebook [27-28]",
+                "Source-based research / study; Google web service.",
+                "Uploaded PDFs, text, Docs, Slides and other sources.",
+                "Document ingestion documented; faithful textbook order and correction controls NV."
+              ]
+            ],
+            [
+              0.21,
+              0.25,
+              0.25,
+              0.29
+            ]
+          ]
+        ],
+        [
+          "small",
+          "Naming note: Google's reviewed Workspace page uses “Gemini Notebook (formerly NotebookLM)”; other official pages retain NotebookLM. Recheck the deployed name and account entitlements when running comparisons. [27-28]"
+        ]
+      ]
+    },
+    {
+      "part": "PART 1 - PROBLEM, EXISTING SOLUTIONS, AND VERIFIED GAPS",
+      "title": "B. Comparison matrix 2: reading and accessibility",
+      "items": [
+        [
+          "small",
+          "“Designed for” or “supports assistive technology” is a documented intent/capability, not a passed accessibility audit. NV below identifies the exact unverified area. This review did not install or test these products."
+        ],
+        [
+          "table",
+          [
+            [
+              "System",
+              "TTS / synchronized highlighting",
+              "Dyslexia-related controls",
+              "Screen reader / keyboard"
+            ],
+            [
+              [
+                "Immersive Reader [6-8]",
+                "Read Aloud; availability varies by language and host.",
+                "Line focus, spacing, themes, syllables and picture dictionary; language-dependent.",
+                "Full host-by-host screen-reader / keyboard conformance NV."
+              ],
+              [
+                "Seeing AI [9]",
+                "Spoken document reading; highlight synchronization details NV.",
+                "Dedicated dyslexia customization NV.",
+                "Blind-user design and audio capture cues documented; keyboard coverage NV."
+              ],
+              [
+                "Lookout [10]",
+                "Spoken text; rate / pitch and voice settings. Word highlighting NV.",
+                "Dedicated typography / focus controls NV.",
+                "Blind-user design; document hints and haptics. Full keyboard coverage NV."
+              ],
+              [
+                "Bookshare [11-12]",
+                "Accessible reading available through reader ecosystem; highlighting reader-dependent.",
+                "Reader-dependent; do not attribute every reader feature to the library.",
+                "Compatible reader and accessible edition determine experience; exact combination NV."
+              ],
+              [
+                "DAISY readers [4]",
+                "Text/audio synchronization supported by format; implementation varies.",
+                "Multi-sensory reading possible; display preferences depend on reader.",
+                "Navigable format; reader-specific commands / conformance NV."
+              ],
+              [
+                "EasyReader [13,16]",
+                "Text/audio sync and word/sentence highlighting advertised.",
+                "Fonts, color, letter/line spacing and visible lines; pronunciation controls.",
+                "Linear screen-reader and braille mode advertised. Keyboard audit NV."
+              ],
+              [
+                "Kurzweil 3000 [17]",
+                "Words and sentences highlighted during TTS.",
+                "Rate, colors, zoom and OpenDyslexic; desktop magnification.",
+                "Independent screen-reader interoperability and complete keyboard audit NV."
+              ],
+              [
+                "Read&Write [19]",
+                "Read Aloud and Audio Maker documented; exact sync behavior by edition NV.",
+                "Masking, text formatting, dictionaries and reading support.",
+                "Full toolbar / PDF reader keyboard and screen-reader audit NV."
+              ],
+              [
+                "Speechify [20-21]",
+                "TTS and playback options; highlighting advertised in product materials.",
+                "Exact typography / focus controls on each current platform NV.",
+                "Complete screen-reader / keyboard conformance NV."
+              ],
+              [
+                "NaturalReader [22]",
+                "TTS and highlighting; feature limits depend on plan.",
+                "Font/spacing options for typed text; dyslexia font optional.",
+                "Full screen-reader / keyboard conformance NV."
+              ],
+              [
+                "Thorium [25-26]",
+                "TTS; publication-dependent audio support. Exact word sync NV in reviewed spec.",
+                "Accessibility-oriented display customization; exact settings depend on version.",
+                "Assistive-technology access documented; task-level audit still needed."
+              ],
+              [
+                "Notebook / NotebookLM [27-28]",
+                "Generated audio / study features overlap conceptually; exact word sync NV.",
+                "Dedicated dyslexia reading controls NV.",
+                "Full keyboard and screen-reader task coverage NV."
+              ]
+            ],
+            [
+              0.19,
+              0.28,
+              0.29,
+              0.24
+            ]
+          ]
+        ],
+        [
+          "h",
+          "Fair interpretation"
+        ],
+        [
+          "p",
+          "Customization is already common. A new font, a dark theme or a speed slider should be treated as baseline product quality. Missing documentation creates a research question for hands-on testing. It does not justify calling an established product inaccessible. For any adopted baseline, record the exact browser, operating system, voice, app version and subscription, then test the same chapter and tasks."
+        ]
+      ]
+    },
+    {
+      "part": "PART 1 - PROBLEM, EXISTING SOLUTIONS, AND VERIFIED GAPS",
+      "title": "B. Comparison matrix 3: STEM and AI study support",
+      "items": [
+        [
+          "small",
+          "Math = mathematical content. A supported file format is not evidence of correct conversion from a photographed equation. An AI summary is not evidence that every statement is grounded."
+        ],
+        [
+          "table",
+          [
+            [
+              "System",
+              "Math, tables and diagrams",
+              "AI explanations / grounded Q&A",
+              "Documented boundary / uncertainty"
+            ],
+            [
+              [
+                "Immersive Reader [6,8]",
+                "Equation Read Aloud appears in host/language matrix. Table and diagram exploration NV.",
+                "Translation / picture dictionary documented. Textbook-grounded generative Q&A within reader NV.",
+                "Features differ across host and language; do not generalize one host to all."
+              ],
+              [
+                "Seeing AI [9]",
+                "Rich image descriptions documented. Structural equation / table navigation NV.",
+                "Document questions already documented. Citation fidelity NV.",
+                "App description is vendor evidence, not a textbook STEM benchmark."
+              ],
+              [
+                "Lookout [10]",
+                "Image information available; structured STEM traversal NV.",
+                "Textbook evidence-linked study answers NV.",
+                "Explore mode explicitly beta and less accurate than other modes."
+              ],
+              [
+                "Bookshare [11-12]",
+                "Accessible edition and downstream reader determine STEM access; exact title NV.",
+                "Library-level source-grounded generative Q&A NV.",
+                "Qualifying disability / membership; availability of a required edition not established."
+              ],
+              [
+                "DAISY [4]",
+                "MathML extension exists; figures and text can coexist. Table traversal reader-dependent.",
+                "Format supplies no generative answer engine.",
+                "Structure must first be authored correctly. Navigation is established prior art."
+              ],
+              [
+                "EasyReader [13-16]",
+                "MathML listed; premium image descriptions advertised. Scanned equation repair NV.",
+                "Premium AI study tools documented; exact passage citation / correction propagation NV.",
+                "Do not confuse AI help search with textbook Q&A. PDF support documentation conflicts."
+              ],
+              [
+                "Kurzweil 3000 [17]",
+                "OCR plus notes / study tools; verified math-tree / diagram traversal NV.",
+                "Dictionaries / study guides documented; generative chapter Q&A NV.",
+                "Vendor “highest accuracy” OCR claim not independently evaluated here."
+              ],
+              [
+                "Read&Write [19]",
+                "Screenshot reading; semantic STEM reconstruction NV.",
+                "Simplify AI documented; textbook-grounded Q&A / citations NV.",
+                "Features and platform coverage differ; simplification can change meaning."
+              ],
+              [
+                "Speechify [20-21]",
+                "Structured STEM exploration NV.",
+                "Voice AI assistant can discuss books / sites (vendor). Citation correctness NV.",
+                "AI chat is existing capability; local offline generation not established."
+              ],
+              [
+                "NaturalReader [22-24]",
+                "Smart Filter can skip tables/charts; semantic narration of their structure NV.",
+                "Subscriber Ask AI documented. Fine-grained evidence correctness NV.",
+                "Skipping a chart is not making its information accessible."
+              ],
+              [
+                "Thorium [25-26]",
+                "Accessible publication reading; exact STEM interaction on test build NV.",
+                "Textbook-grounded generative Q&A NV.",
+                "Quality depends on authored EPUB / DAISY content."
+              ],
+              [
+                "Notebook / NotebookLM [27-28]",
+                "Multisource study tools; accessible math-tree navigation NV.",
+                "Source-based answers with passage citations documented.",
+                "Citation interface establishes overlap, not independent truth or learning benefit."
+              ]
+            ],
+            [
+              0.18,
+              0.28,
+              0.29,
+              0.25
+            ]
+          ]
+        ],
+        [
+          "h",
+          "Additional technical prior art"
+        ],
+        [
+          "p",
+          "Docling's structured parsing, MathCAT's speech/navigation and MathReader's OCR-to-math speech are substantial prior art and reusable foundations. They are not the complete proposed workflow. [37,39,43-44]"
+        ]
+      ]
+    },
+    {
+      "part": "PART 1 - PROBLEM, EXISTING SOLUTIONS, AND VERIFIED GAPS",
+      "title": "B. Comparison matrix 4: language, offline and access",
+      "items": [
+        [
+          "small",
+          "No price is inferred from an old blog or a US plan. Except where explicitly stated, exact India checkout price / tax / entitlement is NV. “Offline audio” and “all processing offline” are different capabilities."
+        ],
+        [
+          "table",
+          [
+            [
+              "System",
+              "Language support relevant to India",
+              "Offline boundary",
+              "Verified access / pricing boundary"
+            ],
+            [
+              [
+                "Immersive Reader [6-8]",
+                "Language/host feature matrix includes Indian languages; parity is not universal.",
+                "Host, voice and feature dependent; full offline pipeline NV.",
+                "Bundled host availability vs metered Azure integration differ. Current India cost NV."
+              ],
+              [
+                "Seeing AI [9]",
+                "Multilingual listing; target Hindi technical narration quality NV.",
+                "Feature-by-feature offline operation NV in reviewed listing.",
+                "Free app listing; data / connectivity still matter."
+              ],
+              [
+                "Lookout [10]",
+                "English, Hindi, Bengali, Gujarati, Kannada, Marathi, Tamil, Telugu among listed languages.",
+                "Food-label download explicitly supports offline recognition; not evidence all modes do.",
+                "Android app; exact service limits / India feature availability NV."
+              ],
+              [
+                "Bookshare [11-12]",
+                "Title and reader dependent; required bilingual textbook catalog coverage NV.",
+                "Downloaded reading depends on chosen compatible app and format.",
+                "Reviewed international signup explicitly lists free individual membership in India; proof of eligibility required."
+              ],
+              [
+                "DAISY readers [4]",
+                "Content and voice dependent; DAISY is a format, not a language model.",
+                "Local talking books can be packaged; player-specific limits NV.",
+                "Standard is public; players and library access have separate terms."
+              ],
+              [
+                "EasyReader [13-16]",
+                "Voices and library content determine narration; Hindi quality NV.",
+                "Downloaded reading supported in reader workflow; exact premium / voice behavior NV here.",
+                "Free app with premium subscriptions and limited imports; exact current India price NV."
+              ],
+              [
+                "Kurzweil 3000 [17-18]",
+                "13 TTS languages advertised; passage translation into 70+ languages. Hindi TTS NV.",
+                "FAQ: website cannot work offline; installed Web License client can.",
+                "Commercial licensing; institutional access possible; India quote NV."
+              ],
+              [
+                "Read&Write [19,62]",
+                "Translator and language/settings profiles documented; Hindi voice NV.",
+                "Online voices distinct; full offline feature matrix NV.",
+                "USD 184/year individual listed; higher education quote. India checkout/tax NV."
+              ],
+              [
+                "Speechify [20-21]",
+                "Multiple voices/languages advertised; code-switched pronunciation quality NV.",
+                "Premium downloadable audio advertised; offline OCR/chat NV.",
+                "Free and Premium tiers verified; exact India checkout and usage caps require recheck."
+              ],
+              [
+                "NaturalReader [22-24]",
+                "Voice-dependent multilingual support; exact Hindi model/quality NV.",
+                "Paid MP3 export for offline listening. Offline AI / OCR NV.",
+                "OCR and Ask AI paid. Personal-plan audio restricted to personal use."
+              ],
+              [
+                "Thorium [25-26]",
+                "Localized interface; content / OS voices govern narration.",
+                "Desktop reader works offline; catalogs need network.",
+                "Free/open source; protected content has separate access rules."
+              ],
+              [
+                "Notebook / NotebookLM [27-28]",
+                "Exact Hindi functionality and parity across accounts NV.",
+                "Full source-grounded assistant offline NV.",
+                "Google account / edition entitlements; current India limits / price NV."
+              ]
+            ],
+            [
+              0.18,
+              0.28,
+              0.27,
+              0.27
+            ]
+          ]
+        ],
+        [
+          "p",
+          "Comparison conclusion (I): a defensible student project must show a better bounded workflow on its evaluation chapters, rather than a longer checklist. None of these documentation-only comparisons establishes that Pathya would outperform a product, or that a particular commercial feature is absent. A synchronized correction-to-audio-to-retrieval workflow for the proposed low-cost bilingual scope was <b>not found in the reviewed sources</b>; this is not evidence that no implementation exists."
+        ]
+      ]
+    },
+    {
+      "part": "PART 1 - PROBLEM, EXISTING SOLUTIONS, AND VERIFIED GAPS",
+      "title": "C. What research and standards support",
+      "items": [
+        [
+          "table",
+          [
+            [
+              "Evidence and status",
+              "Supported conclusion",
+              "Boundary and project consequence"
+            ],
+            [
+              [
+                "Read-aloud meta-analysis [29] (R)",
+                "Wood et al. report a positive average comprehension effect (d = 0.35; 95% CI 0.14-0.56).",
+                "Study designs and learners vary. This does not predict a gain for this app, Hindi content or each student; measure comprehension separately."
+              ],
+              [
+                "Specialized fonts [30-31] (R)",
+                "Kuster et al. found no speed/accuracy advantage for Dyslexie. A 2026 meta-analysis abstract reports no consistent reliable benefit.",
+                "The 2026 full text was not available. Offer preferences; do not claim fonts, color overlays or AI cure / treat dyslexia."
+              ],
+              [
+                "Document parsing [32-34,39]",
+                "Docling provides reusable structured parsing; OmniDocBench evaluates diverse documents and components.",
+                "Developer reports / benchmark scores are not a local textbook result. Pin versions and measure language, layout and degradation strata."
+              ],
+              [
+                "Accessible STEM [3,37,43-44]",
+                "MathML carries structure; MathCAT enables speech/navigation. MathReader reports improved math speech WER on its test.",
+                "Math OCR errors can remain mathematically fatal. No reported WER here is transferred to Pathya or Hindi."
+              ],
+              [
+                "Grounded answers [35] (R)",
+                "ALCE evaluates answer and citation quality separately; generated citations can remain incomplete.",
+                "A real citation can still fail to support a claim. Check evidence entailment; add unanswerable questions and abstention."
+              ],
+              [
+                "Multimodal access [36,38]",
+                "VizWiz-LF finds plausible generated answers can contain incorrect visual details. DAISY recommends context-appropriate image descriptions.",
+                "Not a textbook diagram efficacy study. Do not publish unreviewed inferred relations as source facts."
+              ]
+            ],
+            [
+              0.24,
+              0.36,
+              0.4
+            ]
+          ]
+        ],
+        [
+          "h",
+          "Standards translated into implementation requirements"
+        ],
+        [
+          "p",
+          "<b>WCAG 2.2:</b> target AA for the web app; implement semantic structure, meaningful reading order, keyboard operation, visible/unobscured focus, contrast, reflow, language markup and accessible authentication. Avoid drag-only correction. Test target sizing and redundant data entry as applicable. Automated scans alone cannot establish conformance. [1]"
+        ],
+        [
+          "p",
+          "<b>EPUB Accessibility 1.1:</b> use its distinction between content accessibility and discoverability metadata when designing exports; do not label an export conformant without checking the complete requirements. <b>DAISY:</b> navigable, synchronized reading is established practice. <b>MathML Core:</b> reviewed snapshot is a Candidate Recommendation, not a final Recommendation; rendering does not certify speech correctness. [2-4]"
+        ],
+        [
+          "p",
+          "<b>Image guidance:</b> provide a concise alternative plus a linked longer description when needed. State diagram type, key labels and relationships in the textbook's context. A description should not add invisible facts. In Pathya, descriptions are teacher-authored or explicitly labeled generated drafts until reviewed. [38]"
+        ]
+      ]
+    },
+    {
+      "part": "PART 1 - PROBLEM, EXISTING SOLUTIONS, AND VERIFIED GAPS",
+      "title": "D. Seven opportunities, with bounded claims",
+      "items": [
+        [
+          "table",
+          [
+            [
+              "Opportunity / category",
+              "Evidence and gap interpretation",
+              "Student-team decision"
+            ],
+            [
+              [
+                "1. One source-linked content model (engineering)",
+                "DAISY synchronization and Docling's representation already exist [4,39]. Linking corrections, audio and Q&A at paragraph revisions is an integration opportunity.",
+                "MVP foundation. Stable IDs and page geometry are more useful than a custom graph database."
+              ],
+              [
+                "2. Uncertainty-aware repair (underserved workflow)",
+                "Vendor OCR and reading are common [9-10,17,22]; standardized textbook error triage and derivative invalidation were not found in reviewed product docs.",
+                "Flag low-quality extraction; supply accessible review queue. Need a held-out flagging experiment."
+              ],
+              [
+                "3. Evidence return path (engineering)",
+                "Passage citations already exist [28]; ALCE shows citation quality needs evaluation [35].",
+                "Jump from answer to source paragraph, then return to answer. Suppress stale evidence after edits."
+              ],
+              [
+                "4. Offline study continuity (underserved workflow)",
+                "Several products support downloaded audio or local reading [18,21,23,26]; offline processing and AI are different.",
+                "Cache verified chapter content/audio and position. New imports and cloud explanations may wait."
+              ],
+              [
+                "5. Choice without diagnosis (common + engineering)",
+                "Reading customization is well established [6,13,17,22]. WAI stories show differing interaction needs [5].",
+                "Provide independent controls and presets, then preserve individual changes. Do not market presets as treatment."
+              ],
+              [
+                "6. English-Hindi technical pronunciation (hypothesis)",
+                "OCR models and hosted voices list Hindi [41,51]. End-to-end code-switching quality is not established by a language list.",
+                "Small, editable term glossary; bilingual listener test. No automatic textbook translation in MVP."
+              ],
+              [
+                "7. Structure-aware STEM access (future research)",
+                "MathML, MathCAT and math speech research are substantial prior art [3,37,43]. Diagram hallucination risk is documented [36].",
+                "MVP renders reviewed MathML and simple header tables. Automatic equation parsing / diagram relation exploration is stretch."
+              ]
+            ],
+            [
+              0.26,
+              0.43,
+              0.31
+            ]
+          ]
+        ],
+        [
+          "h",
+          "Search scope and evidence discipline"
+        ],
+        [
+          "p",
+          "The review searched official Microsoft, Google, Bookshare, Dolphin, Kurzweil, Everway/Texthelp, Speechify, NaturalReader and EDRLab documentation; W3C and DAISY standards/guidance; ACL, CVPR, journal publisher, PubMed/PMC and arXiv records; and named public repositories. Searches included OCR, reading order, offline, language support, document Q&A, citation evaluation, dyslexia fonts and accessible mathematics. Access date is 16 November 2026. This is a targeted desktop review, not a systematic review or a hands-on product audit."
+        ],
+        [
+          "p",
+          "The comparison supports choosing a narrow reliability problem. It cannot support “world first,” exhaustive catalog coverage, comparative accessibility rankings or clinical effects. Pages with inconsistent documentation (notably EasyReader PDF input) are recorded as uncertainty. Exact commercial India prices are intentionally left unverified where the reviewed material did not establish a reliable checkout amount."
+        ],
+        [
+          "h",
+          "What can be demonstrated credibly"
+        ],
+        [
+          "p",
+          "Show the same extraction error before and after a correction, prove that stale audio and answers are no longer served, and repeat a study task without internet. This makes the technical contribution inspectable. The hypothesis is that these mechanisms reduce silent errors and recovery effort; only the planned evaluation can establish whether students find the combination useful."
+        ]
+      ]
+    },
+    {
+      "part": "PART 2 - PROPOSED SOLUTION, DIFFERENTIATION, AND FEASIBILITY",
+      "title": "A. The product: study a chapter, trust its provenance",
+      "items": [
+        [
+          "p",
+          "<b>Value proposition (P):</b> Pathya helps students navigate an authorized chapter, hear or inspect its content in their preferred way, notice extraction problems and return from explanations to the exact supporting passage. It should remain useful when its assistant is unavailable. The name is a working label, not a trademark claim."
+        ],
+        [
+          "h",
+          "Users and core use cases"
+        ],
+        [
+          "p",
+          "<b>Primary:</b> students who use screen readers or magnification, and students who choose TTS / visual reading supports, studying English or Hindi science prose. Keep blindness, low vision and dyslexia as separate evaluation strata. <b>Secondary:</b> teachers or authorized helpers who review extraction and pronunciation. The initial pilot uses consenting adult students; work with minors requires a separate institutional process."
+        ],
+        [
+          "p",
+          "Core tasks are: import; navigate by heading/page/paragraph; read, bookmark and correct; download; and request evidence-linked explanation. Independent controls cover size/spacing, colors, focus, voice, rate and uncertainty interruptions. Preserve preferences without requiring diagnosis. A helper sees authorized blocks, not the student's entire reading history."
+        ],
+        [
+          "h",
+          "A realistic complete journey"
+        ],
+        [
+          "p",
+          "A blind student receives a 12-page authorized physics chapter. At college Wi-Fi, they upload it and hear progress messages. Pathya detects two columns and flags a suspicious minus sign. The student can skip to the review queue, listen to the uncertain text, inspect its provenance or ask an authorized helper to review the crop. The helper corrects it using a labeled text form, not drag-and-drop."
+        ],
+        [
+          "p",
+          "After publication of revision 2, the student downloads the chapter, audio and text. On a phone offline, “Go to printed page 38” opens the right section. Table navigation announces the column header with each value. A bookmark saves the paragraph rather than a pixel offset. The assistant is visibly unavailable offline; search and reading continue. After reconnection, an explanation of acceleration cites a specific paragraph, with a link to open and read the evidence."
+        ],
+        [
+          "p",
+          "A low-vision student uses the same content in reflow with adjustable size and an independently zoomable original page. A student with dyslexia chooses short narration segments and sentence focus, turns highlighting off if distracting, and checks an explanation against the original. No preset silently rewrites textbook sentences."
+        ],
+        [
+          "h",
+          "Deliberate scope boundaries"
+        ],
+        [
+          "box",
+          "<b>Outside MVP:</b> arbitrary handwriting; handwriting-to-math; general diagram reasoning; chemistry structures; universal table reconstruction; all Indian languages; full DAISY/EPUB import/export certification; diagnosis or treatment; autonomous tutoring; exam proctoring; Braille production; and large-model training. Camera input is a file/capture control with basic quality feedback, not a guaranteed independent capture guide."
+        ],
+        [
+          "p",
+          "A failed parse must still leave a usable status page, a source-download option if authorized and an explicit way to request review. It must not imply that an inaccessible source image has become accessible merely because an upload succeeded."
+        ]
+      ]
+    },
+    {
+      "part": "PART 2 - PROPOSED SOLUTION, DIFFERENTIATION, AND FEASIBILITY",
+      "title": "B-C. Feature ranking and scope selection",
+      "items": [
+        [
+          "p",
+          "The scoring below is a <b>planning judgment</b>, not empirical evidence. Scores run 1-5; larger is better. U = user value (30%); F = feasibility in 14 weeks (25%); D = defensible differentiation despite overlap (15%); R = lower technical risk (15%); C = lower recurring cost (15%). Total = 0.30U + 0.25F + 0.15D + 0.15R + 0.15C. Value and feasibility dominate."
+        ],
+        [
+          "table",
+          [
+            [
+              "Candidate",
+              "U",
+              "F",
+              "D",
+              "R",
+              "C",
+              "Total / decision"
+            ],
+            [
+              [
+                "Independent reader controls",
+                5,
+                5,
+                1,
+                5,
+                5,
+                "4.40 - mandatory baseline"
+              ],
+              [
+                "Shared page-linked representation",
+                5,
+                4,
+                3,
+                4,
+                5,
+                "4.30 - flagship 1"
+              ],
+              [
+                "Offline prepared-chapter reading",
+                5,
+                4,
+                2,
+                4,
+                5,
+                "4.15 - mandatory baseline"
+              ],
+              [
+                "Confidence + corrections",
+                5,
+                3,
+                4,
+                3,
+                5,
+                "4.05 - flagship 2"
+              ],
+              [
+                "Simple structured-table narration",
+                4,
+                4,
+                2,
+                4,
+                5,
+                "3.85 - bounded MVP"
+              ],
+              [
+                "English-Hindi term glossary",
+                4,
+                4,
+                2,
+                3,
+                4,
+                "3.55 - bounded MVP"
+              ],
+              [
+                "Source-linked / abstaining answers",
+                4,
+                4,
+                2,
+                3,
+                3,
+                "3.40 - flagship 3"
+              ],
+              [
+                "Equation structure navigation",
+                5,
+                2,
+                2,
+                2,
+                4,
+                "3.20 - reviewed MathML only"
+              ],
+              [
+                "Automatic diagram exploration",
+                5,
+                1,
+                3,
+                1,
+                2,
+                "2.65 - stretch / research"
+              ],
+              [
+                "Automatic multilingual translation",
+                3,
+                2,
+                1,
+                2,
+                2,
+                "2.15 - future research"
+              ]
+            ],
+            [
+              0.43,
+              0.06,
+              0.06,
+              0.06,
+              0.06,
+              0.06,
+              0.27
+            ]
+          ]
+        ],
+        [
+          "p",
+          "Ranking is not the only decision rule. Accessibility controls outrank “differentiators” but are expected functionality. Table narration scores well but depends on verified headers. Evidence-linked answers score lower; retain them as the third flagship because they directly test the study-to-source return path. If time fails, ship passage retrieval first and cut generative responses, preserving the other two flagships."
+        ],
+        [
+          "h",
+          "MVP, stretch and future work"
+        ],
+        [
+          "p",
+          "<b>MVP:</b> a chapter-scoped accessible reader; PDF/photo ingestion on the laptop; page/heading/paragraph IDs; basic quality signals; correction history and invalidation; English-Hindi segmentation with manual overrides; sentence-level audio; simple tables; reviewed equations/figure descriptions; offline chapter package; and optional online evidence-linked explanation. “Reviewed” is a workflow status, not a guarantee of correctness."
+        ],
+        [
+          "p",
+          "<b>Stretch, only after acceptance gates:</b> word-level timing; an additional tested Indian language; automatic equation candidates reviewed before use; simple labeled diagram relationships; structured HTML export; and more robust camera guidance. <b>Future research:</b> calibrated semantic uncertainty, automatic accessible STEM conversion, learning gains over a semester and robust translation of technical educational content."
+        ],
+        [
+          "h",
+          "Hardest assumption: can unreliable extraction be caught affordably?"
+        ],
+        [
+          "p",
+          "In weeks 1-2, annotate 24 development pages (12 English, 12 Hindi), including columns, shadows and symbols. Compare Tesseract-only extraction with Docling plus Tesseract. Plot important-error recall against reviewer effort; count minutes spent reviewing each page. If errors remain silent or repair takes over 3 minutes/page on ordinary pages, narrow ingestion to cleaner PDFs and teacher-prepared chapters. Do not add a chatbot to hide a failed extraction pipeline."
+        ]
+      ]
+    },
+    {
+      "part": "PART 2 - PROPOSED SOLUTION, DIFFERENTIATION, AND FEASIBILITY",
+      "title": "D. Evaluation: extraction and grounded answers",
+      "items": [
+        [
+          "p",
+          "Use a frozen evaluation manifest and the same source bytes across systems. Split by source chapter, not by adjacent page: 24 development pages and 48 held-out pages, with degradation variants kept in the same split as their clean originals. Report clean native PDF, clean scan and phone-photo results separately, also by English/Hindi. Proposed thresholds below are feasibility gates, not achieved results."
+        ],
+        [
+          "table",
+          [
+            [
+              "Measure / annotation",
+              "Method",
+              "Proposed target (T)"
+            ],
+            [
+              [
+                "OCR CER and WER",
+                "CER = (substitutions + deletions + insertions) / reference characters; WER uses words. Fix Unicode normalization and tokenization; retain meaningful symbols. Report micro-average and per-page median/tail.",
+                "Clean prose: CER <=3% English, <=5% Hindi; degraded pages reported separately, no implied pass."
+              ],
+              [
+                "Reading order / coverage",
+                "Two reviewers mark blocks and ordered relations. Pairwise order accuracy = correct comparable block pairs / annotated pairs. Also measure omitted blocks and header/footer intrusion.",
+                ">=95% pairwise order on clean pages; >=98% prose block coverage."
+              ],
+              [
+                "Flagging and review burden",
+                "Label meaning-changing errors (negation, units, missing lines, symbol errors). Report recall, precision, flagged blocks/page and correction minutes/page.",
+                ">=90% critical-error recall with <=25% of prose blocks flagged on development gate; validate again held-out."
+              ],
+              [
+                "Equations (separate set)",
+                "20 reviewed expressions: exact normalized structure match, symbol errors, and spoken structure judged by a knowledgeable reviewer. Track coverage and unsupported cases.",
+                "No unreviewed auto-extracted equation served as trusted; >=90% correct speech on supported reviewed set."
+              ],
+              [
+                "Tables (separate set)",
+                "12 simple tables: cell text accuracy, header association accuracy, row/column completeness and answer-to-cell navigation tasks.",
+                ">=95% header association on supported simple tables; merged headers explicitly unsupported unless reviewed."
+              ],
+              [
+                "Figures (separate set)",
+                "12 figures: two reviewers score label correctness, relations, omissions and invented facts against the page. Student utility scored separately.",
+                "Zero invented factual relations in descriptions published as reviewed; report draft errors separately."
+              ],
+              [
+                "Grounded Q&A: 60 questions",
+                "30 supported; 10 absent; 10 misleading premises; 10 from ambiguous/damaged content. Score claim-level correctness and support, citation resolution/entailment and false confident answers.",
+                ">=95% citation resolution; >=90% supported factual claims; <=5% unsupported factual claims."
+              ],
+              [
+                "Abstention / retrieval",
+                "Report correct abstentions on 30 unsafe/unsupported questions and unnecessary abstentions on supported ones. Recall@5 uses manually linked evidence blocks.",
+                ">=90% appropriate abstention; <=20% unnecessary abstention; evidence Recall@5 >=90%."
+              ]
+            ],
+            [
+              0.23,
+              0.48,
+              0.29
+            ]
+          ]
+        ],
+        [
+          "small",
+          "Targets may conflict: raising abstention can increase refusal of answerable questions. Publish coverage versus risk and raw denominators, not just one “accuracy.” Raters should see source crops and reference text, be blind to condition where possible and adjudicate disagreements. An LLM judge may assist triage but is not the sole ground-truth authority. [34-36]"
+        ]
+      ]
+    },
+    {
+      "part": "PART 2 - PROPOSED SOLUTION, DIFFERENTIATION, AND FEASIBILITY",
+      "title": "D. Evaluation: people, ablations and device costs",
+      "items": [
+        [
+          "h",
+          "Baselines and ablations"
+        ],
+        [
+          "p",
+          "<b>B0:</b> Tesseract + flat text + sentence TTS, with the same voice and device. <b>B1:</b> full structured reader. <b>B2:</b> B1 without uncertainty cues/review support. <b>B3:</b> evidence retrieval with source links versus generated evidence-linked explanation. Use the same extraction when testing interface ablations, and the same interface when testing parsers. Compare a suitable installed EasyReader/Thorium edition on prepared accessible content and Seeing AI/Lookout on capture tasks where access permits. Record content preparation time; do not compare an already accessible edition against an unprocessed scan without disclosure."
+        ],
+        [
+          "h",
+          "A feasible formative study, not a clinical trial"
+        ],
+        [
+          "p",
+          "Aim for 6-9 consenting adult intended users: approximately 2-3 blind, 2-3 low vision and 2-3 with dyslexia, recruited with an accessibility office if feasible. Sample size is a planning assumption. Reimburse time/transport, provide accessible information sheets, allow withdrawal and avoid requiring disclosure beyond what is necessary. Obtain institutional review requirements before recruitment. Use no simulated disability as a substitute for intended-user feedback."
+        ],
+        [
+          "p",
+          "Run 45-60 minute sessions with training and breaks. Counterbalance two equivalent chapter task sets to reduce learning effects. Tasks: locate an exercise; return from a citation; read a table value; notice a seeded uncertain symbol; resume offline; explain a concept and select its supporting passage. Record completion, help required, navigation errors, recoveries, time and comprehension rubric scores. Ask about trust, fatigue and preferences. Report individual and group-stratified observations; small cells do not establish population effects."
+        ],
+        [
+          "table",
+          [
+            [
+              "Acceptance area",
+              "Proposed target / test configuration (T)"
+            ],
+            [
+              [
+                "Accessible task success",
+                "At least 80% independent completion of core find/read/return tasks across sessions; report each group and all assistance. No unresolved keyboard trap or inaccessible critical control."
+              ],
+              [
+                "Manual / automated coverage",
+                "NVDA + Firefox/Chrome on Windows; TalkBack + Chrome on Android. Keyboard-only end-to-end flows; 200% text and 400% zoom/reflow; focus, contrast, language switching and status messages. axe-core adds regression checks [44,54]."
+              ],
+              [
+                "Latency",
+                "On assumed laptop: first usable clean page <=15 s after upload; 10-page chapter <=3 min; cached navigation <300 ms. Online answer p95 <=15 s on measured network. Report cold/warm and failures."
+              ],
+              [
+                "Storage / bandwidth",
+                "20-page package <=50 MB with chosen image resolution and audio; show exact bytes, model downloads excluded and reported separately. Throttle to 1 Mbps / 300 ms RTT; interrupt download and resume."
+              ],
+              [
+                "Offline behavior",
+                "After explicit download, restart app with network disabled; read, navigate, search and bookmark chapter. Clear status for unavailable AI, missing audio and storage eviction. No silent online fallback."
+              ],
+              [
+                "Cost and reliability",
+                "Log pages, TTS characters, input/output tokens, retries and per-job costs; hard API budget cap. Crash worker mid-job, retry, edit while offline, then test conflict and stale-cache behavior."
+              ]
+            ],
+            [
+              0.25,
+              0.75
+            ]
+          ]
+        ],
+        [
+          "p",
+          "If intended-user recruitment fails, complete expert/manual checks and disclose the limitation. Do not invent a user study or describe technical test success as accessibility validation or improved learning. A future larger study could test retained understanding after a delay; it is beyond this project's evidence claims."
+        ]
+      ]
+    },
+    {
+      "part": "PART 3 - TECH STACK, ARCHITECTURE, AND BUILD PLAN",
+      "title": "A. Concrete stack: accessible reader and extraction",
+      "items": [
+        [
+          "p",
+          "Affordable default (P): one TypeScript web app and a Python service/worker on a college laptop. Preprocess chapters there; phones consume prepared chapter packages. A local area network can support a demo, but production phone access and service-worker caching require a trusted HTTPS origin. Localhost on a phone refers to that phone, not the laptop."
+        ],
+        [
+          "table",
+          [
+            [
+              "Layer / recommended choice",
+              "Why it fits / alternatives",
+              "License, hardware and cost boundary"
+            ],
+            [
+              [
+                "Frontend: React + TypeScript + Vite; semantic HTML; CSS controls",
+                "A single responsive reader; use native controls first. Alternative: vanilla TypeScript reduces framework overhead. PDF.js renders the optional source pane; reflowed HTML is the main reading surface.",
+                "React/Vite/TypeScript commonly permissive; confirm exact lockfile licenses. PDF.js Apache-2.0 verified [46]. Device target: Android 4 GB RAM; measure, do not promise minimum compatibility."
+              ],
+              [
+                "Backend: Python 3.11/3.12 + FastAPI + Pydantic",
+                "Typed request/response schemas; Python document libraries. Alternative: Node API, but avoid splitting business logic across two backends.",
+                "FastAPI MIT verified [53]. One 4-core / 16 GB laptop is the planning target; no per-call API cost locally. Pin a compatible environment after the week-1 spike."
+              ],
+              [
+                "PDF/image ingestion: pdfplumber; PDFium renderer; Pillow / OpenCV",
+                "Check native text first; extract coordinates with pdfplumber. Rasterize only necessary pages. Alternative: PyMuPDF is convenient but requires an explicit license decision.",
+                "pdfplumber MIT verified [47]. Verify pypdfium2/PDFium notices and OpenCV/Pillow licenses in pinned build. CPU-only; bounded page count/resolution."
+              ],
+              [
+                "OCR: Tesseract eng + hin",
+                "Low-cost CPU baseline; preserve word boxes/confidence where available. Explicitly configure language; benchmark mixed-script pages.",
+                "Tesseract Apache-2.0; language files listed for English/Hindi [40-41]. Model license/version still recorded. No recurring service charge."
+              ],
+              [
+                "Layout / tables: Docling with selected local OCR adapter",
+                "Reuse its layout and document representation; map into a small application schema. Alternative: PaddleOCR/PP-Structure after measurement, rather than running both pipelines in production.",
+                "Docling code MIT; PaddleOCR code Apache-2.0 [39,42]. Models have separate notices. Local weights must be predownloaded; CPU memory/latency measured early."
+              ],
+              [
+                "Structured model: JSON Schema + SQLite relational tables",
+                "Store typed blocks and edges; no separate graph database required. JSON exports allow debugging and offline transport. Alternative: PostgreSQL if shared deployment grows.",
+                "Application-owned schema; record dependency licenses. SQLite database and file store on laptop; no managed database fee."
+              ]
+            ],
+            [
+              0.28,
+              0.4,
+              0.32
+            ]
+          ]
+        ],
+        [
+          "h",
+          "Local versus hosted extraction"
+        ],
+        [
+          "p",
+          "Optional higher-quality configuration: send only selected, consented low-quality pages to Google Document AI Enterprise OCR or its layout parser, then map the response into the same block schema. Both are documented services, not guaranteed improvements for this corpus. Benchmark quality, response geometry, processing region and revision/version first; preserve the local candidate for audit. [49-50]"
+        ],
+        [
+          "p",
+          "Do not send every page to several vendors or train a large model from scratch. The budget and schedule favor assembling and evaluating pretrained components. If no GPU is available, batch preparation is acceptable; phone-side document parsing is outside MVP. A hosted API brings recurring page fees, connectivity and data-processing terms; local tools bring setup, model-download and CPU costs."
+        ]
+      ]
+    },
+    {
+      "part": "PART 3 - TECH STACK, ARCHITECTURE, AND BUILD PLAN",
+      "title": "A. Concrete stack: speech, retrieval and operations",
+      "items": [
+        [
+          "table",
+          [
+            [
+              "Layer / default",
+              "Alternatives and trade-offs",
+              "Constraints to verify"
+            ],
+            [
+              [
+                "Speech: eSpeak NG sentence files on preparation server; optional installed device voice",
+                "CPU, deterministic file generation and local operation. Less natural than neural voices. Optional Azure Speech produces higher-quality candidate audio plus timing events; listener test decides.",
+                "eSpeak core GPL-3.0-or-later [45]; package notices/source obligations reviewed before redistribution. Device voice availability and offline behavior vary. Azure per-character terms and voice-specific SSML limits apply [51-52]."
+              ],
+              [
+                "Synchronization: sentence-to-audio manifest",
+                "Exact sentence start/end from separate clips; highlight current sentence. Word boundaries only when returned by selected engine and mapped reliably.",
+                "Do not estimate word timing by equal durations. Cache by text, language, voice and engine version. No alignment-model training required."
+              ],
+              [
+                "Retrieval: SQLite text search + optional multilingual-e5-small embeddings",
+                "Keyword lookup plus 384-dimensional local vectors; brute-force cosine is adequate for a small chapter corpus. Alternative: Postgres/pgvector when scale justifies it.",
+                "E5 model card MIT, query:/passage: prefixes and input limits [48]. Test Hindi recall; word tokenization may limit lexical search. CPU inference; no embedding API fee."
+              ],
+              [
+                "Answer generation: Gemini API gemini-3.5-flash-lite; optional [60]",
+                "Base mode returns extractive evidence cards. Hosted model receives authorized blocks and returns structured claims. Alternative: licensed small local instruct model on better hardware; not a phone default.",
+                "Official stable endpoint supports structured output; this is not a grounding guarantee. Recheck availability, tariff, retention and terms at build time. Hard token/cost limits."
+              ],
+              [
+                "Storage/jobs/cache: SQLite + private files + single durable worker",
+                "Jobs table with leases/retries; content-hash derived artifacts. Alternative: Redis/RQ or Celery only when concurrency needs justify another service. IndexedDB/Cache Storage for downloaded chapter.",
+                "SQLite/file-system backup and locking tested. Browser quotas/eviction vary. Do not introduce an S3/Redis/graph stack just for a small demo."
+              ],
+              [
+                "Authentication / privacy: local single-user mode; hosted sessions if needed",
+                "Local demonstration can avoid student accounts. Shared pilot uses secure session cookies, per-document ownership and authorized reviewer roles.",
+                "No raw passwords in app code. Verify auth library licenses and deployment region; collect no diagnosis or speech recordings by default."
+              ],
+              [
+                "Testing / monitoring: pytest, Playwright, axe-core; structured logs",
+                "Golden documents, correction dependency tests and keyboard/screen-reader checks. Track stage durations, queue failures, bytes and API usage.",
+                "axe-core MPL-2.0 [54]; other pinned licenses recorded. No source text or sensitive query bodies in routine logs. Error metrics do not replace user feedback."
+              ]
+            ],
+            [
+              0.28,
+              0.4,
+              0.32
+            ]
+          ]
+        ],
+        [
+          "h",
+          "Hardware and recurring-cost commitments"
+        ],
+        [
+          "p",
+          "Assume a 16 GB preparation laptop and a 4 GB Android client, not a GPU workstation. Cap processing to one page/job at a time and 20-page demo chapters initially. Measure peak RAM, idle/active CPU, model size and package bytes in week 2. These are proposed deployment limits, not measured library minimums. A neural OCR/VLM alternative may exceed them; retain the simpler local route if it does."
+        ],
+        [
+          "p",
+          "There is no unavoidable hosted AI fee in the base reader: preparation and eSpeak speech can be local. Optional hosted OCR, speech, LLM, storage and HTTPS hosting each add charges. Price the exact chosen configuration at build time; service marketing free tiers are not a reliability or budget guarantee. Maintain a dependency/model inventory with license, version, checksum, attribution and redistribution decision."
+        ]
+      ]
+    },
+    {
+      "part": "PART 3 - TECH STACK, ARCHITECTURE, AND BUILD PLAN",
+      "title": "B. Architecture: a small pipeline with clear boundaries",
+      "items": [
+        [
+          "diagram",
+          "architecture"
+        ],
+        [
+          "small",
+          "Figure 1. Proposed system. The graph is a logical content model stored as ordinary database records. Optional cloud enrichment is isolated; prepared chapter reading does not depend on it."
+        ],
+        [
+          "h",
+          "Responsibilities and important interfaces"
+        ],
+        [
+          "p",
+          "<b>Client:</b> upload/capture, accessible status, settings, navigation, review forms and offline package manager. <b>API:</b> authorization, content limits, job state, version negotiation and signed/private artifact access. <b>Worker:</b> native-text inspection, image preprocessing, OCR/layout adapters, structured conversion, quality rules, speech and indexing. <b>Publisher:</b> validates a revision manifest and atomically makes it current. It never exposes a half-updated mixture."
+        ],
+        [
+          "p",
+          "1. Client uploads PDF/image with language hints. 2. API validates bytes and creates a job. 3. Worker extracts one page at a time and preserves geometry. 4. Typed blocks and links become a candidate revision. 5. Checks create review items; authorized corrections create a new revision. 6. Speech and search artifacts are built for eligible content. 7. Reader requests a versioned chapter manifest. 8. Q&A retrieves only eligible current blocks. 9. Client downloads a complete package and stores local reading state. 10. Deletion revokes access and removes derivatives through a tracked job."
+        ],
+        [
+          "h",
+          "Why this is feasible"
+        ],
+        [
+          "p",
+          "There are two application processes plus a browser, a relational database and private files. Models are reused, not trained. Parser adapters can be replaced without rewriting the reader; the stable block schema protects the interface. Optional online assistance can fail without blocking access to already prepared content. The complexity budget is spent on correction consistency and accessibility, not on microservices."
+        ]
+      ]
+    },
+    {
+      "part": "PART 3 - TECH STACK, ARCHITECTURE, AND BUILD PLAN",
+      "title": "B. Data contracts and provenance",
+      "items": [
+        [
+          "p",
+          "Use opaque document and block IDs, not text hashes as public identity. IDs remain stable for ordinary edits; splitting/merging creates explicit successor links. Physical PDF index and teacher-visible printed page label are different. Coordinates refer to a normalized top-left page space; retain the affine transform to the original pixels, crop and rotation so highlights remain correct."
+        ],
+        [
+          "code",
+          "Document { id, owner_id, title, source_sha256, rights_note,\n  languages[], current_revision, retention_until, state }\nPage { id, document_id, pdf_index_0, printed_label,\n  width, height, rotation, source_asset, transform }\nBlock { id, page_id, type, parent_id, order_key,\n  bbox:[x0,y0,x1,y1], text_raw, text_current, lang,\n  revision, status, confidence:{engine,score,flags[]},\n  provenance:{parser,model,version,reviewer,changed_at} }\nEdge { from_id, relation, to_id }\nCorrection { id, block_id, base_revision, operations[],\n  author_id, reason, created_at, accepted_revision }\nArtifact { id, kind, dependency_revisions[], hash,\n  language, voice, engine_version, status, private_uri }"
+        ],
+        [
+          "p",
+          "Block types: heading, paragraph, list item, table, table cell, equation, figure and caption. Relations: contains, precedes, caption-of, refers-to, header-for and supersedes. A table stores row/column indices, spans, header associations and cell IDs. An equation stores reviewed MathML, original crop and a fallback spoken description. A figure stores source caption, short alternative and extended description with separate origin/review status."
+        ],
+        [
+          "table",
+          [
+            [
+              "Endpoint / interface",
+              "Request and outcome"
+            ],
+            [
+              [
+                "POST /documents",
+                "Multipart bytes + title/language/rights note. Returns document_id and job_id (202). Reject excess size/pages before expensive processing."
+              ],
+              [
+                "GET /jobs/{id}",
+                "State: queued, validating, extracting, review_required, building, ready, failed or cancelled; per-page progress and accessible reason."
+              ],
+              [
+                "GET /documents/{id}/manifest",
+                "Current immutable revision, block/page summaries, chapter packages and artifact hashes. Client may request a known revision."
+              ],
+              [
+                "PATCH /blocks/{id}",
+                "base_revision + allowed operations. Compare-and-swap; conflicting edit returns 409 with accessible reconciliation fields."
+              ],
+              [
+                "POST /questions",
+                "document_id, revision, question, optional block scope. Returns evidence IDs, claims, citations, origin label or abstention reason."
+              ],
+              [
+                "DELETE /documents/{id}",
+                "Immediately revokes active access, cancels jobs and schedules physical deletion of source/derivatives; returns deletion job receipt."
+              ]
+            ],
+            [
+              0.34,
+              0.66
+            ]
+          ]
+        ],
+        [
+          "h",
+          "Generated material has a different identity"
+        ],
+        [
+          "p",
+          "Store original text, accepted corrections, teacher commentary and AI explanations separately. Answer records include model/prompt version, evidence block revisions, generated timestamp and a visible “AI explanation” label. Never index a generated explanation as if it were source evidence. A correction is a transcription repair; a teacher's conceptual rewrite belongs in a labeled note, preserving the original wording for audit."
+        ]
+      ]
+    },
+    {
+      "part": "PART 3 - TECH STACK, ARCHITECTURE, AND BUILD PLAN",
+      "title": "B. Extraction, checks and correction propagation",
+      "items": [
+        [
+          "h",
+          "Ingest defensively, preserve evidence"
+        ],
+        [
+          "p",
+          "Validate MIME by bytes, allow only PDF/JPEG/PNG initially, reject password-protected or malformed documents with an accessible message, and cap page count, pixels, CPU time and decompression size. Process in a non-privileged worker with a timeout and no document-triggered external URL fetch. Keep source bytes immutable; store processed crops as derivatives. Strip unnecessary camera metadata from working images. These are proposed controls, not a completed security assessment."
+        ],
+        [
+          "p",
+          "Inspect native text coverage and coordinate plausibility before OCR. A mixed PDF may require OCR only on some pages. For photos, test rotation, deskew, crop and conservative contrast correction; do not erase faint minus signs through aggressive thresholding. Docling gives block/layout candidates; Tesseract eng+hin supplies a transparent baseline. Record all parser/model versions and map coordinates back to the source. [39-41,47]"
+        ],
+        [
+          "h",
+          "Checks are layered, not a single confidence number"
+        ],
+        [
+          "p",
+          "Check empty/duplicate regions, paragraph coverage, column progression, header repetition, impossible character sequences, suspicious script mixing and orphaned captions. Flag formula/table regions separately. Reserve numeric thresholds for development tuning. Text from native PDFs may have no OCR confidence; label it “not scored,” not “100%.” Randomly review a sample of apparently good blocks to detect silent errors. Keep a visible source and edit trail for every accepted correction."
+        ],
+        [
+          "diagram",
+          "correction"
+        ],
+        [
+          "small",
+          "Figure 2. Correction transaction and rebuild. A published revision is immutable; a newer one replaces it only after required artifacts pass validation."
+        ],
+        [
+          "h",
+          "Transaction and concurrency behavior"
+        ],
+        [
+          "p",
+          "An accepted edit increments the block and document revision in one transaction, records the operation, and marks dependent speech, chunks, embeddings and answers stale. New read/answer requests resolve the new version; stale derivatives cannot be served under its manifest. Rebuild only affected units. Until audio is ready, show text or synthesize the new sentence; do not play old audio as current. An affected answer remains in history with a stale warning, excluded from current answers."
+        ],
+        [
+          "p",
+          "Reading order edits also invalidate sequence manifests and table/figure adjacency. Re-extraction never silently overwrites teacher corrections: propose a new candidate, match by geometry/text, and request reconciliation when IDs cannot be preserved. Two offline reviewers editing the same base revision cause a conflict rather than last-writer-wins. Keep old references resolvable as historical versions while permission and retention allow."
+        ]
+      ]
+    },
+    {
+      "part": "PART 3 - TECH STACK, ARCHITECTURE, AND BUILD PLAN",
+      "title": "B. Narration, offline use and privacy",
+      "items": [
+        [
+          "h",
+          "Make synchronization honest and affordable"
+        ],
+        [
+          "p",
+          "Split paragraphs into language-tagged sentences, with manual overrides for abbreviations and mixed English-Hindi terms. Generate one clip per sentence and store text offsets, clip duration, block revision and voice. This gives reliable sentence-level highlighting without pretending to have word alignment. For optional Azure synthesis, use returned word/bookmark events only for tested voices; support varies across voice families. [51-52]"
+        ],
+        [
+          "p",
+          "A pronunciation glossary maps a term + language + scope to spoken alias or supported phoneme instructions. Scope overrides to document/user so “lead” in chemistry need not alter another book. Keep displayed textbook spelling unchanged. Include units, acronyms and common science terms in a small listener-reviewed English/Hindi list. If TTS fails or a device voice is absent, retain accessible text and cached audio, and announce the missing voice."
+        ],
+        [
+          "h",
+          "Offline package, not an implied offline AI system"
+        ],
+        [
+          "p",
+          "A chapter manifest names its revision, trusted block text, navigation, table structure, reviewed math/descriptions, optional source thumbnails, audio hashes and byte sizes. The user explicitly downloads it. Store structured text/settings/bookmarks in IndexedDB and immutable audio/assets in Cache Storage. Verify hashes and switch the active manifest atomically only after required files are present. Keep the old package until replacement succeeds."
+        ],
+        [
+          "p",
+          "Support local navigation, simple text search, sentence playback and bookmarks after restart without network. New OCR and online explanations wait. If audio was not downloaded, offer installed speech only after an offline device check; do not promise that all Web Speech voices work offline. Provide storage usage, download progress, delete-download control and clear recovery when browser eviction removes files. Service workers require HTTPS except local development contexts; configure and test deployment before the pilot."
+        ],
+        [
+          "table",
+          [
+            [
+              "Failure / event",
+              "Graceful behavior (P)"
+            ],
+            [
+              [
+                "Interrupted download / full storage",
+                "Retain previous complete package; show missing bytes/files and retry. Do not mark the chapter offline-ready prematurely."
+              ],
+              [
+                "Server revision changes while client offline",
+                "Read cached revision with date. Queue bookmarks and correction proposals with base revision; synchronize on reconnection and show conflicts."
+              ],
+              [
+                "Cloud outage / exhausted API budget",
+                "Continue reading/search; show evidence passages or a clear assistant-unavailable status. No repeated hidden retries."
+              ],
+              [
+                "Source contains inaccessible STEM",
+                "Announce the unreviewed figure/equation/table and offer caption/review request. A source crop is supplementary, not an accessible substitute."
+              ]
+            ],
+            [
+              0.34,
+              0.66
+            ]
+          ]
+        ],
+        [
+          "h",
+          "Secure storage, deletion and retention"
+        ],
+        [
+          "p",
+          "Default to private documents, owner/reviewer checks on every API and artifact, HTTPS in hosted mode and secret keys only server-side. Store no diagnosis, microphone recording or unnecessary identifiers. For a pilot, propose source/derivative retention until project end plus 30 days, with immediate user-requested revocation and deletion job completion within 7 days; disclose backup expiry separately (e.g. 30 days). These are policy proposals, not legal compliance claims."
+        ],
+        [
+          "p",
+          "Deletion covers originals and all derivatives. Online clients receive a purge request; disconnected devices require local deletion. Disclose shared-device risks and exact data sent to cloud providers. Review institutional, provider, copyright and applicable data requirements before deployment; this report makes no legal compliance claim."
+        ]
+      ]
+    },
+    {
+      "part": "PART 3 - TECH STACK, ARCHITECTURE, AND BUILD PLAN",
+      "title": "B. Grounded assistance and bounded STEM handling",
+      "items": [
+        [
+          "h",
+          "Retrieval and answer contract"
+        ],
+        [
+          "p",
+          "Index paragraph-sized chunks of about 150-350 tokens, retaining heading context, page/block IDs and revisions; never split a table cell from its headers. For small chapters start with lexical search and add local E5 vectors after measuring recall. E5 expects <b>query:</b> and <b>passage:</b> prefixes exactly as in the model card; its 384-dimensional embeddings suit a small in-memory index. Truncate/chunk within the selected model's input limit. [48]"
+        ],
+        [
+          "p",
+          "Filter by owner, document and current eligible revision before ranking. Retrieve a small set (initially top 5) and include neighboring blocks if needed. Unreviewed critical symbols and generated explanations are excluded from trusted evidence. Send only selected excerpts to an optional hosted LLM. The instruction is to explain from supplied evidence, preserve units/negation, identify missing support and return claim-level allowed evidence IDs. Source text is untrusted data; instructions embedded in a book must not change application behavior."
+        ],
+        [
+          "code",
+          "Answer { origin:\"ai_explanation\", document_revision:7,\n  claims:[{text:\"...\", evidence:[{block_id:\"b17\", rev:3}]}],\n  abstain:false, uncertainty_notes:[], model_id:\"pinned-id\" }\nAbstention { abstain:true, reason:\"source_needs_review\",\n  evidence_candidates:[\"b17\"], next_action:\"open_review\" }"
+        ],
+        [
+          "p",
+          "Validate response schema, allowed IDs, revision and quoted spans deterministically. A valid ID is insufficient: evidence may still not entail the claim. Evaluate with human source comparison; optionally add an entailment checker as a second signal. Low retrieval support, contradictory sources, stale content or unresolved critical extraction should trigger an explicit abstention. A prompt alone cannot guarantee groundedness. [35]"
+        ],
+        [
+          "h",
+          "Equations, tables and diagrams: explicit support limits"
+        ],
+        [
+          "p",
+          "<b>Equations:</b> MVP accepts teacher-verified MathML for a small supported set (fractions, powers and simple algebra). Expose native MathML and test actual NVDA/browser behavior, including numerator/denominator navigation. Use MathCAT through compatible assistive technology, not a custom speech grammar. A crop-to-LaTeX model is stretch; malformed or unverified expressions remain flagged. MathML can encode an incorrectly transcribed formula perfectly. [3,43-44]"
+        ],
+        [
+          "p",
+          "<b>Tables:</b> support rectangular tables with a single header row and optional row headers. Render HTML table semantics, announce “row label; column label; value,” and let users move by cell or request a row summary. Treat merged headers, cross-page tables and ambiguous alignment as review cases. A generated verbal summary is additional commentary, not a replacement for exact cells."
+        ],
+        [
+          "p",
+          "<b>Diagrams:</b> retain caption, short alternative and linked extended description. Prefer teacher-reviewed descriptions for the demo. A stretch relation list may expose “battery connects to resistor” with corresponding label IDs, but only after verification. Do not infer trends from unreadable axes or identify missing labels confidently. Test description correctness and student utility separately; fluent visual language can still hallucinate. [36,38]"
+        ]
+      ]
+    },
+    {
+      "part": "PART 3 - TECH STACK, ARCHITECTURE, AND BUILD PLAN",
+      "title": "C. Fourteen-week roadmap and cut rules",
+      "items": [
+        [
+          "small",
+          "Planning allocation: 504 person-hours across 3 students. Suggested primary ownership: A reader/accessibility, B extraction/content, C API/retrieval/evaluation. Cross-review every interface. Reserve roughly 20% for integration, accessibility repairs and documentation; weeks 15-16 are optional contingency, not hidden MVP scope."
+        ],
+        [
+          "table",
+          [
+            [
+              "Week",
+              "Deliverable / dependency",
+              "Acceptance gate (P/T)"
+            ],
+            [
+              [
+                "1",
+                "Rights manifest, 24-page development sample; user-task sketches; parser environment spike.",
+                "Native text, Tesseract and Docling run on actual laptop; measure RAM/time. Confirm Hindi OCR and font rendering."
+              ],
+              [
+                "2",
+                "Hardest-risk experiment: annotate key errors/order; compare pipelines and review burden.",
+                "Decide clean-PDF vs photo scope; publish errors and flagging curves. Narrow scope if ordinary-page repair exceeds 3 min/page."
+              ],
+              [
+                "3",
+                "Versioned JSON schema, page coordinates and API contracts; accessible reader skeleton.",
+                "10 fixture pages retain printed/PDF page mapping; keyboard navigation and labeled controls work."
+              ],
+              [
+                "4",
+                "Durable jobs, ingestion caps, text/layout adapter. Depends on schema.",
+                "Interrupted job retries idempotently; no duplicate documents/artifacts or hanging progress."
+              ],
+              [
+                "5",
+                "Correction forms, role checks, revision transactions and dependency invalidation.",
+                "Seeded edits make audio/index/answer stale; unauthorized and conflicting edits rejected."
+              ],
+              [
+                "6",
+                "Sentence narration, glossary, English-Hindi segmentation.",
+                "Ten mixed-language passages checked by listeners; missing-voice fallback is explicit."
+              ],
+              [
+                "7",
+                "Reflow, heading/page navigation, preferences, simple table semantics.",
+                "NVDA keyboard tasks and Android TalkBack smoke test; no critical focus trap."
+              ],
+              [
+                "8",
+                "Offline manifests, cache/download controls and resume.",
+                "Airplane-mode restart reads downloaded text/audio; interrupted update keeps valid old package."
+              ],
+              [
+                "9",
+                "Chapter retrieval, evidence cards and citation return navigation.",
+                "Development evidence Recall@5 measured; cross-document leakage/stale references rejected."
+              ],
+              [
+                "10",
+                "Optional generated explanations with abstention; reviewed MathML/figures.",
+                "Question set includes missing evidence and injected book instructions; enforce ID/revision checks."
+              ],
+              [
+                "11",
+                "Freeze features; complete extraction/Q&A held-out tests and failure drills.",
+                "Report all denominators, supported coverage, per-language errors and measured resource costs."
+              ],
+              [
+                "12",
+                "Consent-based formative sessions or disclosed expert fallback.",
+                "Document independent task success, assistance, preferences and group-specific barriers."
+              ],
+              [
+                "13",
+                "Fix highest-impact barriers; repeat only affected checks.",
+                "No unresolved blocker in upload/read/find/return/offline/delete flows; report remaining limitations."
+              ],
+              [
+                "14",
+                "Release package, reproducible demo, model/license manifest and final report.",
+                "Fresh-machine setup verified; demo works without cloud; achieved results clearly separate from targets."
+              ],
+              [
+                "15-16",
+                "Contingency: repair/integration; selected stretch only after gates.",
+                "No new flagship; repeat affected evaluation and freeze final version."
+              ]
+            ],
+            [
+              0.08,
+              0.48,
+              0.44
+            ]
+          ]
+        ],
+        [
+          "h",
+          "What to cut, and what to protect"
+        ],
+        [
+          "p",
+          "Cut in order: automatic diagram relations; automatic equation OCR; word-level alignment; extra languages; generative answer prose. Keep passage retrieval and source links. If extraction is weak, deliver teacher-reviewed chapter preparation and disclose preparation effort. Protect accessible navigation, correction consistency, offline restart and honest status labeling. If only 12 weeks are available, combine weeks 9-10 as extractive evidence support and move feature freeze to week 9; use weeks 10-12 for testing, repairs and release."
+        ]
+      ]
+    },
+    {
+      "part": "PART 3 - TECH STACK, ARCHITECTURE, AND BUILD PLAN",
+      "title": "C. Evaluation corpus and costed delivery",
+      "items": [
+        [
+          "h",
+          "A small corpus with a rights ledger"
+        ],
+        [
+          "p",
+          "Prepare 72 unique pages: 24 development and 48 held-out, from disjoint chapters. Aim for 24 English science pages from the specifically licensed OpenStax <i>Physics</i> edition, 24 Hindi / mixed-language science pages authored by the team or supplied by a teacher with written adaptation/testing permission, and 24 varied supplementary pages split between team-made layouts and clearly licensed StoryWeaver books. StoryWeaver material is a multilingual narrative/illustration stress case, not a science-textbook substitute. Final selection is a week-1 deliverable, not a corpus already acquired. [55-58]"
+        ],
+        [
+          "p",
+          "Across this set, select 20 equations, 12 simple tables and 12 figures for separate annotation. Include single/two-column prose, sidebars, footnotes, mixed script and technical units. For 12 source pages create clean scans plus skew/blur/shadow phone variants; keep variants in the same split and report them separately, not as independent originals. Two people check text/order/STEM references; adjudicate disagreements before testing."
+        ],
+        [
+          "p",
+          "Record source URL, title, edition/date, chapter/page, creator, download date, checksum, exact license, third-party asset exclusions, attribution and permission evidence. The reviewed <i>Physics</i> preface says CC BY 4.0, while OpenStax's general current help describes CC BY-NC-SA. Check the exact downloaded edition/file and every selected asset; do not generalize either notice. StoryWeaver books/images use CC BY 4.0 with attribution, while readalongs/videos have different restrictions. Use book assets only. NCERT access does not imply republication permission: its notice prohibits rehosting. Exclude NCERT from the redistributed demo without permission. [55-59]"
+        ],
+        [
+          "h",
+          "Budget envelope: planning allocations, not vendor quotations"
+        ],
+        [
+          "table",
+          [
+            [
+              "Item / assumption",
+              "Base INR",
+              "Upper INR"
+            ],
+            [
+              [
+                "Participant time / local travel: 6 sessions x 500; up to 9 x 700",
+                3000,
+                6300
+              ],
+              [
+                "Optional APIs: OCR/TTS/LLM combined hard spending cap",
+                1500,
+                3000
+              ],
+              [
+                "Temporary HTTPS hosting / storage allocation",
+                500,
+                1000
+              ],
+              [
+                "Printing / phone data / simple capture stand",
+                500,
+                1000
+              ],
+              [
+                "Contingency",
+                1500,
+                2700
+              ],
+              [
+                "Total cash envelope (existing hardware and labor excluded)",
+                7000,
+                14000
+              ]
+            ],
+            [
+              0.66,
+              0.17,
+              0.17
+            ]
+          ]
+        ],
+        [
+          "p",
+          "The base month-to-month reader can run locally without paid model calls. The allocations above do not promise that any named service costs that amount. Track API cost as pages x OCR rate + TTS characters/1M x speech rate + input tokens/1M x input rate + output tokens/1M x output rate + storage/egress; add retries, taxes and currency conversion when relevant. Use current provider tariffs before enabling a paid route, with user-visible limits and a server-side stop."
+        ],
+        [
+          "p",
+          "Storage sanity check (assumption): 20 pages x 500 words / 150 spoken words per minute is about 66.7 minutes. At 32 kbit/s, compressed audio is about 16 MB (decimal); add thumbnails, text and manifests. This explains the proposed 50 MB package target, not a measured result. Store actual durations and bytes because language, rate and encoding change the total."
+        ]
+      ]
+    },
+    {
+      "part": "PART 3 - TECH STACK, ARCHITECTURE, AND BUILD PLAN",
+      "title": "D. Build first, demonstrate honestly, publish limits",
+      "items": [
+        [
+          "h",
+          "Exactly what to build first"
+        ],
+        [
+          "p",
+          "Implement one 10-12 page English/Hindi demonstration chapter using the final block schema, accessible heading/page navigation and sentence reading. Then add one text/order correction that atomically invalidates audio and retrieval and rebuilds them. Run that path offline after download. Only once this works should the team add evidence-linked generation. This sequence makes the first usable product independent of LLM availability."
+        ],
+        [
+          "h",
+          "A convincing eight-minute end-to-end demonstration"
+        ],
+        [
+          "table",
+          [
+            [
+              "Time",
+              "Action and visible evidence"
+            ],
+            [
+              [
+                "0:00-1:00",
+                "Upload a legally usable chapter; show page count, physical/printed page mapping, extraction progress and declared language scope."
+              ],
+              [
+                "1:00-2:00",
+                "Navigate by heading and printed page with keyboard/NVDA; reflow at large text; toggle narration independently of screen-reader speech."
+              ],
+              [
+                "2:00-3:15",
+                "Open a clearly disclosed seeded OCR/symbol issue. Correct through a labeled form. Show revision increment and stale derivative states."
+              ],
+              [
+                "3:15-4:15",
+                "Listen to rebuilt sentence; read a simple table cell with its row/column headers; inspect one explicitly pre-reviewed equation."
+              ],
+              [
+                "4:15-5:30",
+                "Ask a supported question, open its exact evidence paragraph and return. Ask an unsupported question and receive a meaningful abstention."
+              ],
+              [
+                "5:30-6:45",
+                "Disable network, restart and resume the downloaded chapter; search and bookmark. Show assistant unavailable without blocking reading."
+              ],
+              [
+                "6:45-8:00",
+                "Reconnect and show revision synchronization, then deletion receipt. Present held-out measurements, preparation time and remaining failures."
+              ]
+            ],
+            [
+              0.19,
+              0.81
+            ]
+          ]
+        ],
+        [
+          "h",
+          "An honest novelty statement for the project review"
+        ],
+        [
+          "box",
+          "“Pathya is a student-built integration of structured textbook extraction, accessible reading and evidence-linked study support. Our proposed contribution is a revision-aware workflow that exposes extraction uncertainty and propagates corrections to narration, navigation and answer evidence, evaluated on a bounded English-Hindi corpus and affordable devices. We do not claim that OCR, TTS, document chat, source citations or accessible math navigation are new.”"
+        ],
+        [
+          "h",
+          "Largest limitations and unresolved questions"
+        ],
+        [
+          "p",
+          "Uncertainty heuristics can miss fluent but wrong OCR; human review remains necessary. Hindi technical pronunciation and mixed-script search require native-speaker testing. Reviewed MathML/descriptions restrict scale, and helper dependence may reduce independence. Browser storage can be evicted, online services can change, and a small user sample cannot prove educational or clinical efficacy. The project needs a named maintenance owner after the semester to remain dependable."
+        ],
+        [
+          "p",
+          "Continue only if early experiments establish a useful extraction-and-repair workflow. Success means supported content stays navigable, corrections stay consistent and students can check evidence with manageable effort. Publish failures and unsupported content coverage alongside aggregate scores. No accuracy, learning gain, novelty or cost saving has been measured by this report."
+        ]
+      ]
+    },
+    {
+      "part": "PART 3 - TECH STACK, ARCHITECTURE, AND BUILD PLAN",
+      "title": "D. Numbered bibliography (1 of 3)",
+      "items": [
+        [
+          "small",
+          "Every source below was accessed on 16 November 2026. Dates are publication/update dates where verified; n.d. means no stable publication date established. Living pages and repositories can change. Titles link to original sources. Product documentation is vendor evidence. Research conclusions are bounded by the reviewed study."
+        ],
+        [
+          "ref",
+          {
+            "n": 1,
+            "title": "W3C. Web Content Accessibility Guidelines (WCAG) 2.2",
+            "url": "https://www.w3.org/TR/WCAG22/",
+            "date": "12 December 2024",
+            "kind": "W3C Recommendation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 2,
+            "title": "W3C. EPUB Accessibility 1.1",
+            "url": "https://www.w3.org/TR/epub-a11y-11/",
+            "date": "17 October 2024",
+            "kind": "W3C Recommendation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 3,
+            "title": "W3C. MathML Core",
+            "url": "https://www.w3.org/TR/mathml-core/",
+            "date": "24 June 2025",
+            "kind": "Candidate Recommendation Snapshot"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 4,
+            "title": "DAISY Consortium. DAISY Format",
+            "url": "https://daisy.org/activities/standards/daisy/",
+            "date": "n.d.; DAISY 3 released 2005",
+            "kind": "Official documentation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 5,
+            "title": "W3C WAI. Stories of Web Users",
+            "url": "https://www.w3.org/WAI/people-use-web/user-stories/",
+            "date": "n.d. (living documentation)",
+            "kind": "Official documentation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 6,
+            "title": "Microsoft. Languages and products supported by Immersive Reader",
+            "url": "https://support.microsoft.com/en-us/education/learning-accelerators/languages-and-products-supported-by-immersive-reader",
+            "date": "n.d. (living documentation)",
+            "kind": "Official documentation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 7,
+            "title": "Microsoft. Use Immersive Reader and reading mode in Microsoft Edge",
+            "url": "https://support.microsoft.com/en-gb/education/learning-accelerators/use-immersive-reader-in-microsoft-edge-1",
+            "date": "n.d. (living documentation)",
+            "kind": "Official documentation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 8,
+            "title": "Microsoft. What is Azure AI Immersive Reader?",
+            "url": "https://learn.microsoft.com/en-us/azure/ai-services/immersive-reader/overview",
+            "date": "n.d. (living documentation)",
+            "kind": "Official documentation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 9,
+            "title": "Microsoft. Seeing AI: app description and version history",
+            "url": "https://apps.apple.com/us/app/seeing-ai/id999062298",
+            "date": "Living listing; document Q&A release notes 2024",
+            "kind": "Vendor app-store listing"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 10,
+            "title": "Google. Use Lookout to explore your surroundings",
+            "url": "https://support.google.com/accessibility/android/answer/9031274?hl=en",
+            "date": "n.d. (living documentation)",
+            "kind": "Official documentation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 11,
+            "title": "Bookshare. Sign up around the world",
+            "url": "https://www.bookshare.org/sign-up-outside-the-us",
+            "date": "n.d. (living documentation)",
+            "kind": "Official documentation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 12,
+            "title": "Bookshare. Who qualifies for Bookshare?",
+            "url": "https://www.bookshare.org/help-and-learning-articles/who-qualifies-for-bookshare",
+            "date": "n.d. (living documentation)",
+            "kind": "Official documentation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 13,
+            "title": "Dolphin. EasyReader App",
+            "url": "https://yourdolphin.com/EasyReader",
+            "date": "n.d. (living documentation)",
+            "kind": "Official documentation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 14,
+            "title": "Dolphin. About EasyReader Premium and EasyReader Education",
+            "url": "https://yourdolphin.com/product-help/easyreader-app/361.htm?lid=1",
+            "date": "n.d. (living documentation)",
+            "kind": "Official documentation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 15,
+            "title": "Dolphin. EasyReader supported file formats",
+            "url": "https://yourdolphin.com/support/article?id=49&lid=1",
+            "date": "n.d. (living documentation)",
+            "kind": "Official documentation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 16,
+            "title": "Dolphin. EasyReader Android listing",
+            "url": "https://play.google.com/store/apps/details?hl=en-US&id=com.yourdolphin.easyreader",
+            "date": "Updated 28 August 2026 in reviewed listing",
+            "kind": "Vendor app-store listing"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 17,
+            "title": "Kurzweil Education. Kurzweil 3000",
+            "url": "https://www.kurzweiledu.com/products/k3000.html",
+            "date": "n.d. (living documentation)",
+            "kind": "Official documentation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 18,
+            "title": "Kurzweil Education. Frequently asked questions",
+            "url": "https://www.kurzweiledu.com/help/frequently-asked-questions.html",
+            "date": "n.d. (living documentation)",
+            "kind": "Official documentation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 19,
+            "title": "Everway / Texthelp Academy. Read&Write for Education how-to articles",
+            "url": "https://academy.everway.com/read-and-write-education/howtos/",
+            "date": "n.d. (living documentation)",
+            "kind": "Official documentation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 20,
+            "title": "Speechify. Free and Premium plans",
+            "url": "https://speechify.com/pricing/",
+            "date": "n.d. (living documentation)",
+            "kind": "Official documentation"
+          }
+        ]
+      ]
+    },
+    {
+      "part": "PART 3 - TECH STACK, ARCHITECTURE, AND BUILD PLAN",
+      "title": "D. Numbered bibliography (2 of 3)",
+      "items": [
+        [
+          "small",
+          "Every source below was accessed on 16 November 2026. Dates are publication/update dates where verified; n.d. means no stable publication date established. Living pages and repositories can change. Titles link to original sources. Product documentation is vendor evidence. Research conclusions are bounded by the reviewed study."
+        ],
+        [
+          "ref",
+          {
+            "n": 21,
+            "title": "Speechify. iPhone and iPad application",
+            "url": "https://speechify.com/ios/",
+            "date": "n.d. (living documentation)",
+            "kind": "Official documentation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 22,
+            "title": "NaturalReader. Features of Personal Version",
+            "url": "https://help.naturalreaders.com/en/articles/8823808-what-features-are-available-in-naturalreader-ai-text-to-speech-personal-version",
+            "date": "n.d. (living documentation)",
+            "kind": "Official documentation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 23,
+            "title": "NaturalReader. Working with Text and Audio (Personal Version)",
+            "url": "https://help.naturalreaders.com/en/articles/11543218-working-with-text-and-audio-personal-version",
+            "date": "11 September 2025",
+            "kind": "Official documentation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 24,
+            "title": "NaturalReader. Plans and pricing (Personal Version)",
+            "url": "https://help.naturalreaders.com/en/articles/8854700-plans-pricing-personal-version",
+            "date": "n.d. (living documentation)",
+            "kind": "Official documentation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 25,
+            "title": "EDRLab. Thorium Reader",
+            "url": "https://www.edrlab.org/software/thorium-reader/",
+            "date": "n.d. (living documentation)",
+            "kind": "Official documentation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 26,
+            "title": "EDRLab. Thorium Desktop technical specification",
+            "url": "https://www.thoriumreader.com/en/legals/desktop/technical-spec/",
+            "date": "n.d. (living documentation)",
+            "kind": "Official documentation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 27,
+            "title": "Google. Gemini Notebook (formerly NotebookLM)",
+            "url": "https://workspace.google.com/products/gemini-notebook/",
+            "date": "n.d. (living documentation)",
+            "kind": "Official documentation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 28,
+            "title": "Google. NotebookLM goes global: source passages and citations",
+            "url": "https://blog.google/innovation-and-ai/products/notebooklm-goes-global-support-for-websites-slides-fact-check/",
+            "date": "6 June 2024",
+            "kind": "Vendor announcement"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 29,
+            "title": "Wood, S. G., Moxley, J. H., Tighe, E. L., & Wagner, R. K. Does Use of Text-to-Speech and Related Read-Aloud Tools Improve Reading Comprehension for Students with Reading Disabilities? A Meta-Analysis",
+            "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5494021/",
+            "date": "Online 23 January 2017; journal issue January-February 2018",
+            "kind": "Peer-reviewed; J. Learning Disabilities 51(1), 73-84"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 30,
+            "title": "Kuster, S. M., van Weerdenburg, M., Gompel, M., & Bosman, A. M. T. Dyslexie font does not benefit reading in children with or without dyslexia",
+            "url": "https://link.springer.com/article/10.1007/s11881-017-0154-6",
+            "date": "Online 4 December 2017; volume 68, 2018",
+            "kind": "Peer-reviewed; Annals of Dyslexia, 25-42"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 31,
+            "title": "Azzarello, C., Paek, S., Hodge, C., Jameson, M., & Lewis, J. Does font improve reading in dyslexic children?: meta-analysis of dyslexia-friendly fonts and dyslexic children's reading performance",
+            "url": "https://link.springer.com/article/10.1007/s11881-026-00389-8",
+            "date": "31 July 2026",
+            "kind": "Peer-reviewed; abstract reviewed, full text subscription restricted"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 32,
+            "title": "Auer, C., et al. Docling Technical Report",
+            "url": "https://arxiv.org/abs/2408.09869",
+            "date": "19 August 2024; v5, 9 December 2024",
+            "kind": "Technical report; not treated as independent validation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 33,
+            "title": "Ouyang, L., et al. OmniDocBench: Benchmarking Diverse PDF Document Parsing with Comprehensive Annotations",
+            "url": "https://openaccess.thecvf.com/content/CVPR2025/html/Ouyang_OmniDocBench_Benchmarking_Diverse_PDF_Document_Parsing_with_Comprehensive_Annotations_CVPR_2025_paper.html",
+            "date": "CVPR 2025",
+            "kind": "Peer-reviewed; proceedings metadata and repository reviewed; HTML fetch restricted"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 34,
+            "title": "OpenDataLab. OmniDocBench repository and evaluation code",
+            "url": "https://github.com/opendatalab/OmniDocBench",
+            "date": "Living repository",
+            "kind": "Public code / benchmark documentation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 35,
+            "title": "Gao, T., Yen, H., Yu, J., & Chen, D. Enabling Large Language Models to Generate Text with Citations",
+            "url": "https://aclanthology.org/2023.emnlp-main.398/",
+            "date": "December 2023",
+            "kind": "Peer-reviewed; EMNLP, 6465-6488"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 36,
+            "title": "Huh, M., et al. Long-Form Answers to Visual Questions from Blind and Low Vision People",
+            "url": "https://arxiv.org/abs/2408.06303",
+            "date": "12 August 2024; v2, 25 July 2025",
+            "kind": "Research paper; arXiv record reports COLM 2024"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 37,
+            "title": "Hyeon, S., Jung, K., Kim, N.-J., Ryu, H. G., & Do, J. MathReader: Text-to-Speech for Mathematical Documents",
+            "url": "https://arxiv.org/abs/2501.07088",
+            "date": "13 January 2025; v2, 19 January 2025",
+            "kind": "Research paper; arXiv record reports ICASSP 2025 acceptance"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 38,
+            "title": "DAISY. Image Descriptions, Accessible Publishing Knowledge Base",
+            "url": "https://kb.daisy.org/publishing/docs/html/images-desc.html",
+            "date": "n.d. (living documentation)",
+            "kind": "Official documentation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 39,
+            "title": "Docling project. Source, features and license",
+            "url": "https://github.com/docling-project/docling",
+            "date": "Living repository",
+            "kind": "Public code; MIT code license"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 40,
+            "title": "Tesseract. Source and language data documentation",
+            "url": "https://github.com/tesseract-ocr/tesseract",
+            "date": "Living repository",
+            "kind": "Public code; Apache-2.0"
+          }
+        ]
+      ]
+    },
+    {
+      "part": "PART 3 - TECH STACK, ARCHITECTURE, AND BUILD PLAN",
+      "title": "D. Numbered bibliography (3 of 3)",
+      "items": [
+        [
+          "small",
+          "Every source below was accessed on 16 November 2026. Dates are publication/update dates where verified; n.d. means no stable publication date established. Living pages and repositories can change. Titles link to original sources. Product documentation is vendor evidence. Research conclusions are bounded by the reviewed study."
+        ],
+        [
+          "ref",
+          {
+            "n": 41,
+            "title": "Tesseract. Languages/scripts supported in different versions",
+            "url": "https://tesseract-ocr.github.io/tessdoc/Data-Files-in-different-versions.html",
+            "date": "n.d. (living documentation)",
+            "kind": "Official documentation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 42,
+            "title": "PaddlePaddle. PaddleOCR source and license",
+            "url": "https://github.com/PaddlePaddle/PaddleOCR",
+            "date": "Living repository",
+            "kind": "Public code; Apache-2.0 code license"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 43,
+            "title": "DAISY. MathCAT source and license",
+            "url": "https://github.com/daisy/MathCAT",
+            "date": "Living repository",
+            "kind": "Public code; MIT"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 44,
+            "title": "NV Access. NVDA User Guide",
+            "url": "https://api.nvaccess.org/documentation/userGuide.html",
+            "date": "Reviewed live guide identifies version 2026.3.1",
+            "kind": "Official documentation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 45,
+            "title": "eSpeak NG. Source, features and license",
+            "url": "https://github.com/espeak-ng/espeak-ng",
+            "date": "Living repository",
+            "kind": "Public code; GPL-3.0-or-later core"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 46,
+            "title": "Mozilla. PDF.js source and license",
+            "url": "https://github.com/mozilla/pdf.js",
+            "date": "Living repository",
+            "kind": "Public code; Apache-2.0"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 47,
+            "title": "jsvine. pdfplumber source and license",
+            "url": "https://github.com/jsvine/pdfplumber",
+            "date": "Living repository",
+            "kind": "Public code; MIT"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 48,
+            "title": "intfloat. multilingual-e5-small model card",
+            "url": "https://huggingface.co/intfloat/multilingual-e5-small",
+            "date": "Living model card; linked technical report 2024",
+            "kind": "Model documentation; MIT"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 49,
+            "title": "Google Cloud. Enterprise Document OCR",
+            "url": "https://docs.cloud.google.com/document-ai/docs/enterprise-document-ocr",
+            "date": "n.d. (living documentation)",
+            "kind": "Official documentation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 50,
+            "title": "Google Cloud. Gemini layout parser",
+            "url": "https://docs.cloud.google.com/document-ai/docs/layout-parse-chunk",
+            "date": "n.d. (living documentation)",
+            "kind": "Official documentation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 51,
+            "title": "Microsoft. Azure Speech languages and voices",
+            "url": "https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-support",
+            "date": "n.d. (living documentation)",
+            "kind": "Official documentation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 52,
+            "title": "Microsoft. SSML document structure and events",
+            "url": "https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/speech-synthesis-markup-structure",
+            "date": "n.d. (living documentation)",
+            "kind": "Official documentation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 53,
+            "title": "FastAPI. Documentation and license",
+            "url": "https://fastapi.tiangolo.com/",
+            "date": "n.d. (living documentation)",
+            "kind": "Official documentation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 54,
+            "title": "Deque. axe-core accessibility testing engine",
+            "url": "https://www.deque.com/axe/axe-core/",
+            "date": "n.d. (living documentation)",
+            "kind": "Official documentation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 55,
+            "title": "OpenStax. Physics preface and license",
+            "url": "https://openstax.org/books/physics/pages/preface",
+            "date": "Book published 2020; page is living",
+            "kind": "Official documentation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 56,
+            "title": "OpenStax. Licensing information for textbooks",
+            "url": "https://help.openstax.org/s/article/Licensing-information-of-OpenStax-textbooks",
+            "date": "Living help page; edition-specific check required",
+            "kind": "Official documentation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 57,
+            "title": "Pratham Books. StoryWeaver open content and licenses",
+            "url": "https://storyweaver.org.in/en/open-content",
+            "date": "n.d. (living documentation)",
+            "kind": "Official documentation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 58,
+            "title": "Pratham Books. StoryWeaver attribution guidelines",
+            "url": "https://storyweaver.org.in/en/attributions",
+            "date": "n.d. (living documentation)",
+            "kind": "Official documentation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 59,
+            "title": "NCERT. Textbooks and copyright notice",
+            "url": "https://ncert.nic.in/textbook.php",
+            "date": "n.d. (living documentation)",
+            "kind": "Official documentation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 60,
+            "title": "Google. Gemini 3.5 Flash-Lite model specification",
+            "url": "https://aistudio.google.com/docs/models/gemini-3.5-flash-lite",
+            "date": "Latest model update July 2026",
+            "kind": "Official model documentation; stable endpoint listed"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 61,
+            "title": "Bookshare. What formats are available for Bookshare books?",
+            "url": "https://www.bookshare.org/help-and-learning-articles/what-format-are-bookshare-books-available-in",
+            "date": "n.d. (living documentation)",
+            "kind": "Official documentation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 62,
+            "title": "Everway. Read&Write education pricing and platform entitlements",
+            "url": "https://www.everway.com/products/read-and-write-education/pricing/",
+            "date": "n.d. (living documentation)",
+            "kind": "Official documentation"
+          }
+        ],
+        [
+          "ref",
+          {
+            "n": 63,
+            "title": "Microsoft. Seeing AI launches on Android",
+            "url": "https://blogs.microsoft.com/accessibility/seeing-ai-app-launches-on-android-including-new-and-updated-features-and-new-languages/",
+            "date": "4 December 2023",
+            "kind": "Vendor announcement"
+          }
+        ]
+      ]
+    }
+  ]
+}

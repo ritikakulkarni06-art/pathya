@@ -1,0 +1,17 @@
+# Compatibility choices verified against published PyPI metadata.
+# Docling 2.70.0 permits these versions. Older RapidOCR releases require the
+# GUI OpenCV distribution while IBM models require headless, installing both.
+rapidocr==3.10.0
+docling-core==2.50.1
+docling-ibm-models==3.9.1
+docling-parse==4.7.0
+
+# Explicit matching CPU-capable Windows pair. No CUDA/model download required.
+torch==2.7.1
+torchvision==0.22.1
+
+# Build/locking tools are part of the reproducible development environment.
+pip==25.0.1
+setuptools==80.9.0
+wheel==0.45.1
+
