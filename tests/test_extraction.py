@@ -46,7 +46,11 @@ def test_fixture_contract_and_synthetic_complex_content(chapter):
     assert any(block.metadata.mathml for block in result.blocks)
     assert any(block.metadata.alt_text_short for block in result.blocks)
     assert any(block.metadata.header_cell_ids for block in result.blocks)
-    assert "?" not in result.model_dump_json() or any(block.lang == "hi" for block in result.blocks)
+    assert any(
+        "\u092a\u094d\u0930\u0915\u093e\u0936" in block.text_current
+        for block in result.blocks
+        if block.lang == "hi"
+    )
 
 
 @pytest.mark.parametrize(

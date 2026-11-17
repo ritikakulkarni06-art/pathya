@@ -1,4 +1,4 @@
-# Extraction contract for Person 1 ? approval required
+# Extraction contract for Person 1 - approval required
 
 Status: **draft v1.0.0, awaiting written teammate approval**. P6 and later stages must wait for Person 1's acceptance or requested changes. The synthetic fixture is a development aid, not a measured OCR result.
 
@@ -11,7 +11,7 @@ Status: **draft v1.0.0, awaiting written teammate approval**. P6 and later stage
 
 ## Identifiers and pages
 
-The extraction result belongs to the document supplied by the backend. Do not put owner IDs, private paths or a document ID in this payload. Page and block `id` values are stable **within that document's extraction output** and use letters, digits, hyphens or underscores (1?128 characters). Page and block IDs must be distinct. The backend stores a persistent mapping to opaque UUID4 IDs; integrations use returned backend IDs after import. Identical local IDs in two books cannot collide.
+The extraction result belongs to the document supplied by the backend. Do not put owner IDs, private paths or a document ID in this payload. Page and block `id` values are stable **within that document's extraction output** and use letters, digits, hyphens or underscores (1-128 characters). Page and block IDs must be distinct. The backend stores a persistent mapping to opaque UUID4 IDs; integrations use returned backend IDs after import. Identical local IDs in two books cannot collide.
 
 `pdf_index_0` is the zero-based source PDF index. `printed_label` is a separate string (for example `iii`, `11` or `A-3`), never inferred from the PDF index. `bbox` is `[x0,y0,x1,y1]`, normalized to a top-left coordinate origin, strictly ordered and within [0,1]. `width`/`height` are original page dimensions in the parser's declared units. `transform` is `[a,b,c,d,e,f]` mapping normalized displayed coordinates to original pixel coordinates: `x'=a*x+c*y+e`, `y'=b*x+d*y+f`; include rotation/crop effects.
 

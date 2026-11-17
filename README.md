@@ -1,12 +1,12 @@
-# Pathya ? AI Textbook Reader
+# Pathya - AI Textbook Reader
 
 Pathya is a proposed accessible English/Hindi textbook reader. This repository contains the team plan and the **Role 3 backend foundation**. Students will eventually read, listen, correct content and inspect evidence-linked explanations.
 
 ## Current implementation
 
-P1?P5 of the [backend playbook](docs/PLAYBOOK.md): FastAPI configuration/health/errors, content-safe logs, transactional SQLite migrations and immutable history, private file storage, local/session authentication, CSRF and document roles, versioned extraction schemas, adapters and atomic initial import.
+P1-P5 of the [backend playbook](docs/PLAYBOOK.md): FastAPI configuration/health/errors, content-safe logs, transactional SQLite migrations and immutable history, private file storage, local/session authentication, CSRF and document roles, versioned extraction schemas, adapters and atomic initial import.
 
-The extraction contract is **draft v1.0.0**; the user authorized deferring teammate approval while implementation continues with fixtures. Uploads, processing jobs, correction endpoints, retrieval, speech, grounded answers, packages and deletion workflows are scheduled for P6?P16 and are not implemented yet. LLM calls remain disabled. This is not a production-ready service or a measured accessibility/accuracy result.
+The extraction contract is **draft v1.0.0**; the user authorized deferring teammate approval while implementation continues with fixtures. Uploads, processing jobs, correction endpoints, retrieval, speech, grounded answers, packages and deletion workflows are scheduled for P6-P16 and are not implemented yet. LLM calls remain disabled. This is not a production-ready service or a measured accessibility/accuracy result.
 
 ## Quick start ? Python 3.12
 

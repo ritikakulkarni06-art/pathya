@@ -13,6 +13,8 @@ from starlette.middleware.base import RequestResponseEndpoint
 from starlette.responses import Response
 
 from app.api.auth import router as auth_router
+from app.api.documents import router as documents_router
+from app.api.limits import BodyLimitMiddleware
 from app.config import Settings
 from app.db.connection import Database
 from app.db.migrate import migrate
@@ -48,6 +50,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         config.login_rate_limit, config.login_window_seconds
     )
     application.include_router(auth_router)
+    application.include_router(documents_router)
     application.add_middleware(
         CORSMiddleware,
         allow_origins=config.cors_origins,
@@ -55,6 +58,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         allow_methods=["GET", "POST", "PATCH", "PUT", "DELETE"],
         allow_headers=["Content-Type", "X-CSRF-Token", "X-Request-ID"],
     )
+
+    application.add_middleware(BodyLimitMiddleware, settings=config)
 
     @application.middleware("http")
     async def request_context(request: Request, call_next: RequestResponseEndpoint) -> Response:

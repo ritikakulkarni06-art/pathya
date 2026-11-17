@@ -48,3 +48,11 @@
 - `make install` installs the exact locked environment for source-checkout execution; it does not require an unpinned editable-build bootstrap. `make check` also enforces >=85% coverage of app/db.
 
 - User override, 16 November 2026: teammate approval is deferred. Continue P6 onwards against the draft using fixtures; never represent this as actual teammate acceptance. Reconcile before connecting real adapters.
+
+## P6
+
+- Upload bodies are capped at ASGI receive time, including chunked bodies; multipart overhead has a separate 64 KiB allowance. Actual file bytes are also bounded during staging and source storage.
+- Magic bytes must match a recognized filename extension when supplied. PDF inspection never fetches links. Parser diagnostics are suppressed because they may include private data; errors have fixed, accessible descriptions.
+- Rights notes are required. The immutable original keeps its metadata; only a verified working PNG has metadata stripped. Sources are not silently rewritten.
+- With no institutional project-end date supplied yet, retention is conservatively upload time plus RETENTION_DAYS_AFTER_END. Final policy/project-end configuration is deferred to P13 and institutional review.
+- Failed uploads before job creation remove their temporary/source files and rows, or leave an explicit failed state if physical cleanup itself fails.
