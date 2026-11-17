@@ -85,3 +85,25 @@ is attempted. Cache keys include source revision, engine, segmenter and relevant
 glossary hashes. Immutable package manifests describe downloads rather than
 producing a server-side ZIP. Paid providers fail closed pending verified pricing
 and budget reservation support in P11.
+
+
+### P10 evidence retrieval
+
+Chunks aim at 150-350 approximate tokens, allowing shorter topic/page boundaries
+and indivisible table associations. The estimate is words*1.3 plus Devanagari
+code-points/2; it is not a model tokenizer. Long prose retains source offsets.
+Reviewed figure descriptions and equation spoken fallbacks are source metadata;
+generated explanations are excluded. Header, caption and heading revisions are
+chunk dependencies. not_scored native text remains eligible and visibly marked.
+
+FTS5 unicode61 may split Hindi combining marks poorly. An NFC character trigram
+table provides an additional Hindi lexical signal. Scores use only the authorized
+current candidate pool; global FTS BM25 statistics are deliberately avoided.
+Optional vector ranking uses reciprocal-rank fusion (k=60). Hash vectors test
+plumbing only. Native Hindi review and real recall measurement remain pending.
+
+E5 uses local_files_only=True, trust_remote_code=False, CPU, exact query:/passage:
+prefixes and float32 384-dimensional BLOBs. Inputs beyond 512 model tokens are
+refused explicitly. No downloads occur at runtime. See the
+[model card](https://huggingface.co/intfloat/multilingual-e5-small) and
+[local loader API](https://sbert.net/docs/package_reference/sentence_transformer/model.html).

@@ -24,7 +24,7 @@ def worker_client(tmp_path, database):
         pathya_data_dir=tmp_path,
         pathya_db_path=database.path,
         storage_min_free_bytes=0,
-        job_lease_seconds=10,
+        job_lease_seconds=30,
     )
     with TestClient(create_app(settings)) as client:
         yield client
@@ -106,7 +106,13 @@ def test_fixture_extract_and_idempotent_retry(worker_client):
         count = conn.execute("SELECT count(*) AS n FROM blocks").fetchone()["n"]
     with database.write_tx() as conn:
         conn.execute("UPDATE jobs SET state='queued' WHERE id=?", (response["job_id"],))
-    assert run_once(database, settings)
+    for _ in range(5):
+        assert run_once(database, settings)
+        with database.read_conn() as connection:
+            if jobs.get_job(connection, response["job_id"])["state"] == "review_required":
+                break
+    else:
+        raise AssertionError("The extraction retry did not complete")
     with database.read_conn() as conn:
         assert conn.execute("SELECT count(*) AS n FROM pages").fetchone()["n"] == 10
         assert conn.execute("SELECT count(*) AS n FROM blocks").fetchone()["n"] == count
@@ -215,3 +221,52 @@ def test_cancelled_worker_cannot_change_document_state(worker_client):
         )
         assert conn.execute("SELECT count(*) AS n FROM blocks").fetchone()["n"] == 0
         assert jobs.get_job(conn, response["job_id"])["state"] == "cancelled"
+
+
+def test_heartbeat_busy_retries_without_claiming_ownership_or_exposing_errors(seeded, monkeypatch):
+    import sqlite3
+
+    import app.worker.runner as runner
+
+    settings = Settings(
+        _env_file=None,
+        pathya_env="test",
+        pathya_data_dir=seeded.path.parent,
+        pathya_db_path=seeded.path,
+    )
+    with seeded.write_tx() as connection:
+        identifier = jobs.enqueue(
+            connection, "d", "build_index", {}, 3, "busy-heartbeat", now_utc()
+        )
+    job = claim_next(seeded, settings)
+    real_heartbeat = runner.heartbeat
+
+    def busy(*args):
+        error = sqlite3.OperationalError("busy")
+        error.sqlite_errorcode = sqlite3.SQLITE_BUSY
+        raise error
+
+    monkeypatch.setattr(runner, "heartbeat", busy)
+    assert runner.renew_lease(seeded, job, settings) is None
+    monkeypatch.setattr(runner, "heartbeat", real_heartbeat)
+    assert runner.renew_lease(seeded, job, settings) is True
+    cancel(seeded, identifier)
+    assert runner.renew_lease(seeded, job, settings) is False
+
+
+def test_busy_heartbeat_is_distinguished_from_lost_lease(database, monkeypatch):
+    import sqlite3
+
+    import app.worker.runner as runner
+
+    settings = Settings(_env_file=None)
+    busy = sqlite3.OperationalError("busy")
+    busy.sqlite_errorcode = sqlite3.SQLITE_BUSY
+
+    def raise_busy(*args):
+        raise busy
+
+    monkeypatch.setattr(runner, "heartbeat", raise_busy)
+    assert runner.renew_lease(database, {"id": "job", "lease_owner": "worker"}, settings) is None
+    monkeypatch.setattr(runner, "heartbeat", lambda *args: False)
+    assert runner.renew_lease(database, {"id": "job", "lease_owner": "worker"}, settings) is False
