@@ -65,3 +65,12 @@
 - P7 build_audio/build_index handlers deliberately complete with an explicit unavailable-handler/text-fallback message and produce no pretend artifacts. P9/P10 replace them. Other unimplemented handlers fail visibly; delete is not exposed until P13.
 
 - Tests clone a pristine migrated SQLite template via the SQLite backup API into separate per-test databases. Migration behavior is still tested on fresh databases; this reduces repeated schema setup without sharing mutable state. Crash tests explicitly expire the abandoned lease after killing the worker, rather than relying on a two-second wall-clock window under load.
+
+## P8
+
+- Corrections use an op-discriminated union, a single BEGIN IMMEDIATE transaction and append-only history. Conflicts commit a conflict record and return 409 without last-writer-wins behavior.
+- Split/merge support adjacent leaf text blocks. Merge's optional with_base_revision protects the second passage; when omitted it defaults to the first passage's base. Complex structure is rejected explicitly.
+- Current structural edges are materialized; immutable historical manifests preserve prior relationships. Split caption references follow successors. Table-header assignment is limited to complete rows with one header row.
+- Candidate re-extraction is separate from published revisions and never automatically replaces accepted text. Acceptance needs a reconciled review workflow rather than an unsafe implicit publish.
+- P8 supplies a minimal prose index and text-only speech fallback. Full chunking, multilingual ranking and speech adapters remain P9/P10.
+- UTC timestamp helpers now live outside authentication, avoiding unnecessary FastAPI/Argon2 initialization in worker children. Current content/manifest reads take a consistent snapshot and recheck access.

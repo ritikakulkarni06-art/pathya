@@ -14,12 +14,15 @@ from app.db.repos import jobs
 from app.errors import Problem
 from app.services.jobs import LeaseLost, claim_next, fail, finish, heartbeat
 from app.worker.handlers.extract import handle as extract
+from app.worker.handlers.rebuild import handle as rebuild
 
 
 def execute_claimed(database: Database, settings: Settings, job: dict[str, Any]) -> None:
     try:
         if job["kind"] == "extract":
             extract(database, settings, job)
+        elif job["kind"] == "rebuild":
+            rebuild(database, settings, job)
         elif job["kind"] in {"build_audio", "build_index"}:
             finish(
                 database,
@@ -35,7 +38,19 @@ def execute_claimed(database: Database, settings: Settings, job: dict[str, Any])
     except LeaseLost:
         return
     except Problem as error:
-        fail(database, job["id"], job["lease_owner"], error.code, error.detail)
+        if error.code == "stale_revision":
+            try:
+                finish(
+                    database,
+                    job["id"],
+                    job["lease_owner"],
+                    "ready",
+                    "A newer content revision superseded this processing request.",
+                )
+            except LeaseLost:
+                return
+        else:
+            fail(database, job["id"], job["lease_owner"], error.code, error.detail)
     except Exception:
         fail(
             database,

@@ -14,10 +14,11 @@ def database_template(tmp_path_factory):
 @pytest.fixture
 def database(tmp_path, database_template):
     import sqlite3
+    from contextlib import closing
 
     db = Database(tmp_path / "db.sqlite3")
     with database_template.read_conn() as source:
-        with sqlite3.connect(db.path) as target:
+        with closing(sqlite3.connect(db.path)) as target:
             source.backup(target)
     return db
 

@@ -4,9 +4,9 @@ Pathya is a proposed accessible English/Hindi textbook reader. This repository c
 
 ## Current implementation
 
-P1-P5 of the [backend playbook](docs/PLAYBOOK.md): FastAPI configuration/health/errors, content-safe logs, transactional SQLite migrations and immutable history, private file storage, local/session authentication, CSRF and document roles, versioned extraction schemas, adapters and atomic initial import.
+P1-P8 of the [backend playbook](docs/PLAYBOOK.md): FastAPI configuration/health/errors, content-safe logs, transactional SQLite migrations and immutable history, private file storage, local/session authentication, CSRF and document roles, versioned extraction schemas, adapters and atomic initial import; durable worker leases, cancellation/recovery; atomic corrections and conflicts; immutable manifests, review queues and separate re-extraction candidates.
 
-The extraction contract is **draft v1.0.0**; the user authorized deferring teammate approval while implementation continues with fixtures. Uploads, processing jobs, correction endpoints, retrieval, speech, grounded answers, packages and deletion workflows are scheduled for P6-P16 and are not implemented yet. LLM calls remain disabled. This is not a production-ready service or a measured accessibility/accuracy result.
+The extraction contract is **draft v1.0.0**; the user authorized deferring teammate approval while implementation continues with fixtures. Speech adapters, the full retrieval index, grounded answers, packages and deletion workflows remain in P9-P16. LLM calls remain disabled. This is not a production-ready service or a measured accessibility/accuracy result.
 
 ## Quick start ? Python 3.12
 
@@ -22,7 +22,7 @@ On this Windows checkout use `.venv\Scripts\python.exe` directly, or activate `.
 
 Local mode needs no secrets and binds only loopback. To customize, copy `.env.example` to `.env` and edit local values. Session mode requires a random secret of at least 32 characters and HTTPS because cookies are always Secure. Do not use local mode in production. Disable raw access logs as shown; they can contain query text.
 
-On systems with GNU Make, `make check`, `make dev`, `make contracts` and `make openapi` are available. Windows equivalents are `python -m scripts.check` and `python -m scripts.export_contracts`. The worker command deliberately refuses until P7 is implemented.
+On systems with GNU Make, `make check`, `make dev`, `make contracts` and `make openapi` are available. Windows equivalents are `python -m scripts.check` and `python -m scripts.export_contracts`. Run the durable worker in a second terminal with `python -m app.worker`.
 
 ## Team and branches
 

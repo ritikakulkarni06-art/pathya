@@ -1,7 +1,5 @@
-# System verification
+# Backend verification
 
-No automated application tests exist yet. Add meaningful integration checks as components become runnable.
+Run `python -m scripts.check` (or `make check`) for lint, format, strict application types, pytest and the database coverage gate. Tests use isolated SQLite databases, synthetic English/Hindi content and fake adapters; live provider keys are not needed.
 
-Priorities: document authorization, correction conflicts, stale artifact rejection, job retries/recovery, citation and revision integrity, unsupported-answer abstention, extraction accuracy, keyboard/screen-reader workflows and offline restart/resume.
-
-Use synthetic or authorized fixtures; keep private source files and credentials out of the repository.
+Coverage includes authorization, immutable migrations/history, bounded uploads/storage, worker lease races/crash recovery, revision conflicts/rollback, stale derivatives and verified manifests. Later stages extend the suite with speech, retrieval, grounded answers and deletion. See docs/IMPLEMENTATION_STATUS.md for recorded checkpoint results.

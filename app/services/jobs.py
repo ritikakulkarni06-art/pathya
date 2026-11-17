@@ -3,11 +3,11 @@ from datetime import UTC, datetime, timedelta
 from typing import Any
 from uuid import uuid4
 
+from app.clock import now_utc
 from app.config import Settings
 from app.db.connection import Database
 from app.db.repos import jobs
 from app.errors import Problem
-from app.services.auth import now_utc
 
 ACTIVE = {"validating", "extracting", "building"}
 
