@@ -16,3 +16,5 @@ Next manual gate: approve the extraction/speech/identifier contracts with teamma
 - P6 complete: 98 tests passed; strict types/lint/format passed; DB coverage 95%. Upload, listing and metadata APIs include rights notes, magic/type checks, PDF/password/page/pixel limits, source deduplication, private storage, metadata-free working images and request-body limits.
 
 - P7 complete: 104-test full regression passed with 96% database coverage; a subsequent cancellation-race guard passed its targeted test plus lint/type checks. Durable claims, leases, heartbeat, visible retries, cancellation, process timeout and real crash/restart are implemented. P8 full checks will include the new guard.
+
+- P8 complete: 120 tests passed with 97% app/db coverage, lint, formatting, strict types and deterministic contracts. Atomic corrections/conflicts, split/merge history, dependency invalidation, text-fallback rebuilds, immutable verified manifests, content/review routes and separate re-extraction candidates are implemented.

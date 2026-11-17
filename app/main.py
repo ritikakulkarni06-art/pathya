@@ -13,6 +13,7 @@ from starlette.middleware.base import RequestResponseEndpoint
 from starlette.responses import Response
 
 from app.api.auth import router as auth_router
+from app.api.content import router as content_router
 from app.api.documents import router as documents_router
 from app.api.jobs import router as jobs_router
 from app.api.limits import BodyLimitMiddleware
@@ -54,12 +55,27 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     application.include_router(auth_router)
     application.include_router(documents_router)
     application.include_router(jobs_router)
+    application.include_router(content_router)
     application.add_middleware(
         CORSMiddleware,
         allow_origins=config.cors_origins,
         allow_credentials=True,
         allow_methods=["GET", "POST", "PATCH", "PUT", "DELETE"],
-        allow_headers=["Content-Type", "X-CSRF-Token", "X-Request-ID"],
+        allow_headers=[
+            "Content-Type",
+            "X-CSRF-Token",
+            "X-Request-ID",
+            "If-None-Match",
+            "Range",
+            "If-Range",
+        ],
+        expose_headers=[
+            "ETag",
+            "Content-Range",
+            "Accept-Ranges",
+            "X-Request-ID",
+            "X-Build-Sequence",
+        ],
     )
 
     application.add_middleware(BodyLimitMiddleware, settings=config)
@@ -78,7 +94,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         response.headers["X-Request-ID"] = request.state.request_id
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["Referrer-Policy"] = "no-referrer"
-        response.headers["Cache-Control"] = "no-store"
+        response.headers.setdefault("Cache-Control", "no-store")
         route = request.scope.get("route")
         log_event(
             request_id=request.state.request_id,
@@ -104,6 +120,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @application.exception_handler(Problem)
     async def handle_problem(request: Request, exc: Problem) -> JSONResponse:
         response = problem_response(exc.status, exc.code, exc.detail)
+        if exc.extra:
+            response.body = (
+                __import__("json")
+                .dumps({**__import__("json").loads(response.body), **exc.extra})
+                .encode()
+            )
+            response.headers["content-length"] = str(len(response.body))
         if exc.status == 429:
             response.headers["Retry-After"] = str(config.login_window_seconds)
         return response

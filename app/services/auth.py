@@ -5,13 +5,13 @@ import threading
 import time
 from collections import deque
 from collections.abc import Awaitable, Callable
-from datetime import UTC, datetime
 from typing import Any
 
 from argon2 import PasswordHasher, Type
 from argon2.exceptions import InvalidHashError, VerificationError
 from fastapi import Depends, Request
 
+from app.clock import now_utc as now_utc
 from app.config import Settings
 from app.db.connection import Database
 from app.db.repos import answers, assets, content, jobs, sessions, users
@@ -24,10 +24,6 @@ CSRF_COOKIE = "pathya_csrf"
 PASSWORDS = PasswordHasher(type=Type.ID)
 # Verification against the dummy hash keeps missing-account login failures comparable.
 DUMMY_HASH = PASSWORDS.hash(secrets.token_urlsafe(32))
-
-
-def now_utc() -> str:
-    return datetime.now(UTC).isoformat()
 
 
 def token_digest(token: str) -> str:
@@ -148,7 +144,11 @@ def require_doc_access(
                     document_id = resource["document_id"]
             if document_id is None:
                 raise Problem(404, "document_not_found", "This document is unavailable.")
-        return require_document(request.app.state.database, str(document_id), user["id"], minimum)
+        document = require_document(
+            request.app.state.database, str(document_id), user["id"], minimum
+        )
+        document["_access_user_id"] = user["id"]
+        return document
 
     return dependency
 

@@ -2,14 +2,16 @@ import json
 from typing import Any
 
 from app.adapters.extraction import get_extraction_adapter
+from app.clock import now_utc
 from app.config import Settings
 from app.db.connection import Database
 from app.db.repos import jobs
 from app.errors import Problem
 from app.schemas.content import ExtractionResult
-from app.services.auth import now_utc
 from app.services.ingest import import_extraction
 from app.services.jobs import LeaseLost, finish, progress
+from app.services.manifests import publish_manifest
+from app.services.reconcile import propose_candidate
 from app.services.storage import FileStore
 
 
@@ -88,7 +90,36 @@ def handle(database: Database, settings: Settings, job: dict[str, Any]) -> None:
     collected["quality_flags"] = sorted(flags)
     validated = ExtractionResult.model_validate(collected)
     progress(database, job["id"], owner, "building", total, total, "Saving the extracted chapter.")
+    if payload.get("mode") == "reextract":
+        candidate_id = propose_candidate(database, document_id, validated, lease=(job["id"], owner))
+        with database.write_tx() as connection:
+            connection.execute(
+                "UPDATE jobs SET progress_json=? WHERE id=? AND lease_owner=?",
+                (
+                    json.dumps(
+                        {"candidate_id": candidate_id, "pages_total": total, "pages_done": total}
+                    ),
+                    job["id"],
+                    owner,
+                ),
+            )
+        finish(
+            database,
+            job["id"],
+            owner,
+            "review_required",
+            "A separate extraction candidate is ready for reconciliation; accepted corrections were preserved.",
+        )
+        return
     import_extraction(database, document_id, validated, lease=(job["id"], owner))
+    with database.read_conn() as connection:
+        current = connection.execute(
+            "SELECT current_revision FROM documents WHERE id=?", (document_id,)
+        ).fetchone()
+    if current is not None and current["current_revision"] == 1:
+        publish_manifest(
+            database, settings.pathya_data_dir, document_id, 1, lease=(job["id"], owner)
+        )
     needs_review = any(
         block.critical_flag or block.status == "needs_review" for block in validated.blocks
     )

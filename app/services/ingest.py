@@ -5,11 +5,11 @@ from dataclasses import dataclass
 from typing import Any
 from uuid import uuid4
 
+from app.clock import now_utc
 from app.db.connection import Database
 from app.db.repos import documents, extraction
 from app.errors import Problem
 from app.schemas.content import ExtractionResult, parse_extraction
-from app.services.auth import now_utc
 from app.services.jobs import LeaseLost
 
 
