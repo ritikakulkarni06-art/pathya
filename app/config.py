@@ -30,6 +30,9 @@ class Settings(BaseSettings):
     llm_max_retries: int = Field(default=2, ge=0, le=2)
     llm_prices_path: Path = Path("config/prices.json")
     llm_price_max_age_days: int = Field(default=30, ge=1)
+    question_max_chars: int = Field(default=2000, ge=1, le=2000)
+    answer_no_evidence_threshold: float = Field(default=0, ge=0, allow_inf_nan=False)
+    answer_low_support_threshold: float = Field(default=0.1, ge=0, allow_inf_nan=False)
     api_budget_inr_hard_cap: float = Field(default=0, ge=0, allow_inf_nan=False)
     document_budget_inr_hard_cap: float = Field(default=0, ge=0, allow_inf_nan=False)
     embeddings_enabled: bool = False

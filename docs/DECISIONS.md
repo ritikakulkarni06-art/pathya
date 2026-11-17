@@ -122,3 +122,15 @@ alone allow at most two retries; each retry is independently reserved and visibl
 Timeouts are not retried. Placeholder/free/expired tariffs block paid calls.
 No dependency is added. See docs/LLM_AND_BUDGET.md for accounting limits and the
 manual price/model/provider checks.
+
+### P12 grounded questions
+
+Return exact eligible evidence cards when generation is disabled, unavailable,
+over budget or fails validation. Navigation bookmarks are client state, not bearer
+credentials. Saved explanations are private to their requester and document owner.
+Use lexical overlap for abstention thresholds; RRF scores are not confidence.
+Otherwise-identical sentences with differing numbers/negation are a conservative
+conflict signal. All such checks are heuristics, not entailment proof.
+Recheck document access/current revision in the answer write transaction after
+generation, and discard stale claims/cards. Reviewed media evidence uses reviewed
+source metadata. No generated text is indexed. See docs/GROUNDING.md.

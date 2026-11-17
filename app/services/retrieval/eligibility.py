@@ -7,6 +7,14 @@ def metadata(block: dict[str, Any]) -> dict[str, Any]:
     return dict(json.loads(value) if isinstance(value, str) else value)
 
 
+def evidence_text(block: dict[str, Any]) -> str:
+    if block["type"] == "equation":
+        return str(metadata(block).get("spoken_fallback", ""))
+    if block["type"] == "figure":
+        return str(metadata(block).get("alt_text_short", ""))
+    return str(block["text_current"])
+
+
 def is_eligible(block: dict[str, Any], expected_revision: int | None = None) -> bool:
     """Current means active block identity and matching dependency, not doc rev == block rev."""
     provenance = block.get("provenance", block.get("provenance_json", {}))

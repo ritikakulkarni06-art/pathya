@@ -8,7 +8,7 @@ from app.db.connection import Database
 from app.errors import Problem
 from app.services.access import check_document
 from app.services.retrieval.chunker import grams, words
-from app.services.retrieval.eligibility import is_eligible
+from app.services.retrieval.eligibility import evidence_text, is_eligible
 
 
 def search_snapshot(
@@ -136,7 +136,7 @@ def search_snapshot(
                         {
                             "block_id": bid,
                             "rev": rev,
-                            "text": blocks[bid]["text_current"],
+                            "text": evidence_text(blocks[bid]),
                             "page_id": blocks[bid]["page_id"],
                         }
                         for bid, rev in deps.items()

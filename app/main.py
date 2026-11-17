@@ -18,6 +18,7 @@ from app.api.content import router as content_router
 from app.api.documents import router as documents_router
 from app.api.jobs import router as jobs_router
 from app.api.limits import BodyLimitMiddleware
+from app.api.questions import router as questions_router
 from app.api.search import router as search_router
 from app.api.speech import router as speech_router
 from app.config import Settings
@@ -62,6 +63,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     application.include_router(content_router)
     application.include_router(speech_router)
     application.include_router(search_router)
+    application.include_router(questions_router)
     application.add_middleware(
         CORSMiddleware,
         allow_origins=config.cors_origins,
