@@ -27,6 +27,7 @@ def search_chapter(
         k,
         block_scope,
         neighbors=neighbors,
+        embedder=getattr(request.app.state, "embedding_provider", None),
     )
 
 

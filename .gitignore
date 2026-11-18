@@ -35,6 +35,7 @@ coverage/
 *.log
 data/
 backups/
+eval/out/
 uploads/
 storage/
 audio/

@@ -23,6 +23,7 @@ def question(
         user["id"],
         payload,
         llm=getattr(request.app.state, "llm_client", None),
+        embedder=getattr(request.app.state, "embedding_provider", None),
     )
 
 

@@ -7,6 +7,7 @@ from uuid import uuid4
 
 from pydantic import ValidationError
 
+from app.adapters.embeddings import EmbeddingProvider
 from app.adapters.llm import DisabledLLM, GeminiClient, LLMClient, LLMUnavailable
 from app.clock import now_utc
 from app.config import Settings
@@ -179,6 +180,7 @@ def ask(
     *,
     llm: LLMClient | None = None,
     checker: EntailmentChecker | None = None,
+    embedder: EmbeddingProvider | None = None,
 ) -> dict[str, Any]:
     with database.read_conn() as connection:
         doc = check_document(connection, request.document_id, user_id)
@@ -218,6 +220,7 @@ def ask(
             user_id,
             request.question,
             block_scope=request.block_scope,
+            embedder=embedder,
         )
         revision = snapshot["document_revision"]
         body["document_revision"] = revision

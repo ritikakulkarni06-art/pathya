@@ -165,3 +165,16 @@ Grant/audio scheduling writes recheck authorization in their write transaction.
 Admin metrics contain identifiers/counts only; stage timing is observed attempts,
 not an assertion that killed processes recorded a final duration. No extra service
 or dependency is added. Synthetic seed/reset scripts use only fixed local adapters.
+
+### P15 evaluation and integration
+
+Sample-only fake evaluation explicitly scripts expected outcomes and cannot be
+reported as model accuracy. Human data uses an authorized existing API with
+environment session credentials and the same pipeline. Reports always expose
+denominators, null empty ratios and separately labeled targets; human support
+fields remain unscored. Post-hoc threshold sweeps add abstention without new paid
+calls and cannot recover already-abstained responses. Each run writes a new private
+output directory, and CSV formula-leading cells are escaped. No 60-question human
+corpus, live model result, Hindi approval or accessibility result is invented.
+Private server-side embedding injection supports fixture tests without enabling
+an online model. No new dependency is added.
