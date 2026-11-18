@@ -36,6 +36,9 @@ coverage/
 data/
 backups/
 eval/out/
+!eval/data/
+eval/data/*
+!eval/data/sample.jsonl
 uploads/
 storage/
 audio/
