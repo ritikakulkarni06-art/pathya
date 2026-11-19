@@ -373,7 +373,7 @@ their own rules) and **not forward-compatible**: 1.1.0-only readers reject 1.2.0
 | `contract_family` (document) | P1 | Required in 1.2.0, always `"pathya.p1.content"`. Distinguishes this payload from any other format that reuses a version string. |
 | `Block.heading_level` | P1 | 1–6 on headings only; 1 is the most prominent. Derived from the relative glyph size of headings across the document. Null when unknown (no words to measure). |
 | `Block.role` | P1 | Required in 1.2.0: `body`, `page_header`, `page_footer` or `footnote`. Independent of `block_type`; a running footer is a `paragraph` with role `page_footer`. |
-| `Block.review_status` (machine output) | P1 | Pipeline rule: `needs_review` iff the block carries a review-trigger flag (`critical_symbol_uncertain`, `low_confidence`, `possible_ocr_error`, `block_type_uncertain`, `table_structure_uncertain`, `math_needs_review`, `unsupported_content`, `missing_geometry`), otherwise `unreviewed`. Producers never emit `approved` or `rejected`. |
+| `Block.review_status` (machine output) | P1 | Pipeline rule: `needs_review` iff the block carries a review-trigger flag (`critical_symbol_uncertain`, `low_confidence`, `possible_ocr_error`, `block_type_uncertain`, `table_structure_uncertain`, `math_needs_review`, `unsupported_content`, `missing_geometry`, `reading_order_uncertain`), otherwise `unreviewed`. Producers never emit `approved` or `rejected`. |
 | `quality_flags: critical_symbol_uncertain` | P1 | See below. |
 | `Document.integration.document_revision`, `.backend_document_id` | **P3** | Producers leave `integration` null. P3 is authoritative for backend IDs, access control, revisions, commits and invalidation. |
 | `Block.integration.backend_block_id` | **P3** | Stable opaque block identifier assigned by P3 (1–128 characters). Separate from the producer UUID, which is scoped to one extraction run. Survives corrections. |
@@ -413,7 +413,9 @@ identifiers.
   whitespace and left gaps). Sentences end after `.`, `!`, `?`, `।`
   or `॥` (plus closing quotes or brackets) before whitespace or the end of the
   text. They do not end after listed abbreviations (`Fig.`, `e.g.` …), on
-  decimal points, or before a lowercase Latin word.
+  decimal points, after a list marker that opens the text (`1.`, `iv.`, `a.`),
+  or before a lowercase Latin word. P3's own segmenter (`pathya-reader-v1`) follows
+  the same coverage rules; which one is canonical is not yet decided.
 
 ### Critical-symbol uncertainty
 

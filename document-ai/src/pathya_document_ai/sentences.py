@@ -21,8 +21,9 @@ Segmentation (segmenter ``pathya-sentences/2``) is deliberately simple and
 deterministic: a sentence ends after ``.``, ``!``, ``?``, ``।`` (danda) or
 ``॥`` (double danda), optionally followed by closing quotes or brackets, when
 the next character is whitespace or the end of the text. It does not end on a
-decimal point (no following space), after a listed abbreviation, or when the
-next word starts with a lowercase Latin letter.
+decimal point (no following space), after a listed abbreviation, after a list
+marker that opens the text (``1.``, ``iv.``, ``a.``), or when the next word
+starts with a lowercase Latin letter.
 """
 
 from __future__ import annotations
@@ -38,6 +39,7 @@ _ABBREVIATIONS = frozenset({
     "e.g.", "i.e.", "etc.", "fig.", "figs.", "eq.", "eqs.", "no.", "nos.", "dr.", "mr.", "mrs.", "ms.",
     "vs.", "approx.", "p.", "pp.", "vol.", "ch.", "sec.",
 })
+_LIST_MARKER = re.compile(r"\(?(?:\d{1,3}|[ivxlcdm]{1,6}|[a-z])[.)]", re.IGNORECASE)
 _BOUNDARY = re.compile(rf"[{re.escape(_TERMINATORS)}]+[{re.escape(_CLOSERS)}]*(?=\s|$)")
 
 
@@ -52,6 +54,8 @@ def segment_sentences(text: str) -> list[tuple[int, int]]:
         end = match.end()
         if _is_abbreviation(text, match.start()) or _continues_lowercase(text, end):
             continue
+        if _LIST_MARKER.fullmatch(text[cuts[-1] if cuts else 0:end].strip()):
+            continue  # "1.", "iv.", "a." opening a list item is not a sentence of its own
         while end < len(text) and text[end].isspace():  # trailing whitespace joins this sentence
             end += 1
         if end < len(text):

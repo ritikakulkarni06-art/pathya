@@ -129,9 +129,12 @@ QUALITY_FLAGS_ADDED_IN_1_2 = frozenset({QualityFlag.CRITICAL_SYMBOL_UNCERTAIN})
 REVIEW_TRIGGER_FLAGS = frozenset({
     QualityFlag.CRITICAL_SYMBOL_UNCERTAIN, QualityFlag.LOW_CONFIDENCE, QualityFlag.POSSIBLE_OCR_ERROR,
     QualityFlag.BLOCK_TYPE_UNCERTAIN, QualityFlag.TABLE_STRUCTURE_UNCERTAIN, QualityFlag.MATH_NEEDS_REVIEW,
-    QualityFlag.UNSUPPORTED_CONTENT, QualityFlag.MISSING_GEOMETRY,
+    QualityFlag.UNSUPPORTED_CONTENT, QualityFlag.MISSING_GEOMETRY, QualityFlag.READING_ORDER_UNCERTAIN,
 })
-"""1.2.0 pipeline rule: a machine-produced block is ``needs_review`` iff it carries one of these flags."""
+"""1.2.0 pipeline rule: a machine-produced block is ``needs_review`` iff it carries one of these flags.
+
+Includes the written P1 decision (P3 CONTRACT_APPROVALS, "Tharun's integration feedback"): uncertain
+reading order, math, table structure and missing geometry are review conditions."""
 
 
 class BlockRole(StrEnum):

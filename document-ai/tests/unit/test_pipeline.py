@@ -109,8 +109,11 @@ def test_ocr_path_flags_uncertain_critical_symbols(tmp_path: Path) -> None:
     critical = by_text["Speed 4.5 m/s"]
     assert QualityFlag.CRITICAL_SYMBOL_UNCERTAIN in critical.quality_flags
     assert critical.review_status is ReviewStatus.NEEDS_REVIEW
-    assert QualityFlag.CRITICAL_SYMBOL_UNCERTAIN not in by_text["Plain words"].quality_flags
-    assert by_text["Plain words"].review_status is ReviewStatus.UNREVIEWED
+    plain = by_text["Plain words"]
+    assert QualityFlag.CRITICAL_SYMBOL_UNCERTAIN not in plain.quality_flags
+    # Without layout, OCR lines carry reading_order_uncertain, a review condition (written P1 decision).
+    assert QualityFlag.READING_ORDER_UNCERTAIN in plain.quality_flags
+    assert plain.review_status is ReviewStatus.NEEDS_REVIEW
 
 
 def test_scanned_page_without_ocr_stays_needs_ocr(tmp_path: Path) -> None:

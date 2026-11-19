@@ -165,7 +165,9 @@ def test_upgrade_derives_roles_from_layout_labels() -> None:
 
 @pytest.mark.parametrize(("flags", "status"), [
     ([], ReviewStatus.UNREVIEWED),
-    ([QualityFlag.READING_ORDER_UNCERTAIN, QualityFlag.LANGUAGE_UNCERTAIN], ReviewStatus.UNREVIEWED),
+    ([QualityFlag.LANGUAGE_UNCERTAIN, QualityFlag.MIXED_SCRIPT], ReviewStatus.UNREVIEWED),
+    ([QualityFlag.READING_ORDER_UNCERTAIN], ReviewStatus.NEEDS_REVIEW),  # written P1 decision
+    ([QualityFlag.MISSING_GEOMETRY], ReviewStatus.NEEDS_REVIEW),
     ([QualityFlag.CRITICAL_SYMBOL_UNCERTAIN], ReviewStatus.NEEDS_REVIEW),
     ([QualityFlag.LOW_CONFIDENCE], ReviewStatus.NEEDS_REVIEW),
     ([QualityFlag.TABLE_STRUCTURE_UNCERTAIN], ReviewStatus.NEEDS_REVIEW),
@@ -245,6 +247,17 @@ def test_sentence_offsets_cover_current_text_with_trailing_whitespace_to_precedi
     astral = "𝑥 = 2. Next."
     assert segment_sentences(astral) == [(0, 7), (7, 12)]  # code points
     assert to_utf16_ranges(astral, segment_sentences(astral)) == [(0, 8), (8, 13)]  # JavaScript indices
+
+
+@pytest.mark.parametrize(("text", "expected"), [
+    ("1. Distance is the length of the path travelled.", ["1. Distance is the length of the path travelled."]),
+    ("2. Displacement is shortest. It has direction.", ["2. Displacement is shortest. ", "It has direction."]),
+    ("iv. Roman numbered item.", ["iv. Roman numbered item."]),
+    ("a. Lettered item.", ["a. Lettered item."]),
+    ("He saw it. A dog ran.", ["He saw it. ", "A dog ran."]),
+])
+def test_list_markers_are_not_sentences(text: str, expected: list[str]) -> None:
+    assert [text[s:e] for s, e in segment_sentences(text)] == expected
 
 
 def test_sentences_bound_to_revision_and_exact_text() -> None:
