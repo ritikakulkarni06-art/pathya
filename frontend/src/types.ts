@@ -5,6 +5,8 @@ export type Lang = 'en' | 'hi'
 export type BlockType = 'heading' | 'paragraph' | 'list_item' | 'table' | 'equation' | 'figure'
 export type BlockStatus = 'trusted' | 'needs_review' | 'reviewed' | 'unsupported'
 
+export type PageStatus = 'ok' | 'blank' | 'needs_ocr' | 'partial' | 'failed'
+
 export interface Confidence {
   engine: string
   /** null means "not scored" (e.g. native PDF text). Never shown as 100%. */
@@ -54,6 +56,12 @@ export interface Page {
   id: string
   pdf_index_0: number
   printed_label: string
+  /** True when the book page had no printed number, so printed_label is only its position in the file. */
+  label_missing?: boolean
+  /** How completely Role 1 could read the page (contract 1.1.0). Absent means ok. */
+  status?: PageStatus
+  /** Processing notes from Role 1, for teachers and reviewers. */
+  warnings?: { stage: string; code: string; message: string }[]
   /** Original scan/PDF page image, when the backend provides one. */
   source_asset?: string
 }
@@ -179,6 +187,9 @@ export const FLAG_REASONS: Record<string, string> = {
   unreviewed_figure: 'This figure description is a generated draft that no teacher has checked yet.',
   merged_headers: 'This table has merged header cells, which the reader cannot yet present reliably.',
   figure_not_described: 'This picture has no description yet.',
+  // A sign, decimal point, exponent or unit that changes the meaning may be wrong (name still to be agreed).
+  critical_symbol_uncertain: 'A sign, decimal point or other symbol that changes the meaning may be wrong here.',
+  critical_minus_sign_uncertain: 'A minus sign may be missing or wrong here, which would change the meaning.',
   // Role 1 contract 1.1.0 quality flags.
   low_confidence: 'The scanner was unsure about some characters in this passage.',
   possible_ocr_error: 'Some characters in this passage may have been misread.',

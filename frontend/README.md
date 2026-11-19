@@ -70,8 +70,12 @@ Where the contract does not say enough, the converter guesses. Each guess is mar
 - page headers and footers arrive as paragraphs (skipped by layout label)
 - `mul` and `und` languages (voice picked by counting Hindi and English letters)
 - `review_status` is never set by the pipeline (a passage with any quality flag is treated as needing review)
-- no document-level revision, and `page_label` may be empty
+- no document-level revision
 - corrections cannot change the passage kind or reading order, although the reader's form offers both
+
+Supported from 1.1.0: page status and warnings (a page that was not read says so on screen and in narration),
+pages without a printed number, uncertain tables, and merged table headers (repeated over each column they cover).
+`npm run test:p1` checks the converter without a browser; pass extra Role 1 JSON files as arguments.
 
 Screens that exist because of the other roles' features. Each one calls the API below; the paths are this
 reader's proposal and still need Role 3's agreement.

@@ -1,7 +1,7 @@
 // Turns a Role 1 document (content contract 1.0.0 / 1.1.0, docs/p1_contract.md in the team repo)
 // into the package this reader displays and narrates. Every place where the reader has to guess,
 // because the contract does not say, is marked "GAP" and listed in README.
-import type { Block, BlockStatus, ChapterPackage, Lang, Page, TableData } from '../types'
+import type { Block, BlockStatus, ChapterPackage, Lang, Page, PageStatus, TableData } from '../types'
 
 interface P1Annotation { text: string; language: string; origin: 'source' | 'human' | 'model_generated'; review_status: string }
 interface P1Block {
@@ -29,7 +29,7 @@ export interface P1Document {
   id: string
   title: string | null
   languages: string[]
-  pages: { id: string; page_index: number; page_label: string | null }[]
+  pages: { id: string; page_index: number; page_label: string | null; status?: PageStatus | null; warnings?: { stage: string; code: string; message: string }[] }[]
   blocks: P1Block[]
   edges: { edge_type: string; source_id: string; target_id: string }[]
   corrections: { block_id: string; author_ref: string | null; created_at: string }[]
@@ -53,8 +53,11 @@ export function fromP1(input: unknown, extra: { subject: string; rights_note: st
   const main: Lang = doc.languages.includes('hi') && !doc.languages.includes('en') ? 'hi' : 'en'
   const pageIndex = new Map(doc.pages.map((p) => [p.id, p.page_index]))
   const pages: Page[] = [...doc.pages].sort((a, b) => a.page_index - b.page_index)
-    // GAP: page_label may be null. The physical page number is shown instead.
-    .map((p) => ({ id: p.id, pdf_index_0: p.page_index, printed_label: p.page_label ?? String(p.page_index + 1) }))
+    // A page without a printed number is named by its place in the file, in brackets, and marked as such.
+    .map((p) => ({
+      id: p.id, pdf_index_0: p.page_index, printed_label: p.page_label ?? `(${p.page_index + 1})`,
+      ...(p.page_label == null && { label_missing: true }), ...(p.status && { status: p.status }), ...(p.warnings?.length && { warnings: p.warnings }),
+    }))
 
   // A caption that belongs to a figure or table is shown with it, not read a second time on its own.
   const captionFor = new Map<string, string>()
@@ -101,11 +104,22 @@ export function fromP1(input: unknown, extra: { subject: string; rights_note: st
         if (!flags.includes('table_structure_uncertain')) flags.push('table_structure_uncertain')
       } else {
         const grid = Array.from({ length: b.table!.row_count! }, () => Array<string>(b.table!.column_count!).fill(''))
-        for (const c of cells) grid[c.table_cell!.row_index][c.table_cell!.column_index] = c.current_text ?? ''
-        if (cells.some((c) => c.table_cell!.row_span > 1 || c.table_cell!.column_span > 1)) flags.push('merged_headers')
-        // GAP: the reader needs one header row. A table without one is sent to review.
-        if (!cells.filter((c) => c.table_cell!.row_index === 0).every((c) => c.table_cell!.is_header)) flags.push('table_structure_uncertain')
-        table = { caption: captionFor.get(b.id), columns: grid[0], rows: grid.slice(1) }
+        const head = grid.map(() => true)
+        for (const c of cells) {
+          const m = c.table_cell!
+          // A merged cell is repeated in every position it covers, so each value still has its full header.
+          for (let r = m.row_index; r < m.row_index + m.row_span; r++) {
+            if (!m.is_header) head[r] = false
+            for (let k = m.column_index; k < m.column_index + m.column_span; k++) grid[r][k] = c.current_text ?? ''
+          }
+        }
+        // Header rows are the leading rows made only of header cells. Stacked headers are joined top to bottom.
+        let n = 0
+        while (n < grid.length - 1 && head[n]) n++
+        // GAP: the reader needs at least one header row. A table without one is sent to review.
+        if (n === 0) { n = 1; flags.push('table_structure_uncertain') }
+        const columns = grid[0].map((_, k) => [...new Set(grid.slice(0, n).map((row) => row[k]).filter(Boolean))].join(' – '))
+        table = { caption: captionFor.get(b.id), columns, rows: grid.slice(n) }
         say = cells.map((c) => c.current_text ?? '').join(' ')
       }
     } else if (b.equation) {
@@ -149,7 +163,8 @@ export function fromP1(input: unknown, extra: { subject: string; rights_note: st
       lang: voiceLang(b.language, say, main),
       revision: b.revision,
       status,
-      confidence: { engine: b.provenance.engine ?? b.provenance.method, score: b.confidence.score, flags },
+      // A symbol that changes the meaning is the reason shown first.
+      confidence: { engine: b.provenance.engine ?? b.provenance.method, score: b.confidence.score, flags: [...flags].sort((x, y) => Number(y.startsWith('critical_')) - Number(x.startsWith('critical_'))) },
       provenance: { parser: b.provenance.engine ?? b.provenance.method, version: b.provenance.engine_version ?? '', reviewer: fix?.author_ref ?? undefined, changed_at: fix?.created_at },
       table,
       mathml,
@@ -158,6 +173,9 @@ export function fromP1(input: unknown, extra: { subject: string; rights_note: st
     })
   }
 
+  // The printed range only counts pages that carry a printed number.
+  const numbered = pages.filter((p) => !p.label_missing)
+  const range = numbered.length ? `${numbered[0].printed_label}–${numbered[numbered.length - 1].printed_label}` : `${pages.length} unnumbered`
   const langs = doc.languages.filter((l): l is Lang => l === 'en' || l === 'hi')
   return {
     document: {
@@ -166,7 +184,7 @@ export function fromP1(input: unknown, extra: { subject: string; rights_note: st
       subject: extra.subject,
       languages: langs.length ? langs : [main],
       page_count: pages.length,
-      printed_range: `${pages[0].printed_label}–${pages[pages.length - 1].printed_label}`,
+      printed_range: range,
       // GAP: the contract has no document-level revision. Role 3 has to supply one.
       current_revision: 1,
       review_count: 0,

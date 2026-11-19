@@ -5,6 +5,7 @@ import { ArrowLeft, Check, Info, CornerDownLeft, Download, FileSearch, Flag, Lis
 import { api, LimitError, OfflineError } from '../api/client'
 import { store, uid } from '../lib/db'
 import { blockText } from '../lib/search'
+import { pageNotice } from '../lib/sentences'
 import { say, submitCorrection, syncPending, useChapter, useOnline, type SubmitOutcome } from '../state/app'
 import { useNarration } from '../state/narration'
 import { readingVars, usePrefs } from '../state/prefs'
@@ -397,7 +398,18 @@ export default function Reader() {
           <article aria-label={doc.title} className="reading mx-auto border-border bg-surface px-5 py-6 sm:rounded-card sm:border sm:px-12 sm:py-10" style={readingVars(prefs)} data-focus={prefs.focusMode} data-reading={nar.status === 'playing'}>
             {pkg.pages.map((page) => (
               <section key={page.id} aria-label={`Printed page ${page.printed_label}`}>
-                <p className="page-mark first:mt-0" id={`page-${page.printed_label}`} lang="en">Page {page.printed_label}</p>
+                <p className="page-mark first:mt-0" id={`page-${page.printed_label}`} lang="en">Page {page.printed_label}{page.label_missing && <span className="font-normal">no printed number, counted from the start of the file</span>}</p>
+                {pageNotice(page) && (
+                  <div role="note" lang="en" data-page-status={page.status} className={`mb-4 rounded-control border px-3 py-2.5 font-sans text-sm tracking-normal [word-spacing:0] ${page.status === 'blank' ? 'border-border text-muted' : 'border-warn-border bg-warn-bg text-warn-ink'}`}>
+                    <p className="m-0 font-medium">{pageNotice(page)}</p>
+                  </div>
+                )}
+                {!!page.warnings?.length && (
+                  <details lang="en" className="mb-4 font-sans text-sm tracking-normal text-muted [word-spacing:0]">
+                    <summary className="cursor-pointer">Notes from the scanner for this page ({page.warnings.length})</summary>
+                    <ul className="m-0 mt-1 pl-5">{page.warnings.map((w, i) => <li key={i}>{w.message}</li>)}</ul>
+                  </details>
+                )}
                 {pkg.blocks.filter((b) => b.page_id === page.id).map((b) => (
                   <BlockView key={b.id} block={b} actions={actions} highlight={prefs.highlight} active={b.id === activeId} flash={flash === b.id}
                     current={unit?.block_id === b.id ? unit.sentence : null} bookmarked={bookmarkIds.has(b.id)} pending={pendingIds.has(b.id)} />

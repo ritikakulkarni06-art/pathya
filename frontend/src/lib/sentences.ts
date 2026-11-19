@@ -1,4 +1,4 @@
-import type { Block, Lang, Pronunciation } from '../types'
+import type { Block, Lang, Pronunciation, Page } from '../types'
 
 // Abbreviations that end in a full stop but do not end a sentence.
 const ABBREV = /\b(?:e\.g|i\.e|etc|vs|Fig|Eq|No|Dr|Mr|Mrs|Ms|approx|cf)\.$/i
@@ -28,6 +28,34 @@ export interface SpeechUnit {
   sentence: number
   text: string
   lang: Lang
+}
+
+/** What the student is told about a page that Role 1 could not read completely. Null when the page is fine. */
+export function pageNotice(page: Page): string | null {
+  const name = page.label_missing ? `Page ${page.pdf_index_0 + 1} of the file` : `Page ${page.printed_label}`
+  switch (page.status) {
+    case 'failed': return `${name} could not be read. Its content is missing from this chapter. Use the printed book for this page.`
+    case 'needs_ocr': return `${name} is a scanned picture that has not been read yet. Some or all of its text is missing here.`
+    case 'partial': return `${name} was only partly read. The text is here, but headings, tables and the reading order may be wrong.`
+    case 'blank': return `${name} is blank in the book.`
+    default: return null
+  }
+}
+
+/** Page notices as narration: spoken before the first passage that follows, or after the last passage of the chapter. */
+export function pageAnnouncements(pages: Page[], blocks: Block[]): { before: Map<string, string[]>; after: Map<string, string[]> } {
+  const before = new Map<string, string[]>()
+  const after = new Map<string, string[]>()
+  let waiting: string[] = []
+  for (const page of pages) {
+    const note = pageNotice(page)
+    if (note) waiting.push(note)
+    const first = blocks.find((b) => b.page_id === page.id)
+    if (first && waiting.length) { before.set(first.id, waiting); waiting = [] }
+  }
+  const last = blocks[blocks.length - 1]
+  if (last && waiting.length) after.set(last.id, waiting)
+  return { before, after }
 }
 
 /** What the narrator says for each block, in reading order. Display text is never changed. */

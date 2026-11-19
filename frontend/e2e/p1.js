@@ -37,6 +37,11 @@ async (page) => {
   ok('every passage has a voice language (en or hi), also for "mul" and "und"', langs.every((l) => l === 'en' || l === 'hi'))
   ok('"mul" list item with mostly Hindi text is read by the Hindi voice', langs[langs.length - 1] === 'hi')
 
+  const note = page.locator('[data-page-status=failed]')
+  ok('a page that could not be read says so, and is not shown as blank', (await note.count()) === 1 && (await note.innerText()).includes('could not be read'))
+  ok('a page with no printed number is named by its place in the file', (await note.innerText()).includes('Page 3 of the file'))
+  ok('scanner notes for a page can be opened', (await page.getByText(/Notes from the scanner for this page/).count()) === 2)
+
   const fig = page.locator('.passage figure')
   ok('figure shows its printed caption once', (await page.getByText('चित्र 10.1 समतल दर्पण द्वारा प्रकाश का परावर्तन').count()) === 1)
   ok('approved human description is not labelled as a draft', (await fig.innerText()).includes('Description written by a teacher'))
