@@ -28,6 +28,7 @@ import unicodedata
 
 import numpy as np
 
+from pathya_document_ai.critical import critical_uncertain
 from pathya_document_ai.geometry import Box, CoordinateTransform, normalize_display_box
 from pathya_document_ai.preprocess import (
     ImageLimits,
@@ -505,10 +506,14 @@ def to_contract_blocks(result: OcrPageResult, page_id: Any, *, start_order: int 
                 reason=f"Mean Tesseract word confidence / 100 over {len(line.word_indices)} words.")
             if line.confidence < low_confidence:
                 flags += [m.QualityFlag.LOW_CONFIDENCE, m.QualityFlag.POSSIBLE_OCR_ERROR]
+        words = [result.words[i] for i in line.word_indices]
+        if critical_uncertain([(w.raw_text, "ocr", w.confidence) for w in words]):
+            flags.append(m.QualityFlag.CRITICAL_SYMBOL_UNCERTAIN)
         blocks.append(m.Block(
             page_id=page_id, block_type=m.BlockType.PARAGRAPH, reading_order=order, bbox=line.bbox,
             raw_text=line.raw_text, current_text=line.raw_text, language=m.Language(line.language),
-            confidence=confidence, quality_flags=flags, provenance=provenance))
+            confidence=confidence, quality_flags=flags, provenance=provenance, role=m.BlockRole.BODY,
+            review_status=m.pipeline_review_status(flags)))
         order += 1
     return blocks
 
@@ -619,19 +624,24 @@ def merge_ocr_into_document(
         notes.append(f"{len(document.edges) - len(edges)} edges to replaced native blocks were removed")
     languages = sorted({b.language for b in blocks} - {m.Language.UNDETERMINED}) or [m.Language.UNDETERMINED]
     data = document.model_dump()
-    if data["schema_version"] == "1.0.0":
-        # Merging adds 1.1.0 information (page status/warnings, duplicate_content); upgrade
-        # explicitly and report it rather than emitting an invalid 1.0.0 document.
+    if data["schema_version"] != m.SCHEMA_VERSION:
+        # Merging adds current-version information (page status/warnings, roles, flags); upgrade
+        # explicitly and report it rather than emitting an invalid older document.
+        previous = data["schema_version"]
         data = m.upgrade_document_data(data)
-        notes.append("document upgraded from schema 1.0.0 to 1.1.0 to record OCR status and flags")
+        notes.append(f"document upgraded from schema {previous} to {m.SCHEMA_VERSION} to record OCR status and flags")
     ordered_pages = [pages[p.page_index].model_dump() if p.page_index in pages else p.model_dump()
                      for p in document.pages]
     status_by_index = {p["page_index"]: p for p in data["pages"]}
     for page_data in ordered_pages:
         if page_data.get("status") is None:
             page_data["status"] = status_by_index[page_data["page_index"]].get("status") or "ok"
-    data.update(pages=ordered_pages, blocks=[b.model_dump() for b in blocks], edges=[e.model_dump() for e in edges],
-                languages=languages)
+    block_data = [b.model_dump() for b in blocks]
+    for b in block_data:  # blocks carried over from an older document get the role the upgrade derives
+        if b.get("role") is None:
+            label = (b["provenance"].get("parameters") or {}).get("layout_label")
+            b["role"] = m._ROLE_FROM_LAYOUT_LABEL.get(label, "body")
+    data.update(pages=ordered_pages, blocks=block_data, edges=[e.model_dump() for e in edges], languages=languages)
     return m.Document.model_validate(data), notes
 
 

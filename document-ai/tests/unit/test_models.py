@@ -397,7 +397,7 @@ def test_invalid_rotation_rejected(sample: dict[str, Any], rotation: int) -> Non
 def test_sample_is_valid_bilingual_document(sample: dict[str, Any]) -> None:
     doc = Document.model_validate(sample)
     assert doc.schema_version == "1.0.0"  # kept at 1.0.0 as the backward-compatibility fixture
-    assert SCHEMA_VERSION == "1.1.0"
+    assert SCHEMA_VERSION == "1.2.0"
     assert {b.language for b in doc.blocks} >= {Language.ENGLISH, Language.HINDI}
 
 
@@ -407,7 +407,8 @@ def test_wrong_schema_version_rejected(sample: dict[str, Any]) -> None:
 
 
 def test_committed_schema_is_current() -> None:
-    assert SCHEMA_FILE.read_text(encoding="utf-8") == render_json_schema(), \
+    # contract/pathya_content.schema.json is the frozen 1.1.0 alias (never moves to newer versions)
+    assert SCHEMA_FILE.read_text(encoding="utf-8") == render_json_schema("1.1.0"), \
         "run scripts/export_schema.py"
 
 

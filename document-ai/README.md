@@ -21,6 +21,23 @@ corrections and extraction evaluation. P2 owns the frontend and speech; P3
 owns HTTP services, persistence, revision transactions and retrieval/answers.
 No P2 or P3 implementation is included.
 
+## Extract a document
+
+```python
+from pathya_document_ai import ExtractionOptions, extract_document
+
+result = extract_document("chapter.pdf", ExtractionOptions(source_uri="asset://p3/123"))
+print(result.to_json(indent=2))     # validated contract Document (1.2.0, proposed)
+```
+
+```
+python -m pathya_document_ai extract chapter.pdf -o chapter.json   # PDF, PNG, JPEG or TIFF
+python -m pathya_document_ai validate chapter.json
+```
+
+See `docs/p1_contract.md` (contract, entry point, exit codes). 1.1.0 output for
+current integrations: `--target-version 1.1.0 --drop heading_level,role`.
+
 ## Python and installation
 
 Use **CPython 3.12.x**. Both lockfiles are hash-locked (`--require-hashes`).

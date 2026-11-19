@@ -28,6 +28,7 @@ from uuid import UUID
 
 import numpy as np
 
+from pathya_document_ai.critical import critical_uncertain
 from pathya_document_ai.geometry import (
     Box,
     CoordinateTransform,
@@ -192,6 +193,8 @@ class PdfExtraction:
     parameters: dict[str, Any]
     created_at: datetime
     warnings: tuple[ExtractionWarning, ...] = ()
+    media_type: str = "application/pdf"  # image sources use image/png, image/jpeg or image/tiff
+    units: str = "pt"  # "px" for image sources
 
 
 @dataclass
@@ -694,7 +697,7 @@ def to_contract_document(
 
     doc_id = document_id or m.new_id()
     asset = m.SourceAsset(id=source_asset_id or m.new_id(), uri=source_uri,
-                          media_type=m.MediaType.PDF, sha256=extraction.sha256)
+                          media_type=m.MediaType(extraction.media_type), sha256=extraction.sha256)
     provenance = m.Provenance(method=m.ExtractionMethod.NATIVE_PDF_TEXT, engine=extraction.engine,
                               engine_version=extraction.engine_version,
                               parameters={k: v for k, v in extraction.parameters.items()},
@@ -703,7 +706,7 @@ def to_contract_document(
     for pe in extraction.pages:
         status, warnings = page_status_from_extraction(pe, m)
         page = m.Page(document_id=doc_id, page_index=pe.page_index, page_label=pe.page_label,
-                      width=pe.width, height=pe.height, units="pt", rotation=pe.rotation,
+                      width=pe.width, height=pe.height, units=extraction.units, rotation=pe.rotation,
                       source_asset_id=asset.id, transform=pe.transform, status=status, warnings=warnings)
         pages.append(page)
         order = 0
@@ -714,12 +717,16 @@ def to_contract_document(
             flags = [m.QualityFlag.READING_ORDER_UNCERTAIN, m.QualityFlag.LANGUAGE_UNCERTAIN]
             if any(is_unmapped_char(ch) for ch in line.text):
                 flags.append(m.QualityFlag.POSSIBLE_OCR_ERROR)
+            if critical_uncertain([(w, "native", None) for w in line.text.split()]):
+                flags.append(m.QualityFlag.CRITICAL_SYMBOL_UNCERTAIN)
             blocks.append(m.Block(
                 page_id=page.id, block_type=m.BlockType.PARAGRAPH, reading_order=order, bbox=line.bbox,
                 raw_text=line.text, current_text=line.text, language=m.Language.UNDETERMINED,
                 confidence=m.Confidence.unavailable(NATIVE_CONFIDENCE_REASON),
-                quality_flags=flags, provenance=provenance,
+                quality_flags=flags, provenance=provenance, role=m.BlockRole.BODY,
+                review_status=m.pipeline_review_status(flags),
             ))
             order += 1
     return m.Document(id=doc_id, title=title, languages=[m.Language.UNDETERMINED], source_asset=asset,
-                      pages=pages, blocks=blocks, created_at=extraction.created_at)
+                      pages=pages, blocks=blocks, created_at=extraction.created_at,
+                      schema_version=m.SCHEMA_VERSION, contract_family=m.CONTRACT_FAMILY)

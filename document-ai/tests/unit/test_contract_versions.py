@@ -41,8 +41,8 @@ def test_v1_0_documents_still_validate_unchanged(v10: dict[str, Any]) -> None:
 
 
 def test_upgrade_preserves_content_and_adds_only_page_status(v10: dict[str, Any]) -> None:
-    upgraded = upgrade_document_data(v10)
-    assert upgraded["schema_version"] == SCHEMA_VERSION == "1.1.0"
+    upgraded = upgrade_document_data(v10, "1.1.0")  # pinned: this test covers the 1.0.0 -> 1.1.0 step
+    assert upgraded["schema_version"] == "1.1.0"
     assert v10["schema_version"] == "1.0.0" and "status" not in v10["pages"][0]  # input not mutated
     old, new = Document.model_validate(v10), Document.model_validate(upgraded)
     assert [p.status.value for p in new.pages] == ["ok", "ok"] and all(not p.warnings for p in new.pages)
@@ -94,7 +94,7 @@ def test_table_meta_counts_are_never_guessed() -> None:
 
 
 def test_schema_documents_both_versions() -> None:
-    schema = build_json_schema()
+    schema = build_json_schema("1.1.0")  # the frozen 1.1.0 artifact
     assert schema["x-pathya-schema-version"] == "1.1.0"
     assert set(schema["properties"]["schema_version"]["enum"]) == {"1.0.0", "1.1.0"}
     assert schema["x-pathya-invariants"]  # Python-only rules are listed, not implied
@@ -206,7 +206,7 @@ def test_child_block_must_be_on_its_parents_page(v10: dict[str, Any]) -> None:
 
 @pytest.mark.parametrize("status", ["ok", "blank", "needs_ocr", "partial", "failed"])
 def test_page_status_values(v10: dict[str, Any], status: str) -> None:
-    data = upgrade_document_data(v10)
+    data = upgrade_document_data(v10, "1.1.0")  # validated against the frozen 1.1.0 schema below
     if status == "blank":  # a blank page has no blocks
         page_id = data["pages"][1]["id"]
         dropped = {b["id"] for b in data["blocks"] if b["page_id"] == page_id}

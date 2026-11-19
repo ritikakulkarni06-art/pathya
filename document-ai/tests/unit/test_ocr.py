@@ -457,7 +457,7 @@ def test_ocr_without_overlap_is_added_unflagged(tmp_path: Path) -> None:
     added = next(b for b in doc.blocks if b.provenance.method.value == "ocr")
     assert added.raw_text == "Margin note" and QualityFlag.DUPLICATE_CONTENT not in added.quality_flags
     assert notes == []
-    assert doc.schema_version == "1.1.0"
+    assert doc.schema_version == "1.2.0"
 
 
 def test_merge_and_layout_paths_agree_on_unreliable_native_text(tmp_path: Path) -> None:

@@ -8,6 +8,8 @@ Field meanings and rules are documented in ``docs/p1_contract.md``.
 from __future__ import annotations
 
 from collections import Counter
+from collections.abc import Iterable
+import hashlib
 from enum import StrEnum
 from typing import Annotated, Any, Literal
 from uuid import UUID, uuid4
@@ -23,11 +25,14 @@ from pydantic import (
 
 from pathya_document_ai.geometry import CoordinateTransform, NormalizedBBox, Rotation
 
-SCHEMA_VERSION = "1.1.0"
+SCHEMA_VERSION = "1.2.0"
 """Semantic version produced by this code. See docs/p1_contract.md#versioning."""
 
-SUPPORTED_SCHEMA_VERSIONS = ("1.0.0", "1.1.0")
-"""Versions accepted on input. 1.0.0 documents are validated against 1.0.0 rules."""
+SUPPORTED_SCHEMA_VERSIONS = ("1.0.0", "1.1.0", "1.2.0")
+"""Versions accepted on input. Each document is validated against its own version's rules."""
+
+CONTRACT_FAMILY = "pathya.p1.content"
+"""1.2.0+: identifies this contract family, distinct from other payloads that reuse a version string."""
 
 NonEmptyStr = Annotated[str, StringConstraints(min_length=1)]
 Sha256Hex = Annotated[str, StringConstraints(pattern=r"^[0-9a-f]{64}$")]
@@ -111,12 +116,31 @@ class QualityFlag(StrEnum):
     OVERLAPPING_REGIONS = "overlapping_regions"
     ORPHAN_CAPTION = "orphan_caption"
     DUPLICATE_CONTENT = "duplicate_content"  # native and OCR text covered the same area
+    # Added in 1.2.0:
+    CRITICAL_SYMBOL_UNCERTAIN = "critical_symbol_uncertain"  # a sign, decimal point, exponent or unit may be wrong
 
 
 QUALITY_FLAGS_ADDED_IN_1_1 = frozenset({
     QualityFlag.BLOCK_TYPE_UNCERTAIN, QualityFlag.MISSING_GEOMETRY, QualityFlag.OVERLAPPING_REGIONS,
     QualityFlag.ORPHAN_CAPTION, QualityFlag.DUPLICATE_CONTENT,
 })
+QUALITY_FLAGS_ADDED_IN_1_2 = frozenset({QualityFlag.CRITICAL_SYMBOL_UNCERTAIN})
+
+REVIEW_TRIGGER_FLAGS = frozenset({
+    QualityFlag.CRITICAL_SYMBOL_UNCERTAIN, QualityFlag.LOW_CONFIDENCE, QualityFlag.POSSIBLE_OCR_ERROR,
+    QualityFlag.BLOCK_TYPE_UNCERTAIN, QualityFlag.TABLE_STRUCTURE_UNCERTAIN, QualityFlag.MATH_NEEDS_REVIEW,
+    QualityFlag.UNSUPPORTED_CONTENT, QualityFlag.MISSING_GEOMETRY,
+})
+"""1.2.0 pipeline rule: a machine-produced block is ``needs_review`` iff it carries one of these flags."""
+
+
+class BlockRole(StrEnum):
+    """Added in 1.2.0: semantic role, independent of ``block_type``."""
+
+    BODY = "body"
+    PAGE_HEADER = "page_header"  # running head repeated on pages
+    PAGE_FOOTER = "page_footer"  # running foot, page numbers
+    FOOTNOTE = "footnote"
 
 
 class ExtractionMethod(StrEnum):
@@ -144,6 +168,19 @@ class CorrectionOperation(StrEnum):
     REPLACE_TEXT = "replace_text"
     SET_LANGUAGE = "set_language"
     SET_REVIEW_STATUS = "set_review_status"
+    # Added in 1.2.0 (proposed; see docs/p1_contract.md "Correction policy"):
+    SET_BLOCK_TYPE = "set_block_type"  # between text block types only
+    SET_READING_ORDER = "set_reading_order"  # within the same page and parent
+
+
+CORRECTION_OPERATIONS_ADDED_IN_1_2 = frozenset({CorrectionOperation.SET_BLOCK_TYPE,
+                                                CorrectionOperation.SET_READING_ORDER})
+RETYPEABLE_BLOCK_TYPES = frozenset({BlockType.HEADING, BlockType.PARAGRAPH, BlockType.LIST_ITEM, BlockType.CAPTION})
+
+
+def pipeline_review_status(flags: Iterable[QualityFlag]) -> ReviewStatus:
+    """Review status a producer assigns: never approved/rejected (those are human decisions)."""
+    return ReviewStatus.NEEDS_REVIEW if REVIEW_TRIGGER_FLAGS.intersection(flags) else ReviewStatus.UNREVIEWED
 
 
 # --------------------------------------------------------------- shared value types
@@ -297,6 +334,63 @@ class FigureMeta(_Model):
 # --------------------------------------------------------------------- core models
 
 
+# ------------------------------------------------- 1.2.0 backend-owned fields
+
+
+VoiceLanguage = Literal["en", "hi"]
+
+
+class SentenceRange(_Model):
+    """Half-open range [start, end) of Unicode code points in the block's current_text."""
+
+    start: int = Field(ge=0)
+    end: int = Field(gt=0)
+
+    @model_validator(mode="after")
+    def _ordered(self) -> "SentenceRange":
+        if self.end <= self.start:
+            raise ValueError("sentence range requires start < end")
+        return self
+
+
+class SentenceSegmentation(_Model):
+    """Sentence ranges bound to one block revision and the exact current_text they index."""
+
+    text_revision: int = Field(ge=1, description="Block revision whose current_text was segmented.")
+    text_sha256: Sha256Hex = Field(description="SHA-256 of current_text encoded as UTF-8.")
+    segmenter: NonEmptyStr = Field(description="Segmenter name and version, e.g. 'pathya-sentences/1'.")
+    ranges: list[SentenceRange]
+
+
+class AudioReference(_Model):
+    """Revision-bound reference to synthesized audio. The URI is opaque and backend-owned."""
+
+    uri: NonEmptyStr
+    media_type: NonEmptyStr
+    voice_language: VoiceLanguage
+    text_revision: int = Field(ge=1)
+    text_sha256: Sha256Hex
+    sentence_index: int | None = Field(default=None, ge=0, description="Null for whole-block audio.")
+    duration_ms: int | None = Field(default=None, ge=0)
+    document_revision: int | None = Field(default=None, ge=1)
+
+
+class BlockIntegration(_Model):
+    """Backend/reader-owned block fields (1.2.0). Producers must leave Block.integration null."""
+
+    sentences: SentenceSegmentation | None = None
+    voice_language: VoiceLanguage | None = Field(
+        default=None, description="Narration voice chosen by P2/P3; never replaces Block.language.")
+    audio: list[AudioReference] = Field(default_factory=list)
+
+
+class DocumentIntegration(_Model):
+    """Backend-owned document fields (1.2.0). P3 is authoritative; producers leave this null."""
+
+    document_revision: int = Field(ge=1)
+    backend_document_id: str | None = Field(default=None, description="Opaque P3 identifier.")
+
+
 class PageStatus(StrEnum):
     """Added in 1.1.0: how completely a page was processed."""
 
@@ -365,6 +459,12 @@ class Block(_Model):
     table_cell: TableCellMeta | None = None
     equation: EquationMeta | None = None
     figure: FigureMeta | None = None
+    # Added in 1.2.0 (producer-owned):
+    heading_level: int | None = Field(default=None, ge=1, le=6,
+                                      description="Headings only; 1 is the most prominent. Null if unknown.")
+    role: BlockRole | None = Field(default=None, description="1.2.0+: required semantic role.")
+    # Added in 1.2.0 (backend-owned; producers leave null):
+    integration: BlockIntegration | None = None
 
     @model_validator(mode="after")
     def _block_rules(self) -> "Block":
@@ -384,6 +484,14 @@ class Block(_Model):
                 raise ValueError(f"block_type '{btype}' requires '{name}' metadata")
             if btype is not self.block_type and present:
                 raise ValueError(f"'{name}' metadata is only allowed on '{btype}' blocks")
+        if self.heading_level is not None and self.block_type is not BlockType.HEADING:
+            raise ValueError("heading_level is only allowed on heading blocks")
+        if QualityFlag.CRITICAL_SYMBOL_UNCERTAIN in self.quality_flags \
+                and self.review_status is ReviewStatus.UNREVIEWED:
+            raise ValueError("a block flagged critical_symbol_uncertain cannot be 'unreviewed'; "
+                             "it needs review (or a human decision)")
+        if self.integration is not None:
+            _check_integration(self)
         return self
 
 
@@ -415,6 +523,8 @@ class Correction(_Model):
     new_text: str | None = None
     new_language: Language | None = None
     new_review_status: ReviewStatus | None = None
+    new_block_type: BlockType | None = None  # 1.2.0
+    new_reading_order: int | None = Field(default=None, ge=0)  # 1.2.0
     reason: str | None = None
     author_ref: str | None = Field(default=None, description="Opaque reviewer reference from P3.")
     created_at: AwareDatetime
@@ -425,6 +535,8 @@ class Correction(_Model):
             CorrectionOperation.REPLACE_TEXT: "new_text",
             CorrectionOperation.SET_LANGUAGE: "new_language",
             CorrectionOperation.SET_REVIEW_STATUS: "new_review_status",
+            CorrectionOperation.SET_BLOCK_TYPE: "new_block_type",
+            CorrectionOperation.SET_READING_ORDER: "new_reading_order",
         }
         required = payload[self.operation]
         for name in payload.values():
@@ -439,8 +551,10 @@ class Correction(_Model):
 class Document(_Model):
     """Root of the contract. Cross-references are validated here."""
 
-    schema_version: Literal["1.0.0", "1.1.0"] = SCHEMA_VERSION
-    id: UUID = Field(default_factory=new_id)
+    schema_version: Literal["1.0.0", "1.1.0", "1.2.0"] = SCHEMA_VERSION
+    contract_family: Literal["pathya.p1.content"] | None = Field(
+        default=None, description="1.2.0+: required, always 'pathya.p1.content'.")
+    id: UUID = Field(default_factory=new_id, description="Producer id, scoped to one extraction run.")
     title: str | None = None
     languages: list[Language] = Field(min_length=1)
     source_asset: SourceAsset
@@ -449,6 +563,7 @@ class Document(_Model):
     edges: list[Edge] = Field(default_factory=list)
     corrections: list[Correction] = Field(default_factory=list, description="Applied correction history.")
     created_at: AwareDatetime
+    integration: DocumentIntegration | None = Field(default=None, description="1.2.0+: backend-owned.")
 
     @model_validator(mode="before")
     @classmethod
@@ -501,6 +616,16 @@ class Document(_Model):
             for page in self.pages:
                 if page.status is None:
                     raise ValueError(f"page {page.id} requires a status in a {self.schema_version} document")
+        if self.schema_version in ("1.0.0", "1.1.0"):
+            used = _features_1_2(self)
+            if used:
+                raise ValueError(f"{self.schema_version} document uses 1.2.0 features: {used[:3]}")
+        else:
+            if self.contract_family != CONTRACT_FAMILY:
+                raise ValueError(f"a {self.schema_version} document requires contract_family '{CONTRACT_FAMILY}'")
+            missing_role = [str(b.id) for b in self.blocks if b.role is None]
+            if missing_role:
+                raise ValueError(f"blocks require a role in a {self.schema_version} document: {missing_role[:3]}")
         blocks_per_page = {p.id: 0 for p in self.pages}
         for block in self.blocks:
             blocks_per_page[block.page_id] += 1
@@ -553,6 +678,53 @@ def _check_v1_0_compatible(blocks: list[Block]) -> None:
             raise ValueError(f"block {block.id} is an uncertain table candidate, which requires 1.1.0")
 
 
+def _check_integration(block: "Block") -> None:
+    """Derived backend fields must describe this exact revision and text, or they are stale."""
+    integration = block.integration
+    assert integration is not None
+    digest = hashlib.sha256((block.current_text or "").encode("utf-8")).hexdigest()
+    seg = integration.sentences
+    if seg is not None:
+        if block.current_text is None:
+            raise ValueError("sentence ranges require current_text")
+        if seg.text_revision != block.revision or seg.text_sha256 != digest:
+            raise ValueError("stale sentence ranges: computed for another revision or text; "
+                             "regenerate them for the current revision")
+        length, previous_end = len(block.current_text), 0
+        for r in seg.ranges:
+            if r.start < previous_end or r.end > length:
+                raise ValueError(f"sentence range [{r.start}, {r.end}) overlaps, is unordered or exceeds "
+                                 f"current_text length {length}")
+            previous_end = r.end
+    for audio in integration.audio:
+        if audio.text_revision != block.revision or audio.text_sha256 != digest:
+            raise ValueError("stale audio reference: bound to another revision or text; invalidate it")
+        if audio.sentence_index is not None and (seg is None or audio.sentence_index >= len(seg.ranges)):
+            raise ValueError("audio sentence_index does not reference a current sentence range")
+
+
+def _features_1_2(document: "Document") -> list[str]:
+    """1.2.0-only content in a document (version checks and lossless export)."""
+    found = []
+    if document.contract_family is not None:
+        found.append("contract_family")
+    if document.integration is not None:
+        found.append("document integration")
+    for b in document.blocks:
+        if QUALITY_FLAGS_ADDED_IN_1_2.intersection(b.quality_flags):
+            found.append(f"block {b.id} critical_symbol_uncertain")
+        if b.heading_level is not None:
+            found.append(f"block {b.id} heading_level")
+        if b.role not in (None, BlockRole.BODY):
+            found.append(f"block {b.id} role {b.role.value}")
+        if b.integration is not None:
+            found.append(f"block {b.id} integration")
+    for c in document.corrections:
+        if c.operation in CORRECTION_OPERATIONS_ADDED_IN_1_2:
+            found.append(f"correction {c.id} {c.operation.value}")
+    return found
+
+
 def _missing_ids(data: dict) -> list[str]:  # type: ignore[type-arg]
     missing = []
     if "id" not in data:
@@ -569,7 +741,11 @@ def _missing_ids(data: dict) -> list[str]:  # type: ignore[type-arg]
 
 def required_version(document: "Document") -> str:
     """Lowest contract version able to represent ``document`` exactly."""
-    uses_1_1 = any(QUALITY_FLAGS_ADDED_IN_1_1.intersection(b.quality_flags) for b in document.blocks)         or any(b.table is not None and b.table.is_uncertain_candidate for b in document.blocks)         or any(p.status is not None or p.warnings for p in document.pages)
+    if [f for f in _features_1_2(document) if f != "contract_family"]:
+        return "1.2.0"
+    uses_1_1 = (any(QUALITY_FLAGS_ADDED_IN_1_1.intersection(b.quality_flags) for b in document.blocks)
+                or any(b.table is not None and b.table.is_uncertain_candidate for b in document.blocks)
+                or any(p.status is not None or p.warnings for p in document.pages))
     return "1.1.0" if uses_1_1 else "1.0.0"
 
 
@@ -577,58 +753,115 @@ class IncompatibleVersionError(ValueError):
     """The document uses features the requested contract version cannot represent."""
 
 
-def export_document_data(document: "Document", target_version: str = SCHEMA_VERSION) -> dict:  # type: ignore[type-arg]
+_KEYS_ADDED_IN_1_2 = {"document": ("contract_family", "integration"),
+                      "block": ("heading_level", "role", "integration"),
+                      "correction": ("new_block_type", "new_reading_order")}
+
+
+def export_document_data(document: "Document", target_version: str = SCHEMA_VERSION, *,
+                         drop: Iterable[str] = ()) -> dict:  # type: ignore[type-arg]
     """Serialize ``document`` as JSON-compatible data for ``target_version``.
 
-    * ``1.1.0``: the full document.
-    * ``1.0.0``: only if the content needs nothing from 1.1.0 other than page
-      status, which is then **omitted** (it cannot be expressed in 1.0.0), and
-      only when every page is ``ok`` with no warnings. Otherwise
-      ``IncompatibleVersionError`` is raised: content, flags and failure
-      information are never silently dropped.
+    Nothing is dropped silently. Older targets succeed only when the content
+    fits them; otherwise ``IncompatibleVersionError`` lists what would be lost.
+    A caller may explicitly accept losing specific 1.2.0 producer fields when
+    exporting to 1.1.0/1.0.0 with ``drop={"heading_level", "role"}``; backend
+    ``integration`` fields and the critical-symbol flag can never be dropped.
+
+    * ``1.2.0``: the full document (contract_family and page status required).
+    * ``1.1.0``: no critical flag, no new correction operations, no integration
+      fields; heading levels and non-body roles only if listed in ``drop``.
+    * ``1.0.0``: as 1.1.0, plus no 1.1.0 flags or uncertain tables, every page
+      ``ok`` and no warnings (page status is then omitted).
     """
     if target_version not in SUPPORTED_SCHEMA_VERSIONS:
         raise ValueError(f"unsupported target version {target_version!r}")
+    drop = set(drop)
+    unknown = drop - {"heading_level", "role"}
+    if unknown:
+        raise ValueError(f"only heading_level and role may be dropped explicitly, not {sorted(unknown)}")
+    if any(p.status is None for p in document.pages) and target_version != "1.0.0":
+        raise IncompatibleVersionError(f"every page needs a status to be exported as {target_version}; "
+                                       "upgrade with upgrade_document_data() and set page status")
     data = document.model_dump(mode="json")
     data["schema_version"] = target_version
-    if target_version == "1.1.0":
-        if any(p.status is None for p in document.pages):
-            raise IncompatibleVersionError("every page needs a status to be exported as 1.1.0; "
-                                           "upgrade with upgrade_document_data() and set page status")
+    if target_version == "1.2.0":
+        data["contract_family"] = CONTRACT_FAMILY
+        if any(b.role is None for b in document.blocks):
+            raise IncompatibleVersionError("every block needs a role to be exported as 1.2.0")
         return data
-    blockers = [
-        *(f"block {b.id} flags {sorted(QUALITY_FLAGS_ADDED_IN_1_1.intersection(b.quality_flags))}"
-          for b in document.blocks if QUALITY_FLAGS_ADDED_IN_1_1.intersection(b.quality_flags)),
-        *(f"block {b.id} is an uncertain table" for b in document.blocks
-          if b.table is not None and b.table.is_uncertain_candidate),
-        *(f"page {p.page_index} status {p.status.value}" for p in document.pages
-          if p.status not in (None, PageStatus.OK)),
-        *(f"page {p.page_index} has {len(p.warnings)} warnings" for p in document.pages if p.warnings),
-    ]
+
+    blockers = []
+    for feature in _features_1_2(document):
+        if feature == "contract_family":
+            continue
+        if ("heading_level" in drop and feature.endswith("heading_level")) or \
+                ("role" in drop and " role " in feature):
+            continue
+        blockers.append(feature)
+    if target_version == "1.0.0":
+        blockers += [
+            *(f"block {b.id} flags {sorted(QUALITY_FLAGS_ADDED_IN_1_1.intersection(b.quality_flags))}"
+              for b in document.blocks if QUALITY_FLAGS_ADDED_IN_1_1.intersection(b.quality_flags)),
+            *(f"block {b.id} is an uncertain table" for b in document.blocks
+              if b.table is not None and b.table.is_uncertain_candidate),
+            *(f"page {p.page_index} status {p.status.value}" for p in document.pages
+              if p.status not in (None, PageStatus.OK)),
+            *(f"page {p.page_index} has {len(p.warnings)} warnings" for p in document.pages if p.warnings),
+        ]
     if blockers:
-        raise IncompatibleVersionError(f"document cannot be represented in 1.0.0: {blockers[:5]}")
-    for page in data["pages"]:
-        page.pop("status", None)
-        page.pop("warnings", None)
+        raise IncompatibleVersionError(f"document cannot be represented in {target_version}: {blockers[:5]}")
+    for key in _KEYS_ADDED_IN_1_2["document"]:
+        data.pop(key, None)
+    for block in data["blocks"]:
+        for key in _KEYS_ADDED_IN_1_2["block"]:
+            block.pop(key, None)
+    for correction in data["corrections"]:
+        for key in _KEYS_ADDED_IN_1_2["correction"]:
+            correction.pop(key, None)
+    if target_version == "1.0.0":
+        for page in data["pages"]:
+            page.pop("status", None)
+            page.pop("warnings", None)
     return data
 
 
-def upgrade_document_data(data: dict) -> dict:  # type: ignore[type-arg]
-    """Migrate serialized contract data to the current version (1.0.0 -> 1.1.0 is a relabel).
+_ROLE_FROM_LAYOUT_LABEL = {"page_header": "page_header", "page_footer": "page_footer", "footnote": "footnote",
+                           "Page-header": "page_header", "Page-footer": "page_footer", "Footnote": "footnote"}
 
-    1.1.0 only adds optional values, so every valid 1.0.0 document is a valid
-    1.1.0 document. Unknown versions are rejected rather than guessed.
+
+def upgrade_document_data(data: dict, target_version: str = SCHEMA_VERSION) -> dict:  # type: ignore[type-arg]
+    """Migrate serialized contract data forward to ``target_version`` (default: current).
+
+    * 1.0.0 -> 1.1.0: pages get status ``ok`` and no warnings (what a 1.0.0
+      producer asserted by emitting the page).
+    * 1.1.0 -> 1.2.0: adds ``contract_family``; each block gets a ``role``
+      derived from the layout label recorded in its provenance (``page_header``,
+      ``page_footer``, ``footnote``), otherwise ``body``. ``heading_level`` stays
+      null (unknown) and backend ``integration`` fields stay null.
+
+    Nothing is removed or rewritten. Unknown versions and downgrades are rejected.
     """
     version = data.get("schema_version")
     if version not in SUPPORTED_SCHEMA_VERSIONS:
         raise ValueError(f"unsupported schema_version {version!r}; supported: {SUPPORTED_SCHEMA_VERSIONS}")
+    if target_version not in SUPPORTED_SCHEMA_VERSIONS:
+        raise ValueError(f"unsupported target version {target_version!r}")
+    order = SUPPORTED_SCHEMA_VERSIONS.index
+    if order(target_version) < order(version):
+        raise ValueError(f"upgrade cannot go from {version} down to {target_version}; use export_document_data()")
     upgraded = dict(data)
-    if version == "1.0.0":
-        # 1.0.0 had no processing status; "ok" with no warnings is what a 1.0.0
-        # producer asserted by emitting the page. Nothing else changes.
+    if order(version) < order("1.1.0") <= order(target_version):
         upgraded["pages"] = [{**p, "status": p.get("status") or "ok", "warnings": p.get("warnings", [])}
-                             for p in data.get("pages", [])]
-    upgraded["schema_version"] = SCHEMA_VERSION
+                             for p in upgraded.get("pages", [])]
+    if order(version) < order("1.2.0") <= order(target_version):
+        upgraded["contract_family"] = CONTRACT_FAMILY
+        blocks = []
+        for b in upgraded.get("blocks", []):
+            label = ((b.get("provenance") or {}).get("parameters") or {}).get("layout_label")
+            blocks.append({**b, "role": b.get("role") or _ROLE_FROM_LAYOUT_LABEL.get(label, "body")})
+        upgraded["blocks"] = blocks
+    upgraded["schema_version"] = target_version
     return upgraded
 
 

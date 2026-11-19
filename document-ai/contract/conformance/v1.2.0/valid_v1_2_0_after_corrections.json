@@ -1,0 +1,893 @@
+{
+  "schema_version": "1.2.0",
+  "contract_family": "pathya.p1.content",
+  "id": "7d1e4c52-0000-4000-8000-000000000001",
+  "title": "Science - Class 9 (bilingual sample excerpt)",
+  "languages": [
+    "en",
+    "hi"
+  ],
+  "source_asset": {
+    "id": "7d1e4c52-0000-4000-8000-0000000000f1",
+    "uri": "asset://uploads/science-class9-excerpt.pdf",
+    "media_type": "application/pdf",
+    "sha256": "9b2c4f0e8a71d3e65c0f1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f"
+  },
+  "pages": [
+    {
+      "id": "7d1e4c52-0000-4000-8000-0000000000a0",
+      "document_id": "7d1e4c52-0000-4000-8000-000000000001",
+      "page_index": 0,
+      "page_label": "48",
+      "width": 595.276,
+      "height": 841.89,
+      "units": "pt",
+      "rotation": 0,
+      "source_asset_id": "7d1e4c52-0000-4000-8000-0000000000f1",
+      "transform": {
+        "normalized_origin": "top_left",
+        "source_space": "pdf_user_space",
+        "crop_box": [
+          0.0,
+          0.0,
+          595.276,
+          841.89
+        ],
+        "rotation_applied": 0,
+        "render_dpi": null
+      },
+      "status": "ok",
+      "warnings": []
+    },
+    {
+      "id": "7d1e4c52-0000-4000-8000-0000000000b0",
+      "document_id": "7d1e4c52-0000-4000-8000-000000000001",
+      "page_index": 1,
+      "page_label": "49",
+      "width": 2480.0,
+      "height": 3508.0,
+      "units": "px",
+      "rotation": 0,
+      "source_asset_id": "7d1e4c52-0000-4000-8000-0000000000f1",
+      "transform": {
+        "normalized_origin": "top_left",
+        "source_space": "image_pixels",
+        "crop_box": [
+          0.0,
+          0.0,
+          2480.0,
+          3508.0
+        ],
+        "rotation_applied": 0,
+        "render_dpi": 300.0
+      },
+      "status": "ok",
+      "warnings": []
+    }
+  ],
+  "blocks": [
+    {
+      "id": "7d1e4c52-0000-4000-8000-0000000000a1",
+      "page_id": "7d1e4c52-0000-4000-8000-0000000000a0",
+      "parent_id": null,
+      "block_type": "heading",
+      "reading_order": 0,
+      "bbox": [
+        0.1,
+        0.06,
+        0.62,
+        0.1
+      ],
+      "raw_text": "4.2 Equations of Motion",
+      "current_text": "4.2 Equations of Motion",
+      "language": "en",
+      "revision": 1,
+      "review_status": "unreviewed",
+      "confidence": {
+        "score": null,
+        "origin": "not_available",
+        "reason": "Native PDF text layer; pdfplumber reports no confidence."
+      },
+      "quality_flags": [],
+      "provenance": {
+        "method": "native_pdf_text",
+        "engine": "pdfplumber",
+        "engine_version": "0.11.9",
+        "model": null,
+        "model_version": null,
+        "parameters": {},
+        "created_at": "2026-11-17T09:30:00Z"
+      },
+      "table": null,
+      "table_cell": null,
+      "equation": null,
+      "figure": null,
+      "heading_level": 1,
+      "role": "body",
+      "integration": null
+    },
+    {
+      "id": "7d1e4c52-0000-4000-8000-0000000000a2",
+      "page_id": "7d1e4c52-0000-4000-8000-0000000000a0",
+      "parent_id": null,
+      "block_type": "paragraph",
+      "reading_order": 1,
+      "bbox": [
+        0.1,
+        0.11,
+        0.9,
+        0.2
+      ],
+      "raw_text": "When an object moves along a straight line with uniform acceleration, its velocity after time t is related to its initial velocity u by the first equation of motion.",
+      "current_text": "When an object moves along a straight line with uniform acceleration, its speed after time t is related to its initial speed u by the first equation of motion.",
+      "language": "en",
+      "revision": 2,
+      "review_status": "unreviewed",
+      "confidence": {
+        "score": null,
+        "origin": "not_available",
+        "reason": "Native PDF text layer; pdfplumber reports no confidence."
+      },
+      "quality_flags": [],
+      "provenance": {
+        "method": "native_pdf_text",
+        "engine": "pdfplumber",
+        "engine_version": "0.11.9",
+        "model": null,
+        "model_version": null,
+        "parameters": {},
+        "created_at": "2026-11-17T09:30:00Z"
+      },
+      "table": null,
+      "table_cell": null,
+      "equation": null,
+      "figure": null,
+      "heading_level": null,
+      "role": "body",
+      "integration": null
+    },
+    {
+      "id": "7d1e4c52-0000-4000-8000-0000000000a3",
+      "page_id": "7d1e4c52-0000-4000-8000-0000000000a0",
+      "parent_id": null,
+      "block_type": "equation",
+      "reading_order": 2,
+      "bbox": [
+        0.4,
+        0.21,
+        0.6,
+        0.25
+      ],
+      "raw_text": "v = u + at (4.1)",
+      "current_text": "v = u + at (4.1)",
+      "language": "und",
+      "revision": 1,
+      "review_status": "approved",
+      "confidence": {
+        "score": null,
+        "origin": "not_available",
+        "reason": "Native PDF text layer; pdfplumber reports no confidence."
+      },
+      "quality_flags": [],
+      "provenance": {
+        "method": "native_pdf_text",
+        "engine": "pdfplumber",
+        "engine_version": "0.11.9",
+        "model": null,
+        "model_version": null,
+        "parameters": {},
+        "created_at": "2026-11-17T09:30:00Z"
+      },
+      "table": null,
+      "table_cell": null,
+      "equation": {
+        "source_crop_uri": "asset://crops/7d1e4c52-0000-4000-8000-0000000000a3.png",
+        "source_text": "v = u + at (4.1)",
+        "mathml": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mi>v</mi><mo>=</mo><mi>u</mi><mo>+</mo><mi>a</mi><mi>t</mi></math>",
+        "mathml_review_status": "approved",
+        "spoken_fallback": "v equals u plus a t",
+        "spoken_fallback_origin": "human",
+        "spoken_fallback_review_status": "approved"
+      },
+      "figure": null,
+      "heading_level": null,
+      "role": "body",
+      "integration": null
+    },
+    {
+      "id": "7d1e4c52-0000-4000-8000-0000000000a4",
+      "page_id": "7d1e4c52-0000-4000-8000-0000000000a0",
+      "parent_id": null,
+      "block_type": "table",
+      "reading_order": 3,
+      "bbox": [
+        0.15,
+        0.3,
+        0.85,
+        0.42
+      ],
+      "raw_text": null,
+      "current_text": null,
+      "language": "en",
+      "revision": 1,
+      "review_status": "unreviewed",
+      "confidence": {
+        "score": 0.91,
+        "origin": "engine_reported",
+        "reason": "Docling table-structure score."
+      },
+      "quality_flags": [],
+      "provenance": {
+        "method": "layout_model",
+        "engine": "docling",
+        "engine_version": "2.70.0",
+        "model": "docling-ibm-models/tableformer",
+        "model_version": "3.9.1",
+        "parameters": {
+          "table_mode": "accurate"
+        },
+        "created_at": "2026-11-17T09:30:05Z"
+      },
+      "table": {
+        "row_count": 2,
+        "column_count": 2,
+        "cell_ids": [
+          "7d1e4c52-0000-4000-8000-0000000000a5",
+          "7d1e4c52-0000-4000-8000-0000000000a6",
+          "7d1e4c52-0000-4000-8000-0000000000a7",
+          "7d1e4c52-0000-4000-8000-0000000000a8"
+        ]
+      },
+      "table_cell": null,
+      "equation": null,
+      "figure": null,
+      "heading_level": null,
+      "role": "body",
+      "integration": null
+    },
+    {
+      "id": "7d1e4c52-0000-4000-8000-0000000000a5",
+      "page_id": "7d1e4c52-0000-4000-8000-0000000000a0",
+      "parent_id": "7d1e4c52-0000-4000-8000-0000000000a4",
+      "block_type": "table_cell",
+      "reading_order": 0,
+      "bbox": [
+        0.15,
+        0.3,
+        0.5,
+        0.36
+      ],
+      "raw_text": "Quantity",
+      "current_text": "Quantity",
+      "language": "en",
+      "revision": 1,
+      "review_status": "unreviewed",
+      "confidence": {
+        "score": null,
+        "origin": "not_available",
+        "reason": "Cell text from native PDF text layer."
+      },
+      "quality_flags": [],
+      "provenance": {
+        "method": "layout_model",
+        "engine": "docling",
+        "engine_version": "2.70.0",
+        "model": "docling-ibm-models/tableformer",
+        "model_version": "3.9.1",
+        "parameters": {},
+        "created_at": "2026-11-17T09:30:05Z"
+      },
+      "table": null,
+      "table_cell": {
+        "table_id": "7d1e4c52-0000-4000-8000-0000000000a4",
+        "row_index": 0,
+        "column_index": 0,
+        "row_span": 1,
+        "column_span": 1,
+        "is_header": true,
+        "header_cell_ids": []
+      },
+      "equation": null,
+      "figure": null,
+      "heading_level": null,
+      "role": "body",
+      "integration": null
+    },
+    {
+      "id": "7d1e4c52-0000-4000-8000-0000000000a6",
+      "page_id": "7d1e4c52-0000-4000-8000-0000000000a0",
+      "parent_id": "7d1e4c52-0000-4000-8000-0000000000a4",
+      "block_type": "table_cell",
+      "reading_order": 1,
+      "bbox": [
+        0.5,
+        0.3,
+        0.85,
+        0.36
+      ],
+      "raw_text": "SI unit",
+      "current_text": "SI unit",
+      "language": "en",
+      "revision": 1,
+      "review_status": "unreviewed",
+      "confidence": {
+        "score": null,
+        "origin": "not_available",
+        "reason": "Cell text from native PDF text layer."
+      },
+      "quality_flags": [],
+      "provenance": {
+        "method": "layout_model",
+        "engine": "docling",
+        "engine_version": "2.70.0",
+        "model": "docling-ibm-models/tableformer",
+        "model_version": "3.9.1",
+        "parameters": {},
+        "created_at": "2026-11-17T09:30:05Z"
+      },
+      "table": null,
+      "table_cell": {
+        "table_id": "7d1e4c52-0000-4000-8000-0000000000a4",
+        "row_index": 0,
+        "column_index": 1,
+        "row_span": 1,
+        "column_span": 1,
+        "is_header": true,
+        "header_cell_ids": []
+      },
+      "equation": null,
+      "figure": null,
+      "heading_level": null,
+      "role": "body",
+      "integration": null
+    },
+    {
+      "id": "7d1e4c52-0000-4000-8000-0000000000a7",
+      "page_id": "7d1e4c52-0000-4000-8000-0000000000a0",
+      "parent_id": "7d1e4c52-0000-4000-8000-0000000000a4",
+      "block_type": "table_cell",
+      "reading_order": 2,
+      "bbox": [
+        0.15,
+        0.36,
+        0.5,
+        0.42
+      ],
+      "raw_text": "Acceleration",
+      "current_text": "Acceleration",
+      "language": "en",
+      "revision": 1,
+      "review_status": "unreviewed",
+      "confidence": {
+        "score": null,
+        "origin": "not_available",
+        "reason": "Cell text from native PDF text layer."
+      },
+      "quality_flags": [],
+      "provenance": {
+        "method": "layout_model",
+        "engine": "docling",
+        "engine_version": "2.70.0",
+        "model": "docling-ibm-models/tableformer",
+        "model_version": "3.9.1",
+        "parameters": {},
+        "created_at": "2026-11-17T09:30:05Z"
+      },
+      "table": null,
+      "table_cell": {
+        "table_id": "7d1e4c52-0000-4000-8000-0000000000a4",
+        "row_index": 1,
+        "column_index": 0,
+        "row_span": 1,
+        "column_span": 1,
+        "is_header": false,
+        "header_cell_ids": [
+          "7d1e4c52-0000-4000-8000-0000000000a5"
+        ]
+      },
+      "equation": null,
+      "figure": null,
+      "heading_level": null,
+      "role": "body",
+      "integration": null
+    },
+    {
+      "id": "7d1e4c52-0000-4000-8000-0000000000a8",
+      "page_id": "7d1e4c52-0000-4000-8000-0000000000a0",
+      "parent_id": "7d1e4c52-0000-4000-8000-0000000000a4",
+      "block_type": "table_cell",
+      "reading_order": 3,
+      "bbox": [
+        0.5,
+        0.36,
+        0.85,
+        0.42
+      ],
+      "raw_text": "m/s²",
+      "current_text": "m/s²",
+      "language": "und",
+      "revision": 1,
+      "review_status": "unreviewed",
+      "confidence": {
+        "score": null,
+        "origin": "not_available",
+        "reason": "Cell text from native PDF text layer."
+      },
+      "quality_flags": [],
+      "provenance": {
+        "method": "layout_model",
+        "engine": "docling",
+        "engine_version": "2.70.0",
+        "model": "docling-ibm-models/tableformer",
+        "model_version": "3.9.1",
+        "parameters": {},
+        "created_at": "2026-11-17T09:30:05Z"
+      },
+      "table": null,
+      "table_cell": {
+        "table_id": "7d1e4c52-0000-4000-8000-0000000000a4",
+        "row_index": 1,
+        "column_index": 1,
+        "row_span": 1,
+        "column_span": 1,
+        "is_header": false,
+        "header_cell_ids": [
+          "7d1e4c52-0000-4000-8000-0000000000a6"
+        ]
+      },
+      "equation": null,
+      "figure": null,
+      "heading_level": null,
+      "role": "body",
+      "integration": null
+    },
+    {
+      "id": "7d1e4c52-0000-4000-8000-0000000000a9",
+      "page_id": "7d1e4c52-0000-4000-8000-0000000000a0",
+      "parent_id": null,
+      "block_type": "caption",
+      "reading_order": 4,
+      "bbox": [
+        0.15,
+        0.43,
+        0.7,
+        0.46
+      ],
+      "raw_text": "Table 4.1 Quantity and SI unit",
+      "current_text": "Table 4.1 Quantity and SI unit",
+      "language": "en",
+      "revision": 1,
+      "review_status": "unreviewed",
+      "confidence": {
+        "score": null,
+        "origin": "not_available",
+        "reason": "Native PDF text layer; pdfplumber reports no confidence."
+      },
+      "quality_flags": [],
+      "provenance": {
+        "method": "native_pdf_text",
+        "engine": "pdfplumber",
+        "engine_version": "0.11.9",
+        "model": null,
+        "model_version": null,
+        "parameters": {},
+        "created_at": "2026-11-17T09:30:00Z"
+      },
+      "table": null,
+      "table_cell": null,
+      "equation": null,
+      "figure": null,
+      "heading_level": null,
+      "role": "footnote",
+      "integration": null
+    },
+    {
+      "id": "7d1e4c52-0000-4000-8000-0000000000b1",
+      "page_id": "7d1e4c52-0000-4000-8000-0000000000b0",
+      "parent_id": null,
+      "block_type": "heading",
+      "reading_order": 1,
+      "bbox": [
+        0.1,
+        0.05,
+        0.55,
+        0.09
+      ],
+      "raw_text": "अध्याय 10 : प्रकाश का परावर्तन",
+      "current_text": "अध्याय 10 : प्रकाश का परावर्तन",
+      "language": "hi",
+      "revision": 1,
+      "review_status": "unreviewed",
+      "confidence": {
+        "score": 0.93,
+        "origin": "engine_reported",
+        "reason": "Mean Tesseract word confidence / 100."
+      },
+      "quality_flags": [],
+      "provenance": {
+        "method": "ocr",
+        "engine": "tesseract",
+        "engine_version": "5.4.0",
+        "model": "hin.traineddata",
+        "model_version": "4.1.0",
+        "parameters": {
+          "lang": "hin+eng",
+          "psm": 6,
+          "dpi": 300
+        },
+        "created_at": "2026-11-17T09:31:10Z"
+      },
+      "table": null,
+      "table_cell": null,
+      "equation": null,
+      "figure": null,
+      "heading_level": 1,
+      "role": "body",
+      "integration": null
+    },
+    {
+      "id": "7d1e4c52-0000-4000-8000-0000000000b2",
+      "page_id": "7d1e4c52-0000-4000-8000-0000000000b0",
+      "parent_id": null,
+      "block_type": "paragraph",
+      "reading_order": 2,
+      "bbox": [
+        0.1,
+        0.1,
+        0.9,
+        0.22
+      ],
+      "raw_text": "जब प्रकाश किसी चिकनी सतह पर पड़ता है, तो वह वापस लौट आता है। इसे प्रकाश का परावर्तन कहते हैं (चित्र 10.1 देखें)।",
+      "current_text": "जब प्रकाश किसी चिकनी सतह पर पड़ता है, तो वह वापस लौट आता है। इसे प्रकाश का परावर्तन कहते हैं (चित्र 10.1 देखें)।",
+      "language": "hi",
+      "revision": 1,
+      "review_status": "unreviewed",
+      "confidence": {
+        "score": 0.81,
+        "origin": "engine_reported",
+        "reason": "Mean Tesseract word confidence / 100."
+      },
+      "quality_flags": [],
+      "provenance": {
+        "method": "ocr",
+        "engine": "tesseract",
+        "engine_version": "5.4.0",
+        "model": "hin.traineddata",
+        "model_version": "4.1.0",
+        "parameters": {
+          "lang": "hin+eng",
+          "psm": 6,
+          "dpi": 300
+        },
+        "created_at": "2026-11-17T09:31:10Z"
+      },
+      "table": null,
+      "table_cell": null,
+      "equation": null,
+      "figure": null,
+      "heading_level": null,
+      "role": "body",
+      "integration": null
+    },
+    {
+      "id": "7d1e4c52-0000-4000-8000-0000000000b3",
+      "page_id": "7d1e4c52-0000-4000-8000-0000000000b0",
+      "parent_id": null,
+      "block_type": "figure",
+      "reading_order": 3,
+      "bbox": [
+        0.25,
+        0.24,
+        0.75,
+        0.5
+      ],
+      "raw_text": null,
+      "current_text": null,
+      "language": "und",
+      "revision": 1,
+      "review_status": "needs_review",
+      "confidence": {
+        "score": 0.88,
+        "origin": "engine_reported",
+        "reason": "Docling layout region score."
+      },
+      "quality_flags": [],
+      "provenance": {
+        "method": "layout_model",
+        "engine": "docling",
+        "engine_version": "2.70.0",
+        "model": "docling-ibm-models/layout",
+        "model_version": "3.9.1",
+        "parameters": {},
+        "created_at": "2026-11-17T09:31:05Z"
+      },
+      "table": null,
+      "table_cell": null,
+      "equation": null,
+      "figure": {
+        "source_caption": "चित्र 10.1 समतल दर्पण द्वारा प्रकाश का परावर्तन",
+        "caption_block_id": "7d1e4c52-0000-4000-8000-0000000000b4",
+        "alt_text": {
+          "text": "समतल दर्पण पर आपतित किरण और परावर्तित किरण का आरेख",
+          "language": "hi",
+          "origin": "model_generated",
+          "review_status": "needs_review"
+        },
+        "extended_description": {
+          "text": "एक समतल दर्पण पर एक आपतित किरण पड़ती है। अभिलंब के दोनों ओर आपतन कोण और परावर्तन कोण बराबर दिखाए गए हैं।",
+          "language": "hi",
+          "origin": "human",
+          "review_status": "approved"
+        }
+      },
+      "heading_level": null,
+      "role": "body",
+      "integration": null
+    },
+    {
+      "id": "7d1e4c52-0000-4000-8000-0000000000b4",
+      "page_id": "7d1e4c52-0000-4000-8000-0000000000b0",
+      "parent_id": null,
+      "block_type": "caption",
+      "reading_order": 0,
+      "bbox": [
+        0.25,
+        0.51,
+        0.75,
+        0.54
+      ],
+      "raw_text": "चित्र 10.1 समतल दर्पण द्वारा प्रकाश का परावर्तन",
+      "current_text": "चित्र 10.1 समतल दर्पण द्वारा प्रकाश का परावर्तन",
+      "language": "hi",
+      "revision": 2,
+      "review_status": "unreviewed",
+      "confidence": {
+        "score": 0.9,
+        "origin": "engine_reported",
+        "reason": "Mean Tesseract word confidence / 100."
+      },
+      "quality_flags": [],
+      "provenance": {
+        "method": "ocr",
+        "engine": "tesseract",
+        "engine_version": "5.4.0",
+        "model": "hin.traineddata",
+        "model_version": "4.1.0",
+        "parameters": {
+          "lang": "hin+eng",
+          "psm": 6,
+          "dpi": 300
+        },
+        "created_at": "2026-11-17T09:31:10Z"
+      },
+      "table": null,
+      "table_cell": null,
+      "equation": null,
+      "figure": null,
+      "heading_level": null,
+      "role": "body",
+      "integration": null
+    },
+    {
+      "id": "7d1e4c52-0000-4000-8000-0000000000b5",
+      "page_id": "7d1e4c52-0000-4000-8000-0000000000b0",
+      "parent_id": null,
+      "block_type": "paragraph",
+      "reading_order": 4,
+      "bbox": [
+        0.12,
+        0.58,
+        0.88,
+        0.62
+      ],
+      "raw_text": "(i) आपतन कोण (angle of incidence) = परावतन कोण",
+      "current_text": "(i) आपतन कोण (angle of incidence) = परावर्तन कोण",
+      "language": "mul",
+      "revision": 3,
+      "review_status": "approved",
+      "confidence": {
+        "score": 0.62,
+        "origin": "engine_reported",
+        "reason": "Mean Tesseract word confidence / 100 (pre-correction)."
+      },
+      "quality_flags": [
+        "mixed_script",
+        "possible_ocr_error",
+        "critical_symbol_uncertain"
+      ],
+      "provenance": {
+        "method": "ocr",
+        "engine": "tesseract",
+        "engine_version": "5.4.0",
+        "model": "hin.traineddata",
+        "model_version": "4.1.0",
+        "parameters": {
+          "lang": "hin+eng",
+          "psm": 6,
+          "dpi": 300
+        },
+        "created_at": "2026-11-17T09:31:10Z"
+      },
+      "table": null,
+      "table_cell": null,
+      "equation": null,
+      "figure": null,
+      "heading_level": null,
+      "role": "body",
+      "integration": null
+    }
+  ],
+  "edges": [
+    {
+      "id": "7d1e4c52-0000-4000-8000-0000000000e1",
+      "edge_type": "precedes",
+      "source_id": "7d1e4c52-0000-4000-8000-0000000000a1",
+      "target_id": "7d1e4c52-0000-4000-8000-0000000000a2",
+      "provenance": {
+        "method": "derived",
+        "engine": null,
+        "engine_version": null,
+        "model": null,
+        "model_version": null,
+        "parameters": {},
+        "created_at": "2026-11-17T09:30:06Z"
+      }
+    },
+    {
+      "id": "7d1e4c52-0000-4000-8000-0000000000e2",
+      "edge_type": "caption_of",
+      "source_id": "7d1e4c52-0000-4000-8000-0000000000a9",
+      "target_id": "7d1e4c52-0000-4000-8000-0000000000a4",
+      "provenance": {
+        "method": "derived",
+        "engine": null,
+        "engine_version": null,
+        "model": null,
+        "model_version": null,
+        "parameters": {},
+        "created_at": "2026-11-17T09:30:06Z"
+      }
+    },
+    {
+      "id": "7d1e4c52-0000-4000-8000-0000000000e3",
+      "edge_type": "header_for",
+      "source_id": "7d1e4c52-0000-4000-8000-0000000000a5",
+      "target_id": "7d1e4c52-0000-4000-8000-0000000000a7",
+      "provenance": {
+        "method": "layout_model",
+        "engine": "docling",
+        "engine_version": "2.70.0",
+        "model": null,
+        "model_version": null,
+        "parameters": {},
+        "created_at": "2026-11-17T09:30:05Z"
+      }
+    },
+    {
+      "id": "7d1e4c52-0000-4000-8000-0000000000e4",
+      "edge_type": "header_for",
+      "source_id": "7d1e4c52-0000-4000-8000-0000000000a6",
+      "target_id": "7d1e4c52-0000-4000-8000-0000000000a8",
+      "provenance": {
+        "method": "layout_model",
+        "engine": "docling",
+        "engine_version": "2.70.0",
+        "model": null,
+        "model_version": null,
+        "parameters": {},
+        "created_at": "2026-11-17T09:30:05Z"
+      }
+    },
+    {
+      "id": "7d1e4c52-0000-4000-8000-0000000000e5",
+      "edge_type": "contains",
+      "source_id": "7d1e4c52-0000-4000-8000-0000000000a4",
+      "target_id": "7d1e4c52-0000-4000-8000-0000000000a5",
+      "provenance": {
+        "method": "derived",
+        "engine": null,
+        "engine_version": null,
+        "model": null,
+        "model_version": null,
+        "parameters": {},
+        "created_at": "2026-11-17T09:30:06Z"
+      }
+    },
+    {
+      "id": "7d1e4c52-0000-4000-8000-0000000000e6",
+      "edge_type": "caption_of",
+      "source_id": "7d1e4c52-0000-4000-8000-0000000000b4",
+      "target_id": "7d1e4c52-0000-4000-8000-0000000000b3",
+      "provenance": {
+        "method": "derived",
+        "engine": null,
+        "engine_version": null,
+        "model": null,
+        "model_version": null,
+        "parameters": {},
+        "created_at": "2026-11-17T09:31:12Z"
+      }
+    },
+    {
+      "id": "7d1e4c52-0000-4000-8000-0000000000e7",
+      "edge_type": "refers_to",
+      "source_id": "7d1e4c52-0000-4000-8000-0000000000b2",
+      "target_id": "7d1e4c52-0000-4000-8000-0000000000b3",
+      "provenance": {
+        "method": "derived",
+        "engine": null,
+        "engine_version": null,
+        "model": null,
+        "model_version": null,
+        "parameters": {
+          "pattern": "चित्र 10.1"
+        },
+        "created_at": "2026-11-17T09:31:12Z"
+      }
+    }
+  ],
+  "corrections": [
+    {
+      "id": "7d1e4c52-0000-4000-8000-0000000000c1",
+      "document_id": "7d1e4c52-0000-4000-8000-000000000001",
+      "block_id": "7d1e4c52-0000-4000-8000-0000000000b5",
+      "base_revision": 1,
+      "operation": "replace_text",
+      "new_text": "(i) आपतन कोण (angle of incidence) = परावर्तन कोण",
+      "new_language": null,
+      "new_review_status": null,
+      "new_block_type": null,
+      "new_reading_order": null,
+      "reason": "OCR dropped the र्व conjunct in परावर्तन.",
+      "author_ref": "reviewer:opaque-17",
+      "created_at": "2026-11-17T10:02:00Z"
+    },
+    {
+      "id": "7d1e4c52-0000-4000-8000-000000001201",
+      "document_id": "7d1e4c52-0000-4000-8000-000000000001",
+      "block_id": "7d1e4c52-0000-4000-8000-0000000000a2",
+      "base_revision": 1,
+      "operation": "replace_text",
+      "new_text": "When an object moves along a straight line with uniform acceleration, its speed after time t is related to its initial speed u by the first equation of motion.",
+      "new_language": null,
+      "new_review_status": null,
+      "new_block_type": null,
+      "new_reading_order": null,
+      "reason": "conformance vector",
+      "author_ref": "reviewer:opaque-17",
+      "created_at": "2026-11-19T10:00:00Z"
+    },
+    {
+      "id": "7d1e4c52-0000-4000-8000-000000001202",
+      "document_id": "7d1e4c52-0000-4000-8000-000000000001",
+      "block_id": "7d1e4c52-0000-4000-8000-0000000000b5",
+      "base_revision": 2,
+      "operation": "set_block_type",
+      "new_text": null,
+      "new_language": null,
+      "new_review_status": null,
+      "new_block_type": "paragraph",
+      "new_reading_order": null,
+      "reason": "conformance vector",
+      "author_ref": "reviewer:opaque-17",
+      "created_at": "2026-11-19T10:00:00Z"
+    },
+    {
+      "id": "7d1e4c52-0000-4000-8000-000000001203",
+      "document_id": "7d1e4c52-0000-4000-8000-000000000001",
+      "block_id": "7d1e4c52-0000-4000-8000-0000000000b4",
+      "base_revision": 1,
+      "operation": "set_reading_order",
+      "new_text": null,
+      "new_language": null,
+      "new_review_status": null,
+      "new_block_type": null,
+      "new_reading_order": 0,
+      "reason": "conformance vector",
+      "author_ref": "reviewer:opaque-17",
+      "created_at": "2026-11-19T10:00:00Z"
+    }
+  ],
+  "created_at": "2026-11-17T09:31:15Z",
+  "integration": null
+}

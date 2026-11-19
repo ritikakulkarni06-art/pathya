@@ -1,0 +1,136 @@
+{
+  "contract_family": "pathya.p1.content",
+  "schema_version": "1.2.0",
+  "vectors": [
+    {
+      "file": "valid_v1_2_0_producer_fields.json",
+      "description": "1.2.0: contract_family, heading levels, footnote role, critical flag on an approved block.",
+      "expected_valid": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": false,
+        "schema_1_2_0": true,
+        "python": true
+      }
+    },
+    {
+      "file": "valid_v1_2_0_backend_fields.json",
+      "description": "1.2.0: document revision, sentence ranges, voice_language and revision-bound audio on blocks.",
+      "expected_valid": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": false,
+        "schema_1_2_0": true,
+        "python": true
+      }
+    },
+    {
+      "file": "valid_v1_2_0_after_corrections.json",
+      "description": "1.2.0: text, block-type and reading-order corrections applied by apply_correction (ids kept, revisions bumped, history appended).",
+      "expected_valid": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": false,
+        "schema_1_2_0": true,
+        "python": true
+      }
+    },
+    {
+      "file": "invalid_v1_2_0_missing_contract_family.json",
+      "description": "1.2.0 requires contract_family.",
+      "expected_valid": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": false,
+        "schema_1_2_0": false,
+        "python": false
+      }
+    },
+    {
+      "file": "invalid_v1_2_0_wrong_contract_family.json",
+      "description": "Another payload family reusing the version string.",
+      "expected_valid": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": false,
+        "schema_1_2_0": false,
+        "python": false
+      }
+    },
+    {
+      "file": "invalid_v1_2_0_missing_role.json",
+      "description": "1.2.0 blocks require a role.",
+      "expected_valid": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": false,
+        "schema_1_2_0": false,
+        "python": false
+      }
+    },
+    {
+      "file": "invalid_v1_2_0_heading_level_on_paragraph.json",
+      "description": "heading_level only on headings.",
+      "expected_valid": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": false,
+        "schema_1_2_0": false,
+        "python": false
+      }
+    },
+    {
+      "file": "invalid_v1_2_0_critical_unreviewed.json",
+      "description": "A critical-symbol block cannot be unreviewed.",
+      "expected_valid": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": false,
+        "schema_1_2_0": false,
+        "python": false
+      }
+    },
+    {
+      "file": "invalid_v1_2_0_voice_language_mul.json",
+      "description": "voice_language is en or hi; language stays separate.",
+      "expected_valid": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": false,
+        "schema_1_2_0": false,
+        "python": false
+      }
+    },
+    {
+      "file": "invalid_python_only_v1_2_0_stale_sentences.json",
+      "description": "Sentence ranges/audio from an older revision (JSON Schema cannot hash text).",
+      "expected_valid": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": false,
+        "schema_1_2_0": true,
+        "python": false
+      }
+    },
+    {
+      "file": "invalid_python_only_v1_2_0_stale_audio.json",
+      "description": "Audio bound to another revision.",
+      "expected_valid": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": false,
+        "schema_1_2_0": true,
+        "python": false
+      }
+    },
+    {
+      "file": "invalid_v1_1_0_with_1_2_role.json",
+      "description": "A 1.1.0 document cannot carry a non-body role.",
+      "expected_valid": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": false,
+        "schema_1_2_0": false,
+        "python": false
+      }
+    },
+    {
+      "file": "invalid_v1_1_0_with_critical_flag.json",
+      "description": "critical_symbol_uncertain requires 1.2.0.",
+      "expected_valid": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": false,
+        "schema_1_2_0": false,
+        "python": false
+      }
+    }
+  ]
+}

@@ -1,27 +1,39 @@
 """Versioned JSON Schemas for the shared P1 content contract.
 
-* ``build_json_schema("1.1.0")`` - current contract. Accepts 1.0.0 and 1.1.0
-  documents and applies the 1.0.0 restrictions when ``schema_version`` is
-  ``"1.0.0"`` (via ``if``/``then``).
-* ``build_json_schema("1.0.0")`` - the 1.0.0 contract as a frozen artifact
-  for consumers that only support 1.0.0. It rejects every 1.1.0 document.
+* ``1.0.0`` and ``1.1.0`` are **frozen**: loaded byte-for-byte from
+  ``frozen_schemas/`` (copies of the files published at commit 39331e4, which
+  P2/P3 integrate against). They are never regenerated from the models.
+* ``1.2.0`` (current) is generated from the models. It accepts 1.0.0, 1.1.0
+  and 1.2.0 documents and applies each version's restrictions with
+  ``if``/``then`` on ``schema_version``.
 
-JSON Schema cannot compare array items or follow ID references, so some
-rules are enforced only by the Python validator (``models.Document``). They
-are listed under ``x-pathya-invariants`` and covered by the language-neutral
-conformance vectors in ``contract/conformance/``.
+JSON Schema cannot compare array items, follow ID references or hash text, so
+some rules are enforced only by the Python validator (``models.Document``).
+They are listed under ``x-pathya-invariants`` and covered by the conformance
+vectors in ``contract/conformance/``.
 """
 
 from __future__ import annotations
 
 import copy
+from importlib import resources
 import json
 from pathlib import Path
 from typing import Any
 
-from pathya_document_ai.models import QUALITY_FLAGS_ADDED_IN_1_1, SCHEMA_VERSION, Document, QualityFlag
+from pathya_document_ai.models import (
+    CONTRACT_FAMILY,
+    CORRECTION_OPERATIONS_ADDED_IN_1_2,
+    QUALITY_FLAGS_ADDED_IN_1_1,
+    QUALITY_FLAGS_ADDED_IN_1_2,
+    SCHEMA_VERSION,
+    CorrectionOperation,
+    Document,
+    QualityFlag,
+)
 
-SCHEMA_VERSIONS = ("1.0.0", "1.1.0")
+SCHEMA_VERSIONS = ("1.0.0", "1.1.0", "1.2.0")
+FROZEN_VERSIONS = ("1.0.0", "1.1.0")
 _DRAFT = "https://json-schema.org/draft/2020-12/schema"
 
 PYTHON_ONLY_INVARIANTS = [
@@ -38,98 +50,113 @@ PYTHON_ONLY_INVARIANTS = [
     "Revision 1 blocks have current_text == raw_text; correction base_revision < block revision.",
     "A page with status 'blank' has no blocks.",
     "Confidence: origin 'not_available' iff score is null; null score and heuristic origin need a reason.",
+    "1.2.0: integration.sentences and every audio reference carry the block's current revision and the "
+    "SHA-256 of its exact current_text (otherwise stale); sentence ranges are ordered, non-overlapping "
+    "code-point ranges within current_text; audio sentence_index references an existing range.",
+    "1.0.0/1.1.0 documents use no 1.2.0 feature (role other than body, heading_level, integration, "
+    "critical_symbol_uncertain, set_block_type/set_reading_order corrections).",
 ]
 
 
-def _base() -> dict[str, Any]:
-    return Document.model_json_schema(mode="serialization")
+def _frozen(version: str) -> dict[str, Any]:
+    text = resources.files("pathya_document_ai").joinpath(
+        f"frozen_schemas/pathya_content.v{version}.schema.json").read_text(encoding="utf-8")
+    return json.loads(text)
 
 
-def _require_ids(schema: dict[str, Any]) -> None:
-    for node in [schema, *schema["$defs"].values()]:
-        if "id" in node.get("properties", {}):
-            required = node.setdefault("required", [])
-            if "id" not in required:
-                required.append("id")
+def _drop_required(node: dict[str, Any], *names: str) -> None:
+    node["required"] = [f for f in node.get("required", []) if f not in names]
 
 
-def _v1_1(schema: dict[str, Any]) -> dict[str, Any]:
+def _v1_2() -> dict[str, Any]:
+    schema = copy.deepcopy(Document.model_json_schema(mode="serialization"))
     defs = schema["$defs"]
-    _require_ids(schema)
-    # Page status/warnings may be absent only in 1.0.0 documents (enforced below).
-    defs["Page"]["required"] = [f for f in defs["Page"]["required"] if f not in ("status", "warnings")]
+    for node in [schema, *defs.values()]:  # every serialized id is required
+        if "id" in node.get("properties", {}) and "id" not in node.setdefault("required", []):
+            node["required"].append("id")
+    # Fields introduced after 1.0.0 may be absent in older documents; per-version rules below.
+    _drop_required(defs["Page"], "status", "warnings")
+    _drop_required(schema, "contract_family", "integration")
+    _drop_required(defs["Block"], "heading_level", "role", "integration")
+    _drop_required(defs["Correction"], "new_block_type", "new_reading_order")
+
     defs["TableMeta"]["oneOf"] = [
         {"title": "structured table",
          "properties": {"row_count": {"type": "integer"}, "column_count": {"type": "integer"},
                         "cell_ids": {"minItems": 1}}},
-        {"title": "uncertain table candidate (1.1.0)",
+        {"title": "uncertain table candidate (1.1.0+)",
          "properties": {"row_count": {"type": "null"}, "column_count": {"type": "null"},
                         "cell_ids": {"maxItems": 0}}},
     ]
-    v1_0_flags = sorted(f.value for f in QualityFlag if f not in QUALITY_FLAGS_ADDED_IN_1_1)
-    schema["allOf"] = [{
-        "if": {"properties": {"schema_version": {"const": "1.0.0"}}, "required": ["schema_version"]},
-        "then": {"properties": {
-            "pages": {"items": {"properties": {"status": {"type": "null"}, "warnings": {"maxItems": 0}}}},
-            "blocks": {"items": {"properties": {
-                "quality_flags": {"items": {"enum": v1_0_flags}},
-                "table": {"anyOf": [{"type": "null"}, {"properties": {"cell_ids": {"minItems": 1}}}]},
-            }}},
-        }},
-        "else": {"properties": {"pages": {"items": {
-            "required": ["status", "warnings"],
-            "properties": {"status": {"$ref": "#/$defs/PageStatus"}},
-        }}}},
-    }]
-    return schema
+    defs["Block"]["allOf"] = [
+        {"if": {"required": ["quality_flags"],
+                "properties": {"quality_flags": {"contains": {"const": "critical_symbol_uncertain"}}}},
+         "then": {"properties": {"review_status": {"not": {"const": "unreviewed"}}}}},
+        {"if": {"required": ["heading_level"], "properties": {"heading_level": {"type": "integer"}}},
+         "then": {"properties": {"block_type": {"const": "heading"}}}},
+    ]
 
+    v1_0_flags = sorted(f.value for f in QualityFlag
+                        if f not in QUALITY_FLAGS_ADDED_IN_1_1 and f not in QUALITY_FLAGS_ADDED_IN_1_2)
+    v1_1_flags = sorted(f.value for f in QualityFlag if f not in QUALITY_FLAGS_ADDED_IN_1_2)
+    old_ops = sorted(o.value for o in CorrectionOperation if o not in CORRECTION_OPERATIONS_ADDED_IN_1_2)
 
-def _v1_0(schema: dict[str, Any]) -> dict[str, Any]:
-    """Reconstruct the 1.0.0 schema: the contract before any 1.1.0 addition.
+    def pre_1_2(flags: list[str], *, page_status: bool) -> dict[str, Any]:
+        page: dict[str, Any] = ({"required": ["status", "warnings"], "properties": {"status": {"$ref": "#/$defs/PageStatus"}}}
+                                if page_status else
+                                {"properties": {"status": {"type": "null"}, "warnings": {"maxItems": 0}}})
+        block_props: dict[str, Any] = {
+            "quality_flags": {"items": {"enum": flags}},
+            "role": {"anyOf": [{"type": "null"}, {"const": "body"}]},
+            "heading_level": {"type": "null"},
+            "integration": {"type": "null"},
+        }
+        if not page_status:  # 1.0.0: every table has cells
+            block_props["table"] = {"anyOf": [{"type": "null"}, {"properties": {"cell_ids": {"minItems": 1}}}]}
+        return {"properties": {
+            "contract_family": {"type": "null"},
+            "integration": {"type": "null"},
+            "pages": {"items": page},
+            "blocks": {"items": {"properties": block_props}},
+            "corrections": {"items": {"properties": {"operation": {"enum": old_ops}}}},
+        }}
 
-    The original 1.0.0 file was regenerated in place before the repository's
-    first commit, so it is rebuilt here from the 1.0.0 rules (documented in
-    docs/p1_contract.md and the 1.0.0 conformance vectors) rather than copied.
-    Like the original, it does not mark ``id`` fields as required.
-    """
-    defs = schema["$defs"]
-    schema["properties"]["schema_version"] = {"const": "1.0.0", "default": "1.0.0", "title": "Schema Version",
-                                              "type": "string"}
-    defs["QualityFlag"]["enum"] = [f for f in defs["QualityFlag"]["enum"]
-                                   if QualityFlag(f) not in QUALITY_FLAGS_ADDED_IN_1_1]
-    page = defs["Page"]
-    for name in ("status", "warnings"):
-        page["properties"].pop(name)
-    page["required"] = [f for f in page["required"] if f not in ("status", "warnings")]
-    for name in ("PageStatus", "PageWarning", "ProcessingStage"):
-        defs.pop(name, None)
-    table = defs["TableMeta"]
-    table["properties"]["row_count"] = {"minimum": 1, "title": "Row Count", "type": "integer"}
-    table["properties"]["column_count"] = {"minimum": 1, "title": "Column Count", "type": "integer"}
-    table["properties"]["cell_ids"]["minItems"] = 1
-    table["description"] = "Attached to blocks of type ``table``."
-    return schema
+    schema["allOf"] = [
+        {"if": {"required": ["schema_version"], "properties": {"schema_version": {"const": "1.0.0"}}},
+         "then": pre_1_2(v1_0_flags, page_status=False)},
+        {"if": {"required": ["schema_version"], "properties": {"schema_version": {"const": "1.1.0"}}},
+         "then": pre_1_2(v1_1_flags, page_status=True)},
+        {"if": {"required": ["schema_version"], "properties": {"schema_version": {"const": "1.2.0"}}},
+         "then": {"required": ["contract_family"], "properties": {
+             "contract_family": {"const": CONTRACT_FAMILY},
+             "pages": {"items": {"required": ["status", "warnings"],
+                                 "properties": {"status": {"$ref": "#/$defs/PageStatus"}}}},
+             "blocks": {"items": {"required": ["role"], "properties": {"role": {"$ref": "#/$defs/BlockRole"}}}},
+         }}},
+    ]
+    header = {
+        "$schema": _DRAFT,
+        "$id": f"https://pathya.local/schemas/p1-content/{SCHEMA_VERSION}/document.schema.json",
+        "x-pathya-schema-version": SCHEMA_VERSION,
+        "x-pathya-contract-family": CONTRACT_FAMILY,
+        "x-pathya-invariants": PYTHON_ONLY_INVARIANTS,
+    }
+    return {**header, **schema}
 
 
 def build_json_schema(version: str = SCHEMA_VERSION) -> dict[str, Any]:
     """Return the Draft 2020-12 JSON Schema for contract ``version``."""
     if version not in SCHEMA_VERSIONS:
         raise ValueError(f"unknown schema version {version!r}; known: {SCHEMA_VERSIONS}")
-    schema = copy.deepcopy(_base())
-    schema = _v1_1(schema) if version == "1.1.0" else _v1_0(schema)
-    header: dict[str, Any] = {
-        "$schema": _DRAFT,
-        "$id": f"https://pathya.local/schemas/p1-content/{version}/document.schema.json",
-        "x-pathya-schema-version": version,
-        "x-pathya-invariants": PYTHON_ONLY_INVARIANTS,
-    }
-    if version == "1.0.0":
-        header["x-pathya-reconstructed"] = (
-            "Rebuilt from the 1.0.0 rules after the original file was overwritten before the first commit.")
-    return {**header, **schema}
+    if version in FROZEN_VERSIONS:
+        return _frozen(version)
+    return _v1_2()
 
 
 def render_json_schema(version: str = SCHEMA_VERSION) -> str:
+    if version in FROZEN_VERSIONS:  # exact published bytes, not a re-serialization
+        return resources.files("pathya_document_ai").joinpath(
+            f"frozen_schemas/pathya_content.v{version}.schema.json").read_text(encoding="utf-8")
     return json.dumps(build_json_schema(version), indent=2, ensure_ascii=False, sort_keys=True) + "\n"
 
 

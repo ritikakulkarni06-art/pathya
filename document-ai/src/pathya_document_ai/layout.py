@@ -22,6 +22,7 @@ import time
 from typing import Any
 import unicodedata
 
+from pathya_document_ai.critical import critical_uncertain
 from pathya_document_ai.geometry import Box, normalize_display_box
 
 # ------------------------------------------------------------- adapter output
@@ -644,12 +645,57 @@ def build_layout_document(
         contract_pages[page.page_index] = _page_status_after_layout(
             contract_pages[page.page_index], layout, ocr_results.get(page.page_index), report,
             bool(page_blocks), m)
+    blocks = _finalize_blocks(blocks, {p.id: p.height for p in base.pages}, m)
     languages = sorted({b.language for b in blocks} - {m.Language.UNDETERMINED}) or [m.Language.UNDETERMINED]
     data = base.model_dump()
     data.update(pages=[contract_pages[p.page_index].model_dump() for p in base.pages],
                 blocks=[b.model_dump() for b in blocks], edges=[e.model_dump() for e in edges],
                 languages=languages)
     return LayoutDocumentResult(m.Document.model_validate(data), tuple(reports))
+
+
+_ROLE_FOR_LABEL = {"page_header": "page_header", "page-header": "page_header",
+                   "page_footer": "page_footer", "page-footer": "page_footer", "footnote": "footnote"}
+HEADING_SIZE_TOLERANCE = 0.08  # glyph heights within 8% are the same heading level
+
+
+def heading_levels(heights: dict[Any, float]) -> dict[Any, int]:
+    """Rank heading glyph heights document-wide: largest distinct size is level 1 (max 6)."""
+    distinct: list[float] = []
+    for h in sorted(heights.values(), reverse=True):
+        if not distinct or h < distinct[-1] * (1 - HEADING_SIZE_TOLERANCE):
+            distinct.append(h)
+    def level(h: float) -> int:
+        for i, d in enumerate(distinct):
+            if h >= d * (1 - HEADING_SIZE_TOLERANCE):
+                return min(i + 1, 6)
+        return min(len(distinct), 6)
+    return {key: level(h) for key, h in heights.items()}
+
+
+def _finalize_blocks(blocks: list[Any], page_heights: dict[Any, float], m: Any) -> list[Any]:
+    """Producer-owned 1.2.0 fields, set once every flag is final:
+
+    * ``role`` from the layout label (page header/footer, footnote, else body);
+    * ``review_status`` by the pipeline rule (needs_review iff a review-trigger flag);
+    * ``heading_level`` from the relative glyph size of headings across the
+      document (null when a heading has no words to measure).
+    """
+    heights = {}
+    for b in blocks:
+        glyph = b.provenance.parameters.get("glyph_height_norm")
+        if b.block_type is m.BlockType.HEADING and isinstance(glyph, (int, float)) and glyph > 0:
+            heights[b.id] = glyph * page_heights[b.page_id]
+    levels = heading_levels(heights)
+    out = []
+    for b in blocks:
+        label = str(b.provenance.parameters.get("layout_label") or "").lower()
+        out.append(b.model_copy(update={
+            "role": m.BlockRole(_ROLE_FOR_LABEL.get(label, "body")),
+            "review_status": m.pipeline_review_status(b.quality_flags),
+            "heading_level": levels.get(b.id),
+        }))
+    return out
 
 
 def _page_status_after_layout(page: Any, layout: LayoutPage, ocr: Any, report: PageLayoutReport,
@@ -774,8 +820,12 @@ def _confidence(tokens: list[_Token], m: Any) -> Any:
     return m.Confidence.unavailable("Region contains no text; layout score is in provenance.")
 
 
-def _flags(region: _Region, tokens: list[_Token], text: str | None, m: Any, extra: set[str] = frozenset()) -> list[Any]:  # type: ignore[assignment]
+def _flags(region: _Region, tokens: list[_Token], text: str | None, m: Any, extra: set[str] = frozenset(),  # type: ignore[assignment]
+           *, equation: bool = False) -> list[Any]:
     flags = set(region.flags) | set(extra)
+    ordered = _ordered_tokens(tokens, allow_columns=False) if tokens else []
+    if critical_uncertain([(t.text, t.source, t.confidence) for t in ordered], equation=equation):
+        flags.add("critical_symbol_uncertain")
     languages = {t.language for t in tokens}
     if {"hi", "en"} <= languages or "mul" in languages:
         flags.add("mixed_script")
@@ -798,6 +848,7 @@ def _region_to_blocks(region: _Region, position: int, page_id: Any, provenance: 
         "layout_confidence": None if region.confidence is None else round(region.confidence, 4),
         "layout_alternatives": ";".join(f"{lbl}@{c}" for lbl, c in region.alternatives) or None,
         "text_source": "+".join(sorted({t.source for t in tokens})) or "none",
+        "glyph_height_norm": _median_height(tokens),
     }})
     common = dict(page_id=page_id, reading_order=position, bbox=region.bbox, language=language,
                   confidence=_confidence(tokens, m), provenance=prov)
@@ -809,7 +860,7 @@ def _region_to_blocks(region: _Region, position: int, page_id: Any, provenance: 
         return table_block, children, edges
     if block_type is m.BlockType.EQUATION:
         block = m.Block(block_type=block_type, raw_text=text, current_text=text,
-                        quality_flags=_flags(region, tokens, None, m, {"math_needs_review"}),
+                        quality_flags=_flags(region, tokens, None, m, {"math_needs_review"}, equation=True),
                         equation=m.EquationMeta(source_text=text), **common)
         return block, [], []
     if block_type is m.BlockType.FIGURE:
@@ -821,6 +872,14 @@ def _region_to_blocks(region: _Region, position: int, page_id: Any, provenance: 
     block = m.Block(block_type=block_type, raw_text=raw, current_text=raw,
                     quality_flags=_flags(region, tokens, raw, m, extra), **common)
     return block, [], []
+
+
+def _median_height(tokens: list[_Token]) -> float | None:
+    """Median normalized word height: evidence for heading levels (null without words)."""
+    if not tokens:
+        return None
+    heights = sorted(t.bbox[3] - t.bbox[1] for t in tokens)
+    return round(heights[len(heights) // 2], 6)
 
 
 def _table_blocks(region: _Region, common: dict[str, Any], text: str | None, prov: Any,

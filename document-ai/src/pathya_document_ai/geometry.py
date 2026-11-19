@@ -147,6 +147,30 @@ def normalized_to_pdf_user_space(bbox: Box, transform: CoordinateTransform) -> B
     return (min(xs), min(ys), max(xs), max(ys))
 
 
+def normalized_to_image_pixels(bbox: Box, transform: CoordinateTransform) -> Box:
+    """Map a normalized displayed-page box to **stored** image pixels (top-left origin, no y flip).
+
+    ``crop_box`` is the stored-pixel region (0, 0, width, height) and
+    ``rotation_applied`` the clockwise rotation (e.g. from EXIF) that turned the
+    stored pixels into the displayed page.
+    """
+    if transform.source_space is not SourceCoordinateSpace.IMAGE_PIXELS:
+        raise ValueError("transform does not describe image pixels")
+    cx0, cy0, cx1, cy1 = transform.crop_box
+    w, h = cx1 - cx0, cy1 - cy0
+    u0, v0, u1, v1 = bbox
+    rotation = transform.rotation_applied
+    if rotation is Rotation.R0:
+        xs, ys = (cx0 + u0 * w, cx0 + u1 * w), (cy0 + v0 * h, cy0 + v1 * h)
+    elif rotation is Rotation.R90:
+        xs, ys = (cx0 + v0 * w, cx0 + v1 * w), (cy1 - u0 * h, cy1 - u1 * h)
+    elif rotation is Rotation.R180:
+        xs, ys = (cx1 - u0 * w, cx1 - u1 * w), (cy1 - v0 * h, cy1 - v1 * h)
+    else:  # R270
+        xs, ys = (cx1 - v0 * w, cx1 - v1 * w), (cy0 + u0 * h, cy0 + u1 * h)
+    return (min(xs), min(ys), max(xs), max(ys))
+
+
 def pdf_user_space_to_normalized(box: Box, transform: CoordinateTransform) -> Box:
     """Inverse of :func:`normalized_to_pdf_user_space` (no clipping or validation)."""
     if transform.source_space is not SourceCoordinateSpace.PDF_USER_SPACE:
