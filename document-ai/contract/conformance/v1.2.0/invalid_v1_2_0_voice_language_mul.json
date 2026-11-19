@@ -142,10 +142,11 @@
       "figure": null,
       "role": "body",
       "integration": {
+        "backend_block_id": "p3-blk-a2",
         "sentences": {
           "text_revision": 1,
           "text_sha256": "b4fff080751df794204041c501d78f73639e5b9f7a8ff201b2450417a1b717d4",
-          "segmenter": "pathya-sentences/1",
+          "segmenter": "pathya-sentences/2",
           "ranges": [
             {
               "start": 0,
@@ -156,14 +157,11 @@
         "voice_language": "en",
         "audio": [
           {
-            "uri": "audio://p3/opaque-a2-0",
-            "media_type": "audio/mpeg",
-            "voice_language": "en",
+            "key": "a2-r1-s0",
+            "url": "audio://p3/opaque-a2-0",
+            "bytes": 48213,
             "text_revision": 1,
-            "text_sha256": "b4fff080751df794204041c501d78f73639e5b9f7a8ff201b2450417a1b717d4",
-            "sentence_index": 0,
-            "duration_ms": 5400,
-            "document_revision": 3
+            "text_sha256": "b4fff080751df794204041c501d78f73639e5b9f7a8ff201b2450417a1b717d4"
           }
         ]
       }
@@ -574,6 +572,7 @@
       "figure": null,
       "role": "body",
       "integration": {
+        "backend_block_id": "p3-blk-b2",
         "sentences": null,
         "voice_language": "mul",
         "audio": []

@@ -1,6 +1,6 @@
 # P1 content contract — versions 1.1.0 (integration baseline) and 1.2.0 (proposed)
 
-> **1.2.0 is PROPOSED on branch `feature/p1-contract-v1.2.0`. It is not
+> **1.2.0 is PROPOSED on branch `person-1` (in `document-ai/`). It is not
 > approved; P1, P2 and P3 confirmation is pending.** P3 is integrating
 > **1.1.0** at commit `39331e4`; every 1.1.0 artifact is frozen
 > byte-for-byte. See [1.2.0 changes](#120-changes-proposed) and
@@ -376,9 +376,10 @@ their own rules) and **not forward-compatible**: 1.1.0-only readers reject 1.2.0
 | `Block.review_status` (machine output) | P1 | Pipeline rule: `needs_review` iff the block carries a review-trigger flag (`critical_symbol_uncertain`, `low_confidence`, `possible_ocr_error`, `block_type_uncertain`, `table_structure_uncertain`, `math_needs_review`, `unsupported_content`, `missing_geometry`), otherwise `unreviewed`. Producers never emit `approved` or `rejected`. |
 | `quality_flags: critical_symbol_uncertain` | P1 | See below. |
 | `Document.integration.document_revision`, `.backend_document_id` | **P3** | Producers leave `integration` null. P3 is authoritative for backend IDs, access control, revisions, commits and invalidation. |
-| `Block.integration.sentences` | **P3** (P1 provides `sentences.attach_sentences`) | Bound to the block revision and SHA-256 of `current_text`. |
+| `Block.integration.backend_block_id` | **P3** | Stable opaque block identifier assigned by P3 (1–128 characters). Separate from the producer UUID, which is scoped to one extraction run. Survives corrections. |
+| `Block.integration.sentences` | **P3** (P1 provides `sentences.attach_sentences`) | Headings, paragraphs and list items only. Bound to the block revision and SHA-256 of `current_text`. |
 | `Block.integration.voice_language` | **P2/P3** | `en` or `hi`: the narration voice. Never replaces `Block.language` (which may be `mul`/`und`). |
-| `Block.integration.audio[]` | **P3** | Opaque URI, media type, voice, `text_revision`, `text_sha256`, optional `sentence_index`, `duration_ms`, `document_revision`. |
+| `Block.integration.audio[]` | **P3** | Entries `{key, url, bytes}` (P2 decision): `key` is the reader's clip lookup key, unique within the block; `url` is opaque; `bytes` is the size. Each entry is also bound to `text_revision` and `text_sha256`. |
 
 Producer UUIDs (`Document.id`, page, block, edge ids) are scoped to one
 extraction run. They never grant ownership or access; P3 maps them to its own
@@ -391,8 +392,15 @@ identifiers.
   characters outside the BMP, e.g. mathematical italic letters).
 - **Text:** the exact `current_text` of the block, with no normalization.
   Never `raw_text`.
-- **Convention:** half-open `[start, end)`, ordered, non-overlapping, trimmed of
-  surrounding whitespace.
+- **Coverage (P2 decision):** half-open `[start, end)` ranges cover all of
+  `current_text` without gaps or overlaps. The first starts at 0, each starts
+  where the previous ended, and the last ends at the text length. Whitespace
+  after a sentence belongs to that (preceding) range; leading whitespace
+  belongs to the first. Empty text has no ranges.
+- **Eligible blocks (P2 decision):** headings, paragraphs and list items only.
+  Readers build their own descriptions for tables, equations and figures.
+- **Before substitutions:** offsets refer to `current_text` exactly as stored,
+  before any pronunciation substitution in the reader.
 - **Binding:** `text_revision` equals the block's `revision`, and
   `text_sha256` is SHA-256 of `current_text` in UTF-8. Anything else is stale
   and the document is invalid.
@@ -401,7 +409,8 @@ identifiers.
   (`attach_sentences`) for the new revision. P3 may re-attach audio only by
   re-binding it to the new revision after verifying the text hash is
   unchanged.
-- **Segmenter:** `pathya-sentences/1`. Sentences end after `.`, `!`, `?`, `।`
+- **Segmenter:** `pathya-sentences/2` (`/1` in the earlier draft trimmed
+  whitespace and left gaps). Sentences end after `.`, `!`, `?`, `।`
   or `॥` (plus closing quotes or brackets) before whitespace or the end of the
   text. They do not end after listed abbreviations (`Fig.`, `e.g.` …), on
   decimal points, or before a lowercase Latin word.

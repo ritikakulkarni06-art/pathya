@@ -11,81 +11,40 @@
     },
     "AudioReference": {
       "additionalProperties": false,
-      "description": "Revision-bound reference to synthesized audio. The URI is opaque and backend-owned.",
+      "description": "Prepared audio entry ``{key, url, bytes}`` (P2 decision), bound to a block revision and text.\n\n``key`` is the reader's clip lookup key within a revision-scoped package; ``url``\nis opaque and backend-owned; ``bytes`` is the clip size.",
       "properties": {
-        "document_revision": {
-          "anyOf": [
-            {
-              "minimum": 1,
-              "type": "integer"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Document Revision"
+        "bytes": {
+          "minimum": 0,
+          "title": "Bytes",
+          "type": "integer"
         },
-        "duration_ms": {
-          "anyOf": [
-            {
-              "minimum": 0,
-              "type": "integer"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Duration Ms"
-        },
-        "media_type": {
+        "key": {
           "minLength": 1,
-          "title": "Media Type",
+          "title": "Key",
           "type": "string"
         },
-        "sentence_index": {
-          "anyOf": [
-            {
-              "minimum": 0,
-              "type": "integer"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Null for whole-block audio.",
-          "title": "Sentence Index"
-        },
         "text_revision": {
+          "description": "Block revision the clip was prepared for.",
           "minimum": 1,
           "title": "Text Revision",
           "type": "integer"
         },
         "text_sha256": {
+          "description": "SHA-256 of the block's current_text (UTF-8) at that revision.",
           "pattern": "^[0-9a-f]{64}$",
           "title": "Text Sha256",
           "type": "string"
         },
-        "uri": {
+        "url": {
           "minLength": 1,
-          "title": "Uri",
-          "type": "string"
-        },
-        "voice_language": {
-          "enum": [
-            "en",
-            "hi"
-          ],
-          "title": "Voice Language",
+          "title": "Url",
           "type": "string"
         }
       },
       "required": [
-        "uri",
-        "media_type",
-        "voice_language",
+        "key",
+        "url",
+        "bytes",
         "text_revision",
         "text_sha256"
       ],
@@ -358,6 +317,21 @@
           },
           "title": "Audio",
           "type": "array"
+        },
+        "backend_block_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Stable opaque block identifier assigned by P3 (not the producer UUID).",
+          "title": "Backend Block Id"
         },
         "sentences": {
           "anyOf": [
@@ -1223,6 +1197,7 @@
       "description": "Sentence ranges bound to one block revision and the exact current_text they index.",
       "properties": {
         "ranges": {
+          "description": "Cover current_text completely and contiguously from 0 to its length; trailing whitespace belongs to the preceding range.",
           "items": {
             "$ref": "#/$defs/SentenceRange"
           },
@@ -1230,7 +1205,7 @@
           "type": "array"
         },
         "segmenter": {
-          "description": "Segmenter name and version, e.g. 'pathya-sentences/1'.",
+          "description": "Segmenter name and version, e.g. 'pathya-sentences/2'.",
           "minLength": 1,
           "title": "Segmenter",
           "type": "string"
@@ -1821,7 +1796,7 @@
     "Revision 1 blocks have current_text == raw_text; correction base_revision < block revision.",
     "A page with status 'blank' has no blocks.",
     "Confidence: origin 'not_available' iff score is null; null score and heuristic origin need a reason.",
-    "1.2.0: integration.sentences and every audio reference carry the block's current revision and the SHA-256 of its exact current_text (otherwise stale); sentence ranges are ordered, non-overlapping code-point ranges within current_text; audio sentence_index references an existing range.",
+    "1.2.0: integration.sentences and every audio reference carry the block's current revision and the SHA-256 of its exact current_text (otherwise stale); sentence ranges appear only on headings, paragraphs and list items and cover current_text contiguously from 0 to its length in code points; audio keys are unique within a block.",
     "1.0.0/1.1.0 documents use no 1.2.0 feature (role other than body, heading_level, integration, critical_symbol_uncertain, set_block_type/set_reading_order corrections)."
   ],
   "x-pathya-schema-version": "1.2.0"

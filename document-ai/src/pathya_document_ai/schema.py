@@ -51,8 +51,9 @@ PYTHON_ONLY_INVARIANTS = [
     "A page with status 'blank' has no blocks.",
     "Confidence: origin 'not_available' iff score is null; null score and heuristic origin need a reason.",
     "1.2.0: integration.sentences and every audio reference carry the block's current revision and the "
-    "SHA-256 of its exact current_text (otherwise stale); sentence ranges are ordered, non-overlapping "
-    "code-point ranges within current_text; audio sentence_index references an existing range.",
+    "SHA-256 of its exact current_text (otherwise stale); sentence ranges appear only on headings, "
+    "paragraphs and list items and cover current_text contiguously from 0 to its length in code points; "
+    "audio keys are unique within a block.",
     "1.0.0/1.1.0 documents use no 1.2.0 feature (role other than body, heading_level, integration, "
     "critical_symbol_uncertain, set_block_type/set_reading_order corrections).",
 ]

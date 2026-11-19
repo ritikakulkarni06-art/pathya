@@ -230,30 +230,66 @@ def test_incomplete_pages_are_never_trusted_evidence() -> None:
 # ------------------------------------------------------------- sentence offsets
 
 
-def test_sentence_offsets_are_code_points_on_current_text() -> None:
-    text = "Speed is 4.5 m/s. वेग दिशा बताता है। See Fig. 4.2 next."
+def _covers(text: str, ranges: list[tuple[int, int]]) -> bool:
+    return (not text and not ranges) or (ranges[0][0] == 0 and ranges[-1][1] == len(text)
+                                         and all(a[1] == b[0] for a, b in zip(ranges, ranges[1:])))
+
+
+def test_sentence_offsets_cover_current_text_with_trailing_whitespace_to_preceding_range() -> None:
+    text = "Speed is 4.5 m/s.  वेग दिशा बताता है। See Fig. 4.2 next."
     ranges = segment_sentences(text)
-    assert [text[s:e] for s, e in ranges] == ["Speed is 4.5 m/s.", "वेग दिशा बताता है।", "See Fig. 4.2 next."]
-    assert all(not text[s].isspace() and not text[e - 1].isspace() for s, e in ranges)
+    assert [text[s:e] for s, e in ranges] == ["Speed is 4.5 m/s.  ", "वेग दिशा बताता है। ", "See Fig. 4.2 next."]
+    assert _covers(text, ranges)  # no gaps: every code point belongs to exactly one range
+    assert segment_sentences("  Lead. Tail  ") == [(0, 8), (8, 14)]  # leading ws -> first, trailing -> previous
+    assert segment_sentences("") == [] and segment_sentences("No terminator") == [(0, 13)]
     astral = "𝑥 = 2. Next."
-    assert segment_sentences(astral) == [(0, 6), (7, 12)]
-    assert to_utf16_ranges(astral, segment_sentences(astral)) == [(0, 7), (8, 13)]
+    assert segment_sentences(astral) == [(0, 7), (7, 12)]  # code points
+    assert to_utf16_ranges(astral, segment_sentences(astral)) == [(0, 8), (8, 13)]  # JavaScript indices
 
 
 def test_sentences_bound_to_revision_and_exact_text() -> None:
     doc = _v12()
     block = attach_sentences(_block(doc, "a2"))
     seg = block.integration.sentences
-    assert seg.segmenter == SEGMENTER and seg.text_revision == block.revision
+    assert seg.segmenter == SEGMENTER == "pathya-sentences/2" and seg.text_revision == block.revision
     assert seg.text_sha256 == hashlib.sha256(block.current_text.encode("utf-8")).hexdigest()
+    assert _covers(block.current_text, [(r.start, r.end) for r in seg.ranges])
     doc = _replace(doc, block)
     stale = block.model_copy(update={"current_text": block.current_text + " Extra.", "revision": 2})
     with pytest.raises(ValidationError, match="stale sentence ranges"):
         _replace(doc, stale)
-    out_of_range = json.loads(doc.model_dump_json())
-    out_of_range["blocks"][1]["integration"]["sentences"]["ranges"] = [{"start": 0, "end": 10_000}]
-    with pytest.raises(ValidationError, match="exceeds"):
-        Document.model_validate(out_of_range)
+
+
+@pytest.mark.parametrize(("ranges", "match"), [
+    ([{"start": 1, "end": 10}], "without gaps"),        # does not start at 0
+    ([{"start": 0, "end": 5}, {"start": 6, "end": 10}], "without gaps"),  # gap
+    ([{"start": 0, "end": 5}], "must end at"),          # stops short of the text
+    ([{"start": 0, "end": 10_000}], "must end at"),     # beyond the text
+])
+def test_sentence_ranges_must_cover_without_gaps(ranges: list[dict[str, int]], match: str) -> None:
+    doc = _replace(_v12(), attach_sentences(_block(_v12(), "a2")))
+    data = json.loads(doc.model_dump_json())
+    data["blocks"][1]["integration"]["sentences"]["ranges"] = ranges
+    with pytest.raises(ValidationError, match=match):
+        Document.model_validate(data)
+
+
+def test_sentence_ranges_only_on_headings_paragraphs_and_list_items() -> None:
+    from pathya_document_ai.sentences import build_segmentation
+
+    doc = _v12()
+    for suffix in ("a1", "a2", "b5"):  # heading, paragraph, list item
+        assert build_segmentation(_block(doc, suffix)) is not None
+    caption, cell = _block(doc, "a9"), _block(doc, "a5")
+    assert build_segmentation(caption) is None and build_segmentation(cell) is None
+    from pathya_document_ai.models import SentenceSegmentation
+
+    forced = SentenceSegmentation(
+        text_revision=caption.revision, segmenter=SEGMENTER,
+        text_sha256=hashlib.sha256(caption.current_text.encode("utf-8")).hexdigest(),
+        ranges=[{"start": 0, "end": len(caption.current_text)}])
+    with pytest.raises(ValidationError, match="only allowed on headings"):
+        _replace(doc, caption.model_copy(update={"integration": BlockIntegration(sentences=forced)}))
 
 
 def test_offsets_regenerated_after_text_correction() -> None:
@@ -266,26 +302,40 @@ def test_offsets_regenerated_after_text_correction() -> None:
     assert after.revision == 2 and after.integration is None  # stale ranges removed by the correction
     regenerated = attach_sentences(after)
     assert regenerated.integration.sentences.text_revision == 2
-    assert [after.current_text[s.start:s.end] for s in regenerated.integration.sentences.ranges] == [
-        "4.2 Equations of Motion.", "Revised."]
+    assert [after.current_text[r.start:r.end] for r in regenerated.integration.sentences.ranges] == [
+        "4.2 Equations of Motion. ", "Revised."]
     assert after.raw_text == "4.2 Equations of Motion"  # offsets never index raw_text
 
 
-def _with_audio(doc: Document, suffix: str, voice: str | None = "en", sentences: bool = True) -> Document:
+def _with_audio(doc: Document, suffix: str, voice: str | None = "en", sentences: bool = True,
+                backend_id: str | None = "p3-blk-1") -> Document:
     block = _block(doc, suffix)
-    block = attach_sentences(block) if sentences else block.model_copy(
-        update={"integration": BlockIntegration()})
-    audio = {"uri": "audio://p3/opaque-1", "media_type": "audio/mpeg", "voice_language": "en",
-             "text_revision": block.revision,
-             "text_sha256": hashlib.sha256(block.current_text.encode("utf-8")).hexdigest(),
-             "sentence_index": 0 if sentences else None, "duration_ms": 1200, "document_revision": 3}
-    integration = block.integration.model_copy(update={"audio": [AudioReference.model_validate(audio)],
-                                                       "voice_language": voice})
+    block = attach_sentences(block) if sentences else block.model_copy(update={"integration": BlockIntegration()})
+    clip = AudioReference(key=f"{suffix}-r{block.revision}-s0", url="audio://p3/opaque-1", bytes=48213,
+                          text_revision=block.revision,
+                          text_sha256=hashlib.sha256(block.current_text.encode("utf-8")).hexdigest())
+    integration = block.integration.model_copy(update={"audio": [clip], "voice_language": voice,
+                                                       "backend_block_id": backend_id})
     return _replace(doc, block.model_copy(update={"integration": integration}))
 
 
+def test_audio_entries_are_key_url_bytes_and_unique() -> None:
+    doc = _with_audio(_v12(), "a2")
+    data = json.loads(doc.model_dump_json())
+    clip = data["blocks"][1]["integration"]["audio"][0]
+    assert set(clip) == {"key", "url", "bytes", "text_revision", "text_sha256"}
+    data["blocks"][1]["integration"]["audio"].append(dict(clip))
+    with pytest.raises(ValidationError, match="unique"):
+        Document.model_validate(data)
+    legacy = json.loads(doc.model_dump_json())
+    legacy["blocks"][1]["integration"]["audio"][0]["uri"] = legacy["blocks"][1]["integration"]["audio"][0].pop("url")
+    with pytest.raises(ValidationError):
+        Document.model_validate(legacy)
+    assert not _schema("1.2.0").is_valid(legacy)
+
+
 def test_audio_is_invalidated_when_the_revision_changes() -> None:
-    whole = _with_audio(_v12(), "a2", sentences=False)  # whole-block audio, no sentence ranges
+    whole = _with_audio(_v12(), "a2", sentences=False)
     block = _block(whole, "a2")
     with pytest.raises(ValidationError, match="stale audio"):
         _replace(whole, block.model_copy(update={"revision": 2, "current_text": block.current_text + "!"}))
@@ -294,11 +344,21 @@ def test_audio_is_invalidated_when_the_revision_changes() -> None:
 
     doc = _with_audio(_v12(), "a2")
     block = _block(doc, "a2")
-    assert block.integration.audio[0].text_revision == 1
     corrected = apply_correction(doc, _correction(doc, block, operation="set_language", new_language="mul"))
     after = _block(corrected, "a2")
     assert after.integration.audio == [] and after.integration.sentences is None  # any revision change
     assert after.integration.voice_language == "en"  # a reader choice, not derived from the text
+    assert after.integration.backend_block_id == "p3-blk-1"  # P3 identity survives corrections
+
+
+def test_backend_block_id_is_p3_owned_and_optional() -> None:
+    doc = _with_audio(_v12(), "a2", backend_id="p3-blk-a2")
+    assert _block(doc, "a2").integration.backend_block_id == "p3-blk-a2"
+    assert _block(doc, "a2").id != "p3-blk-a2"  # separate from the producer UUID
+    with pytest.raises(ValidationError):
+        data = json.loads(doc.model_dump_json())
+        data["blocks"][1]["integration"]["backend_block_id"] = ""
+        Document.model_validate(data)
 
 
 def test_voice_language_never_replaces_language() -> None:
@@ -410,7 +470,9 @@ def test_producer_fields_survive_serialization() -> None:
     assert again == doc
     a1 = _block(again, "a1")
     assert (a1.heading_level, a1.role) == (2, BlockRole.PAGE_HEADER)
-    assert _block(again, "a2").integration.audio[0].uri == "audio://p3/opaque-1"
+    clip = _block(again, "a2").integration.audio[0]
+    assert (clip.key, clip.url, clip.bytes) == ("a2-r1-s0", "audio://p3/opaque-1", 48213)
+    assert _block(again, "a2").integration.backend_block_id == "p3-blk-1"
 
 
 # ------------------------------------------------------ 1.2.0 conformance set

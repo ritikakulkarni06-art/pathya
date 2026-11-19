@@ -7,14 +7,17 @@ Offset rules (normative, see docs/p1_contract.md "Sentence offsets"):
   :func:`to_utf16_ranges` (they differ for characters outside the BMP).
 * Offsets index the exact ``current_text`` of the block, never ``raw_text``.
   No normalization (NFC or otherwise) is applied before counting.
-* Ranges are half-open ``[start, end)``, ordered, non-overlapping, and exclude
-  leading and trailing whitespace of each sentence. Text between ranges is
-  whitespace only.
+* Ranges are half-open ``[start, end)`` and cover the whole ``current_text``
+  contiguously: the first starts at 0, each starts where the previous ended,
+  and the last ends at ``len(current_text)``. Whitespace after a sentence
+  belongs to that sentence's range (leading whitespace belongs to the first).
+  Empty text has no ranges.
+* Only headings, paragraphs and list items carry ranges (P2 decision).
 * A segmentation is bound to one block revision and the SHA-256 of
   ``current_text``. Any correction that increments the revision makes it (and
   every audio reference bound to it) stale; it must be regenerated.
 
-Segmentation (segmenter ``pathya-sentences/1``) is deliberately simple and
+Segmentation (segmenter ``pathya-sentences/2``) is deliberately simple and
 deterministic: a sentence ends after ``.``, ``!``, ``?``, ``।`` (danda) or
 ``॥`` (double danda), optionally followed by closing quotes or brackets, when
 the next character is whitespace or the end of the text. It does not end on a
@@ -28,7 +31,7 @@ import hashlib
 import re
 from typing import Any
 
-SEGMENTER = "pathya-sentences/1"
+SEGMENTER = "pathya-sentences/2"  # /2: ranges cover the whole text (P2 decision)
 _TERMINATORS = ".!?।॥"
 _CLOSERS = "\"')]}’”"
 _ABBREVIATIONS = frozenset({
@@ -43,26 +46,18 @@ def text_sha256(text: str) -> str:
 
 
 def segment_sentences(text: str) -> list[tuple[int, int]]:
-    """Return ``[(start, end), ...]`` code-point ranges of the sentences in ``text``."""
-    ranges: list[tuple[int, int]] = []
-    start = 0
+    """Return contiguous ``[(start, end), ...]`` code-point ranges covering all of ``text``."""
+    cuts: list[int] = []
     for match in _BOUNDARY.finditer(text):
         end = match.end()
         if _is_abbreviation(text, match.start()) or _continues_lowercase(text, end):
             continue
-        _append_trimmed(ranges, text, start, end)
-        start = end
-    _append_trimmed(ranges, text, start, len(text))
-    return ranges
-
-
-def _append_trimmed(ranges: list[tuple[int, int]], text: str, start: int, end: int) -> None:
-    while start < end and text[start].isspace():
-        start += 1
-    while end > start and text[end - 1].isspace():
-        end -= 1
-    if end > start:
-        ranges.append((start, end))
+        while end < len(text) and text[end].isspace():  # trailing whitespace joins this sentence
+            end += 1
+        if end < len(text):
+            cuts.append(end)
+    bounds = [0, *cuts, len(text)] if text else []
+    return [(a, b) for a, b in zip(bounds, bounds[1:]) if b > a]
 
 
 def _is_abbreviation(text: str, terminator_index: int) -> bool:
@@ -89,10 +84,11 @@ def to_utf16_ranges(text: str, ranges: list[tuple[int, int]]) -> list[tuple[int,
 
 
 def build_segmentation(block: Any) -> Any:
-    """``SentenceSegmentation`` for ``block``'s current revision, or None if it has no text."""
+    """``SentenceSegmentation`` for the block's current revision; None if it has no text or
+    is not a heading, paragraph or list item."""
     from pathya_document_ai import models as m
 
-    if block.current_text is None:
+    if block.current_text is None or block.block_type not in m.SENTENCE_BLOCK_TYPES:
         return None
     return m.SentenceSegmentation(
         text_revision=block.revision, text_sha256=text_sha256(block.current_text), segmenter=SEGMENTER,

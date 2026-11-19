@@ -4,11 +4,32 @@
 review. Record actual written decisions only in the
 [Approval record](#approval-record).
 
-- **Branch:** `feature/p1-contract-v1.2.0`, based on the 1.1.0 integration
-  baseline `39331e4`. The baseline is unchanged and not merged.
+- **Branch:** `person-1` (Person 1's branch), code in `document-ai/`. Commit
+  `39331e4`, the 1.1.0 integration baseline P3 pins, is imported as a subtree
+  with its history, so it is an ancestor of `person-1`. Nothing is merged into
+  `main`. An earlier draft on `feature/p1-contract-v1.2.0` is superseded by
+  this branch and was left untouched.
 - **Schema:** `contract/schemas/pathya_content.v1.2.0.schema.json`.
-- **Conformance vectors:** `contract/conformance/v1.2.0/` (13 vectors, with
+- **Conformance vectors:** `contract/conformance/v1.2.0/` (16 vectors, with
   verdicts for the 1.0.0, 1.1.0 and 1.2.0 schemas and for Python).
+
+## Decisions already recorded in writing
+
+These are from P3's `docs/CONTRACT_APPROVALS.md` (`person-3` at `2621fc9`),
+relayed from Atul (P2) and Tharun (P1). 1.2.0 implements them:
+
+| Decision | 1.2.0 |
+|---|---|
+| The canonical Document is the direct content response body | `extract_document(...).to_json()` returns the Document itself; there is no envelope |
+| Next version adds a document revision | `Document.integration.document_revision` (P3) |
+| Each block needs a stable backend identifier and its own revision | `Block.integration.backend_block_id` (P3); `Block.revision` already exists |
+| Sentence ranges: start-inclusive, end-exclusive code points into the exact `current_text`, before pronunciation substitutions | `Block.integration.sentences` |
+| Ranges cover all text without gaps; trailing whitespace belongs to the preceding range | Enforced by the Python validator; segmenter `pathya-sentences/2` |
+| Only headings, paragraphs and list items need ranges | Ranges on any other block type are rejected |
+| Optional `voice_language` (`en`/`hi`), keeping the source `language` | `Block.integration.voice_language` |
+| Prepared audio entries `{key, url, bytes}` within a revision-scoped package | `Block.integration.audio[]` with `key`, `url`, `bytes`, plus `text_revision` and `text_sha256` |
+| P1 emits `critical_symbol_uncertain`; P3 derives `critical_flag` | Flag plus `critical.critical_flag` and `critical.is_trusted_evidence` |
+| Conformance checks: direct response, fresh offsets after a text correction, critically uncertain content excluded from trusted evidence | Covered by tests in `tests/unit/test_contract_v1_2.py` and `test_pipeline.py` |
 
 ## Answers to P3's reconciliation questions (`person-3`, c53dadc)
 
@@ -61,10 +82,12 @@ review. Record actual written decisions only in the
    - whether `set_review_status` should invalidate audio (it currently does,
      because the revision changes);
    - whether a correction must bump P3's `document_revision` (P3's call).
-4. **Sentence segmentation:** is `pathya-sentences/1` adequate for P2's
-   narration, or does P2 own segmentation and P1 only validate ranges?
-5. **Audio granularity:** whole-block audio, per-sentence audio, or both
-   (both are allowed now).
+4. **Sentence segmentation:** P2 prefers backend-published ranges. Is
+   `pathya-sentences/2` (rule-based, Hindi danda aware) acceptable as the
+   reference segmenter that P3 runs?
+5. **Audio:** the `key` format and how a clip maps to a sentence are P2/P3's
+   choice. The contract only requires keys to be unique within a block and
+   every entry to be bound to the block revision and text hash.
 6. **Trust policy:** confirm the exact set of flags that block trusted
    evidence.
 

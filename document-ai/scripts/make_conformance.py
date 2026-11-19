@@ -139,15 +139,15 @@ def _with_backend(doc: Doc) -> Doc:
     text = a2["current_text"]
     digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
     a2["integration"] = {
+        "backend_block_id": "p3-blk-a2",
         "sentences": {"text_revision": a2["revision"], "text_sha256": digest, "segmenter": SEGMENTER,
                       "ranges": [{"start": s, "end": e} for s, e in segment_sentences(text)]},
         "voice_language": "en",
-        "audio": [{"uri": "audio://p3/opaque-a2-0", "media_type": "audio/mpeg", "voice_language": "en",
-                   "text_revision": a2["revision"], "text_sha256": digest, "sentence_index": 0,
-                   "duration_ms": 5400, "document_revision": 3}],
+        "audio": [{"key": "a2-r1-s0", "url": "audio://p3/opaque-a2-0", "bytes": 48213,
+                   "text_revision": a2["revision"], "text_sha256": digest}],
     }
     b2 = _block(doc, "b2")  # Hindi paragraph: original tag kept, Hindi voice chosen
-    b2["integration"] = {"sentences": None, "voice_language": "hi", "audio": []}
+    b2["integration"] = {"backend_block_id": "p3-blk-b2", "sentences": None, "voice_language": "hi", "audio": []}
     return doc
 
 
@@ -201,8 +201,27 @@ def _vectors_v12(base: Doc) -> list[tuple[str, str, Callable[[], Doc], dict[str,
     def audio_only_stale(doc: Doc) -> None:
         a2 = _block(doc, "a2")
         a2["integration"]["sentences"] = None
-        a2["integration"]["audio"][0]["sentence_index"] = None
         a2["integration"]["audio"][0]["text_revision"] = 7
+
+    def ranges_with_gap(doc: Doc) -> None:
+        ranges = _block(doc, "a2")["integration"]["sentences"]["ranges"]
+        ranges[0]["end"] -= 1  # leaves one code point uncovered before the next range
+
+    def ranges_on_caption(doc: Doc) -> None:
+        import hashlib
+
+        from pathya_document_ai.sentences import SEGMENTER
+
+        cap = _block(doc, "a9")
+        text = cap["current_text"]
+        cap["integration"] = {"backend_block_id": None, "voice_language": None, "audio": [],
+                              "sentences": {"text_revision": cap["revision"], "segmenter": SEGMENTER,
+                                            "text_sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
+                                            "ranges": [{"start": 0, "end": len(text)}]}}
+
+    def legacy_audio_fields(doc: Doc) -> None:
+        clip = _block(doc, "a2")["integration"]["audio"][0]
+        clip["uri"] = clip.pop("url")  # pre-decision draft shape
 
     return [
         ("valid_v1_2_0_producer_fields", "1.2.0: contract_family, heading levels, footnote role, critical flag "
@@ -227,6 +246,12 @@ def _vectors_v12(base: Doc) -> list[tuple[str, str, Callable[[], Doc], dict[str,
          "(JSON Schema cannot hash text).", make(_with_backend, stale_text), python_only),
         ("invalid_python_only_v1_2_0_stale_audio", "Audio bound to another revision.",
          make(_with_backend, audio_only_stale), python_only),
+        ("invalid_python_only_v1_2_0_sentence_gap", "Sentence ranges must cover current_text without gaps.",
+         make(_with_backend, ranges_with_gap), python_only),
+        ("invalid_python_only_v1_2_0_sentences_on_caption", "Only headings, paragraphs and list items carry "
+         "sentence ranges.", make(_with_backend, ranges_on_caption), python_only),
+        ("invalid_v1_2_0_audio_without_key_url_bytes", "Audio entries are {key, url, bytes} plus revision "
+         "binding.", make(_with_backend, legacy_audio_fields), nowhere),
         ("invalid_v1_1_0_with_1_2_role", "A 1.1.0 document cannot carry a non-body role.",
          old("1.1.0", lambda d: _block(d, "a2").update(role="page_header")), nowhere),
         ("invalid_v1_1_0_with_critical_flag", "critical_symbol_uncertain requires 1.2.0.",

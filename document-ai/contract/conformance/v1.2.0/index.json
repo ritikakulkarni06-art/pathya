@@ -113,6 +113,36 @@
       }
     },
     {
+      "file": "invalid_python_only_v1_2_0_sentence_gap.json",
+      "description": "Sentence ranges must cover current_text without gaps.",
+      "expected_valid": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": false,
+        "schema_1_2_0": true,
+        "python": false
+      }
+    },
+    {
+      "file": "invalid_python_only_v1_2_0_sentences_on_caption.json",
+      "description": "Only headings, paragraphs and list items carry sentence ranges.",
+      "expected_valid": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": false,
+        "schema_1_2_0": true,
+        "python": false
+      }
+    },
+    {
+      "file": "invalid_v1_2_0_audio_without_key_url_bytes.json",
+      "description": "Audio entries are {key, url, bytes} plus revision binding.",
+      "expected_valid": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": false,
+        "schema_1_2_0": false,
+        "python": false
+      }
+    },
+    {
       "file": "invalid_v1_1_0_with_1_2_role.json",
       "description": "A 1.1.0 document cannot carry a non-body role.",
       "expected_valid": {

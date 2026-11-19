@@ -340,6 +340,10 @@ class FigureMeta(_Model):
 VoiceLanguage = Literal["en", "hi"]
 
 
+SENTENCE_BLOCK_TYPES = frozenset({BlockType.HEADING, BlockType.PARAGRAPH, BlockType.LIST_ITEM})
+"""Block types that may carry sentence ranges (P2 decision, 19 Nov 2026)."""
+
+
 class SentenceRange(_Model):
     """Half-open range [start, end) of Unicode code points in the block's current_text."""
 
@@ -358,26 +362,32 @@ class SentenceSegmentation(_Model):
 
     text_revision: int = Field(ge=1, description="Block revision whose current_text was segmented.")
     text_sha256: Sha256Hex = Field(description="SHA-256 of current_text encoded as UTF-8.")
-    segmenter: NonEmptyStr = Field(description="Segmenter name and version, e.g. 'pathya-sentences/1'.")
-    ranges: list[SentenceRange]
+    segmenter: NonEmptyStr = Field(description="Segmenter name and version, e.g. 'pathya-sentences/2'.")
+    ranges: list[SentenceRange] = Field(
+        description="Cover current_text completely and contiguously from 0 to its length; trailing "
+                    "whitespace belongs to the preceding range.")
 
 
 class AudioReference(_Model):
-    """Revision-bound reference to synthesized audio. The URI is opaque and backend-owned."""
+    """Prepared audio entry ``{key, url, bytes}`` (P2 decision), bound to a block revision and text.
 
-    uri: NonEmptyStr
-    media_type: NonEmptyStr
-    voice_language: VoiceLanguage
-    text_revision: int = Field(ge=1)
-    text_sha256: Sha256Hex
-    sentence_index: int | None = Field(default=None, ge=0, description="Null for whole-block audio.")
-    duration_ms: int | None = Field(default=None, ge=0)
-    document_revision: int | None = Field(default=None, ge=1)
+    ``key`` is the reader's clip lookup key within a revision-scoped package; ``url``
+    is opaque and backend-owned; ``bytes`` is the clip size.
+    """
+
+    key: NonEmptyStr
+    url: NonEmptyStr
+    bytes: int = Field(ge=0)
+    text_revision: int = Field(ge=1, description="Block revision the clip was prepared for.")
+    text_sha256: Sha256Hex = Field(description="SHA-256 of the block's current_text (UTF-8) at that revision.")
 
 
 class BlockIntegration(_Model):
     """Backend/reader-owned block fields (1.2.0). Producers must leave Block.integration null."""
 
+    backend_block_id: str | None = Field(
+        default=None, min_length=1, max_length=128,
+        description="Stable opaque block identifier assigned by P3 (not the producer UUID).")
     sentences: SentenceSegmentation | None = None
     voice_language: VoiceLanguage | None = Field(
         default=None, description="Narration voice chosen by P2/P3; never replaces Block.language.")
@@ -685,22 +695,28 @@ def _check_integration(block: "Block") -> None:
     digest = hashlib.sha256((block.current_text or "").encode("utf-8")).hexdigest()
     seg = integration.sentences
     if seg is not None:
+        if block.block_type not in SENTENCE_BLOCK_TYPES:
+            raise ValueError(f"sentence ranges are only allowed on headings, paragraphs and list items, "
+                             f"not '{block.block_type.value}'")
         if block.current_text is None:
             raise ValueError("sentence ranges require current_text")
         if seg.text_revision != block.revision or seg.text_sha256 != digest:
             raise ValueError("stale sentence ranges: computed for another revision or text; "
                              "regenerate them for the current revision")
-        length, previous_end = len(block.current_text), 0
+        length, expected_start = len(block.current_text), 0
         for r in seg.ranges:
-            if r.start < previous_end or r.end > length:
-                raise ValueError(f"sentence range [{r.start}, {r.end}) overlaps, is unordered or exceeds "
-                                 f"current_text length {length}")
-            previous_end = r.end
+            if r.start != expected_start:
+                raise ValueError(f"sentence ranges must cover current_text without gaps or overlaps: "
+                                 f"range starts at {r.start}, expected {expected_start}")
+            expected_start = r.end
+        if expected_start != length:
+            raise ValueError(f"sentence ranges must end at the current_text length {length}, not {expected_start}")
+    keys = [a.key for a in integration.audio]
+    if len(set(keys)) != len(keys):
+        raise ValueError("audio keys must be unique within a block")
     for audio in integration.audio:
         if audio.text_revision != block.revision or audio.text_sha256 != digest:
             raise ValueError("stale audio reference: bound to another revision or text; invalidate it")
-        if audio.sentence_index is not None and (seg is None or audio.sentence_index >= len(seg.ranges)):
-            raise ValueError("audio sentence_index does not reference a current sentence range")
 
 
 def _features_1_2(document: "Document") -> list[str]:
