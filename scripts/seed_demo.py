@@ -62,6 +62,8 @@ def seed_demo(directory: Path = DEFAULT_DEMO_DIR) -> dict[str, Any]:
         prior = json.loads(marker.read_text(encoding="utf-8"))
         if prior.get("format") != DEMO_FORMAT:
             raise ValueError("This directory is not a recognized synthetic demo.")
+    elif directory.exists() and any(directory.iterdir()):
+        raise ValueError("Choose an empty directory or a recognized synthetic demo directory.")
     writer = PdfWriter()
     for _ in range(10):
         writer.add_blank_page(width=612, height=792)

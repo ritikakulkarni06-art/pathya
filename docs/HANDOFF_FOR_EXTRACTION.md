@@ -1,8 +1,8 @@
 # Person 1 handoff
 
-The extraction contract is a draft awaiting your approval. Read `docs/CONTRACTS.md`, inspect `contracts/extraction_output.schema.json`, and validate your output against `tests/fixtures/chapter_demo.json` as an example.
+The checked-in extraction schema describes the current draft backend adapter. The Person 1 `Document` payload needs a reconciled mapping before live integration. See `docs/CONTRACTS.md` and `contracts/extraction_output.schema.json` for the current adapter, and `tests/fixtures/chapter_demo.json` for a synthetic example.
 
-Please reply in writing with approval or concrete changes to: required fields, quality/status flags, normalized coordinates and transform, local stable IDs, printed page labels, reading order, table header associations and reviewed equation/figure metadata. We must settle these before P6.
+Please reply in writing with approval or concrete changes to: required fields, quality/status flags, coordinate convention and transform, local stable IDs, printed page labels, reading order, table header associations and reviewed equation/figure metadata. The user explicitly deferred teammate approval on 16 November 2026 so backend work could continue with fixtures. That is not your acceptance; reconcile before real adapter integration.
 
 ## Integration options
 
@@ -14,4 +14,32 @@ The subprocess reads `{source_path,languages,page_range}` on stdin, with PDF ind
 
 Run `python -m scripts.export_contracts` to regenerate schemas and `python -m scripts.check` to validate the backend. Start from an activated Python 3.12 environment with requirements.lock installed. Critical or needs_review blocks remain visible for review but cannot become trusted evidence merely because OCR returned fluent text.
 
-No upload or worker endpoint has been implemented yet: those begin at P6/P7 after contract acceptance. Re-extraction must later preserve teacher corrections through reconciliation, not call initial import to overwrite them.
+Upload, worker, correction, search, question and deletion workflows are now implemented
+and tested against the draft. POST /documents requires an authorization/rights note
+and queues extraction; GET /jobs/{id} exposes attempts/progress. Extraction is
+page-by-page, validated and imported once transactionally at revision 1. Stable
+document-local adapter IDs map to opaque backend UUIDs. Preserve your IDs on retry;
+do not assume they are globally unique or equal the backend correction IDs.
+
+Allowed status vocabulary is ok, needs_review, corrected, reviewed, unsupported
+and not_scored. critical_flag always excludes trusted retrieval even if text looks
+fluent. Native not_scored text can be eligible with a visible marker. Equations
+need reviewed spoken_fallback; figures need reviewed alt_text_short. Table evidence
+keeps header/value/row-label associations and revisions attached. Do not label
+generated explanations or teacher notes as source metadata/evidence.
+
+Parents/reading order are page-local; printed page labels are separate from the
+zero-based PDF index. Supply the agreed geometry/transform metadata, never silently
+discard unknown layout or pretend an ambiguous header/diagram is supported. Current
+JSON Schema plus cross-reference checks reject invalid references and unsafe MathML.
+
+Accepted corrections create immutable history and new revisions. Re-extraction
+creates a separate review candidate against a base revision and cannot overwrite
+teacher corrections through initial import. An automatic candidate-acceptance
+workflow is not implemented. Any incompatible contract change needs a versioned
+schema/adapter reconciliation and tests, not an in-place mutation of published text.
+
+Run `python -m scripts.export_contracts --check`, `python -m scripts.check`, and the
+offline fixture demo. Deployment-host namespace isolation, real OCR output/rights,
+Hindi review and written contract approval remain manual. No fixture result is a
+claim about your extractor's actual accuracy.

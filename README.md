@@ -1,12 +1,12 @@
 # Pathya - AI Textbook Reader
 
-Pathya is a proposed accessible English/Hindi textbook reader. This repository contains the team plan and the **Role 3 backend foundation**. Students will eventually read, listen, correct content and inspect evidence-linked explanations.
+Pathya is an accessible English and Hindi textbook reader project. This repository contains the team plan and the **Role 3 backend** for authorized chapters, revision-safe reading and search, and evidence-linked study answers.
 
 ## Current implementation
 
-P1-P15 of the [backend playbook](docs/PLAYBOOK.md): FastAPI configuration/health/errors, content-safe logs, transactional SQLite migrations and immutable history, private file storage, local/session authentication, CSRF and document roles, versioned extraction schemas, adapters and atomic initial import; durable worker leases, cancellation/recovery; atomic corrections and conflicts; immutable manifests, review queues and separate re-extraction candidates; revision-safe English/Hindi chapter search; optional LLM adapters and durable budget accounting; questions with validated citations or extractive fallback cards; tracked deletion, retention and private backup/restore; request quotas, safe operational metrics and offline demo tools.
+The backend supports authenticated uploads, durable processing jobs, atomic corrections, revision-safe content and offline manifests, chapter-scoped search, grounded answers with extractive fallbacks, and tracked deletion. The [backend playbook](docs/PLAYBOOK.md) and [implementation status](docs/IMPLEMENTATION_STATUS.md) describe each phase.
 
-The extraction contract is **draft v1.0.0**; the user authorized deferring teammate approval while implementation continues with fixtures. Speech scheduling, scoped pronunciation overrides, synthetic audio fixtures and immutable offline download plans are implemented. Search includes structured evidence, Hindi lexical fallback and optional offline embeddings; see [search behavior and limitations](docs/SEARCH.md). [Question grounding](docs/GROUNDING.md) validates references and quotations; it does not prove entailment. [Deletion and backup policy](docs/PRIVACY.md) is implemented with proposed defaults. [Security controls and limits](docs/SECURITY.md) are implemented. The [evaluation harness](docs/EVALUATION.md) runs marked offline samples; human evaluation remains pending. Final handoff remains in P16. LLM calls remain disabled; [budget controls](docs/LLM_AND_BUDGET.md) require manually verified prices and explicit caps. This is not a production-ready service or a measured accessibility/accuracy result.
+The extraction contract is **draft v1.0.0**, and real extraction and speech integration await teammate agreement. The local demo uses synthetic content and audio with the LLM disabled. Human evaluation and accessibility review are pending. See the [evaluation results](docs/EVALUATION.md) and [contract approvals](docs/CONTRACT_APPROVALS.md).
 
 ## Quick start - Python 3.12
 
@@ -15,14 +15,12 @@ python -m venv .venv
 # Activate the virtual environment for your shell.
 python -m pip install -r requirements.lock
 python -m scripts.check
-python -m uvicorn app.main:create_app --factory --host 127.0.0.1 --port 8000 --workers 1 --no-access-log
+python -m scripts.demo
 ```
 
-On this Windows checkout use `.venv\Scripts\python.exe` directly, or activate `.venv\Scripts\Activate.ps1`. `GET http://127.0.0.1:8000/healthz` and `/readyz` report service health. `GET /auth/me` shows the fixed local demo user. Public interactive API docs are disabled; inspect [the exported OpenAPI contract](contracts/openapi.json).
+On Windows, use `.venv\Scripts\python.exe` directly or activate `.venv\Scripts\Activate.ps1`. The demo runs migrations, seeds a synthetic chapter, starts one API and one worker on loopback, and prints the chapter and manifest URLs. Press Ctrl+C to stop both. To verify startup and exit automatically, run `python -m scripts.demo --smoke --port 0`.
 
-Local mode needs no secrets and binds only loopback. To customize, copy `.env.example` to `.env` and edit local values. Session mode requires a random secret of at least 32 characters and HTTPS because cookies are always Secure. Do not use local mode in production. Disable raw access logs as shown; they can contain query text.
-
-On systems with GNU Make, `make check`, `make dev`, `make contracts` and `make openapi` are available. Windows equivalents are `python -m scripts.check` and `python -m scripts.export_contracts`. Run the durable worker in a second terminal with `python -m app.worker`.
+With GNU Make, use `make check`, `make demo`, `make demo-check` and `make openapi`. For session settings, backup and recovery, see the [runbook](docs/RUNBOOK.md). For requests, responses and errors, see the [exported OpenAPI contract](contracts/openapi.json).
 
 ## Team and branches
 
@@ -40,6 +38,7 @@ Backend code uses `app/`, shared schemas use `contracts/`, and tests use `tests/
 - [Original project report](docs/Pathya_AI_Textbook_Reader_Project_Report.pdf) and [three-person role plan](docs/Pathya_Project_Idea_and_Three_Person_Roles.pdf)
 - [Implementation status](docs/IMPLEMENTATION_STATUS.md), [decisions](docs/DECISIONS.md), [dependency/license inventory](docs/DEPENDENCIES.md)
 - [Extraction contract](docs/CONTRACTS.md), [Person 1 handoff](docs/HANDOFF_FOR_EXTRACTION.md), [pending approvals](docs/CONTRACT_APPROVALS.md)
+- [Person 2 frontend handoff](docs/API_FOR_FRONTEND.md), [API error catalog](contracts/error-codes.json)
 - [Manual steps needed now and later](docs/MANUAL_SETUP.md)
 - [Team roles](docs/TEAM_ROLES.md), [proposed architecture](docs/ARCHITECTURE.md), [roadmap](docs/ROADMAP.md)
 

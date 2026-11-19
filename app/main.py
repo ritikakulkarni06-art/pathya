@@ -17,6 +17,7 @@ from app.api.admin import router as admin_router
 from app.api.auth import router as auth_router
 from app.api.content import router as content_router
 from app.api.deletions import router as deletions_router
+from app.api.documentation import enhance_openapi
 from app.api.documents import router as documents_router
 from app.api.jobs import router as jobs_router
 from app.api.limits import BodyLimitMiddleware
@@ -90,6 +91,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             "Accept-Ranges",
             "X-Request-ID",
             "X-Build-Sequence",
+            "Retry-After",
         ],
     )
 
@@ -200,4 +202,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             ) from None
         return {"status": "ready"}
 
+    original_openapi = application.openapi
+
+    def documented_openapi() -> dict[str, object]:
+        if application.openapi_schema is None:
+            application.openapi_schema = enhance_openapi(original_openapi())
+        return application.openapi_schema
+
+    application.openapi = documented_openapi  # type: ignore[method-assign]
     return application

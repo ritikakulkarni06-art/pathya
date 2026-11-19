@@ -43,6 +43,8 @@ def test_rate_limits_separate_actions_but_share_user_and_ip_windows(tmp_path, mo
 def test_action_routes_return_retry_after(seeded, worker_client, action):
     client = worker_client
     settings = client.app.state.settings
+    origin = settings.cors_origins[0]
+    client.headers["Origin"] = origin
     setattr(settings, action + "_rate_limit", 1)
     client.app.state.action_limiter = ActionLimiter(settings)
     client.app.dependency_overrides[current_user] = lambda: {"id": "u", "role": "user"}
@@ -60,6 +62,9 @@ def test_action_routes_return_retry_after(seeded, worker_client, action):
     assert second.status_code == 429
     assert second.json()["code"] == action + "_rate_limited"
     assert int(second.headers["Retry-After"]) == settings.request_rate_window_seconds
+    assert second.headers["Access-Control-Allow-Origin"] == origin
+    exposed = second.headers["Access-Control-Expose-Headers"].lower().split(", ")
+    assert "retry-after" in exposed
 
 
 def test_daily_page_quota_counts_new_uploads_without_duplicate_charges(worker_client):

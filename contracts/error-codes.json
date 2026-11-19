@@ -1,0 +1,2877 @@
+{
+  "account_unavailable": {
+    "example": {
+      "code": "account_unavailable",
+      "detail": "This account cannot be registered. Try signing in.",
+      "status": 409,
+      "title": "Account unavailable",
+      "type": "urn:pathya:error:account_unavailable"
+    },
+    "origin": "application",
+    "statuses": [
+      409
+    ]
+  },
+  "admin_required": {
+    "example": {
+      "code": "admin_required",
+      "detail": "This operation requires a project administrator.",
+      "status": 403,
+      "title": "Admin required",
+      "type": "urn:pathya:error:admin_required"
+    },
+    "origin": "application",
+    "statuses": [
+      403
+    ]
+  },
+  "answer_not_found": {
+    "example": {
+      "code": "answer_not_found",
+      "detail": "This explanation is unavailable.",
+      "status": 404,
+      "title": "Answer not found",
+      "type": "urn:pathya:error:answer_not_found"
+    },
+    "origin": "application",
+    "statuses": [
+      404
+    ]
+  },
+  "arguments_type": {
+    "example": {
+      "code": "arguments_type",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Arguments type",
+      "type": "urn:pathya:error:arguments_type"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "artifact_not_found": {
+    "example": {
+      "code": "artifact_not_found",
+      "detail": "This artifact is unavailable.",
+      "status": 404,
+      "title": "Artifact not found",
+      "type": "urn:pathya:error:artifact_not_found"
+    },
+    "origin": "application",
+    "statuses": [
+      404
+    ]
+  },
+  "artifact_stale": {
+    "example": {
+      "code": "artifact_stale",
+      "detail": "This output is outdated or unavailable. Use current text while it rebuilds.",
+      "status": 409,
+      "title": "Artifact stale",
+      "type": "urn:pathya:error:artifact_stale"
+    },
+    "origin": "application",
+    "statuses": [
+      409
+    ]
+  },
+  "assertion_error": {
+    "example": {
+      "code": "assertion_error",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Assertion error",
+      "type": "urn:pathya:error:assertion_error"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "asset_not_found": {
+    "example": {
+      "code": "asset_not_found",
+      "detail": "This file is missing. Please request a rebuild.",
+      "status": 404,
+      "title": "Asset not found",
+      "type": "urn:pathya:error:asset_not_found"
+    },
+    "origin": "application",
+    "statuses": [
+      404
+    ]
+  },
+  "audio_pending": {
+    "example": {
+      "code": "audio_pending",
+      "detail": "Audio is not ready. Read the text or request an audio build.",
+      "status": 404,
+      "title": "Audio pending",
+      "type": "urn:pathya:error:audio_pending"
+    },
+    "origin": "application",
+    "statuses": [
+      404
+    ]
+  },
+  "audio_stale": {
+    "example": {
+      "code": "audio_stale",
+      "detail": "This output is outdated. Request a current version or continue reading the text.",
+      "status": 409,
+      "title": "Audio stale",
+      "type": "urn:pathya:error:audio_stale"
+    },
+    "origin": "application",
+    "statuses": [
+      409
+    ]
+  },
+  "authentication_required": {
+    "example": {
+      "code": "authentication_required",
+      "detail": "Your session has expired. Please sign in again.",
+      "status": 401,
+      "title": "Authentication required",
+      "type": "urn:pathya:error:authentication_required"
+    },
+    "origin": "application",
+    "statuses": [
+      401
+    ]
+  },
+  "block_not_found": {
+    "example": {
+      "code": "block_not_found",
+      "detail": "This passage is unavailable.",
+      "status": 404,
+      "title": "Block not found",
+      "type": "urn:pathya:error:block_not_found"
+    },
+    "origin": "application",
+    "statuses": [
+      404
+    ]
+  },
+  "block_superseded": {
+    "example": {
+      "code": "block_superseded",
+      "detail": "This historical passage has successor blocks. Review those blocks before editing.",
+      "status": 409,
+      "title": "Block superseded",
+      "type": "urn:pathya:error:block_superseded"
+    },
+    "origin": "application",
+    "statuses": [
+      409
+    ]
+  },
+  "bool_parsing": {
+    "example": {
+      "code": "bool_parsing",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Bool parsing",
+      "type": "urn:pathya:error:bool_parsing"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "bool_type": {
+    "example": {
+      "code": "bool_type",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Bool type",
+      "type": "urn:pathya:error:bool_type"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "budget_exhausted": {
+    "example": {
+      "code": "budget_exhausted",
+      "detail": "Paid speech is unavailable until its budget and verified tariff are configured. Text remains available.",
+      "status": 402,
+      "title": "Budget exhausted",
+      "type": "urn:pathya:error:budget_exhausted"
+    },
+    "origin": "application",
+    "statuses": [
+      402
+    ]
+  },
+  "bytes_invalid_encoding": {
+    "example": {
+      "code": "bytes_invalid_encoding",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Bytes invalid encoding",
+      "type": "urn:pathya:error:bytes_invalid_encoding"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "bytes_too_long": {
+    "example": {
+      "code": "bytes_too_long",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Bytes too long",
+      "type": "urn:pathya:error:bytes_too_long"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "bytes_too_short": {
+    "example": {
+      "code": "bytes_too_short",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Bytes too short",
+      "type": "urn:pathya:error:bytes_too_short"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "bytes_type": {
+    "example": {
+      "code": "bytes_type",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Bytes type",
+      "type": "urn:pathya:error:bytes_type"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "callable_type": {
+    "example": {
+      "code": "callable_type",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Callable type",
+      "type": "urn:pathya:error:callable_type"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "candidate_not_found": {
+    "example": {
+      "code": "candidate_not_found",
+      "detail": "This extraction candidate is unavailable.",
+      "status": 404,
+      "title": "Candidate not found",
+      "type": "urn:pathya:error:candidate_not_found"
+    },
+    "origin": "application",
+    "statuses": [
+      404
+    ]
+  },
+  "complex_str_parsing": {
+    "example": {
+      "code": "complex_str_parsing",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Complex str parsing",
+      "type": "urn:pathya:error:complex_str_parsing"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "complex_type": {
+    "example": {
+      "code": "complex_type",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Complex type",
+      "type": "urn:pathya:error:complex_type"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "content_pending": {
+    "example": {
+      "code": "content_pending",
+      "detail": "Wait for initial extraction before requesting another candidate.",
+      "status": 409,
+      "title": "Content pending",
+      "type": "urn:pathya:error:content_pending"
+    },
+    "origin": "application",
+    "statuses": [
+      409
+    ]
+  },
+  "correction_rate_limited": {
+    "example": {
+      "code": "correction_rate_limited",
+      "detail": "Too many requests for this action. Please wait before trying again.",
+      "status": 429,
+      "title": "Correction rate limited",
+      "type": "urn:pathya:error:correction_rate_limited"
+    },
+    "origin": "application",
+    "statuses": [
+      429
+    ]
+  },
+  "counter_type": {
+    "example": {
+      "code": "counter_type",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Counter type",
+      "type": "urn:pathya:error:counter_type"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "csrf_failed": {
+    "example": {
+      "code": "csrf_failed",
+      "detail": "Refresh your session and send the CSRF token before changing data.",
+      "status": 403,
+      "title": "Csrf failed",
+      "type": "urn:pathya:error:csrf_failed"
+    },
+    "origin": "application",
+    "statuses": [
+      403
+    ]
+  },
+  "daily_page_quota": {
+    "example": {
+      "code": "daily_page_quota",
+      "detail": "Today's page allowance has been reached. Try again after the next UTC day begins.",
+      "status": 429,
+      "title": "Daily page quota",
+      "type": "urn:pathya:error:daily_page_quota"
+    },
+    "origin": "application",
+    "statuses": [
+      429
+    ]
+  },
+  "dangling_edge": {
+    "example": {
+      "code": "dangling_edge",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Dangling edge",
+      "type": "urn:pathya:error:dangling_edge"
+    },
+    "origin": "extraction_validation",
+    "statuses": [
+      422
+    ]
+  },
+  "dangling_page": {
+    "example": {
+      "code": "dangling_page",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Dangling page",
+      "type": "urn:pathya:error:dangling_page"
+    },
+    "origin": "extraction_validation",
+    "statuses": [
+      422
+    ]
+  },
+  "dangling_parent": {
+    "example": {
+      "code": "dangling_parent",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Dangling parent",
+      "type": "urn:pathya:error:dangling_parent"
+    },
+    "origin": "extraction_validation",
+    "statuses": [
+      422
+    ]
+  },
+  "dataclass_exact_type": {
+    "example": {
+      "code": "dataclass_exact_type",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Dataclass exact type",
+      "type": "urn:pathya:error:dataclass_exact_type"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "dataclass_type": {
+    "example": {
+      "code": "dataclass_type",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Dataclass type",
+      "type": "urn:pathya:error:dataclass_type"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "date_from_datetime_inexact": {
+    "example": {
+      "code": "date_from_datetime_inexact",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Date from datetime inexact",
+      "type": "urn:pathya:error:date_from_datetime_inexact"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "date_from_datetime_parsing": {
+    "example": {
+      "code": "date_from_datetime_parsing",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Date from datetime parsing",
+      "type": "urn:pathya:error:date_from_datetime_parsing"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "date_future": {
+    "example": {
+      "code": "date_future",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Date future",
+      "type": "urn:pathya:error:date_future"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "date_parsing": {
+    "example": {
+      "code": "date_parsing",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Date parsing",
+      "type": "urn:pathya:error:date_parsing"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "date_past": {
+    "example": {
+      "code": "date_past",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Date past",
+      "type": "urn:pathya:error:date_past"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "date_type": {
+    "example": {
+      "code": "date_type",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Date type",
+      "type": "urn:pathya:error:date_type"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "datetime_from_date_parsing": {
+    "example": {
+      "code": "datetime_from_date_parsing",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Datetime from date parsing",
+      "type": "urn:pathya:error:datetime_from_date_parsing"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "datetime_future": {
+    "example": {
+      "code": "datetime_future",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Datetime future",
+      "type": "urn:pathya:error:datetime_future"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "datetime_object_invalid": {
+    "example": {
+      "code": "datetime_object_invalid",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Datetime object invalid",
+      "type": "urn:pathya:error:datetime_object_invalid"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "datetime_parsing": {
+    "example": {
+      "code": "datetime_parsing",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Datetime parsing",
+      "type": "urn:pathya:error:datetime_parsing"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "datetime_past": {
+    "example": {
+      "code": "datetime_past",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Datetime past",
+      "type": "urn:pathya:error:datetime_past"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "datetime_type": {
+    "example": {
+      "code": "datetime_type",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Datetime type",
+      "type": "urn:pathya:error:datetime_type"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "decimal_max_digits": {
+    "example": {
+      "code": "decimal_max_digits",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Decimal max digits",
+      "type": "urn:pathya:error:decimal_max_digits"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "decimal_max_places": {
+    "example": {
+      "code": "decimal_max_places",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Decimal max places",
+      "type": "urn:pathya:error:decimal_max_places"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "decimal_parsing": {
+    "example": {
+      "code": "decimal_parsing",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Decimal parsing",
+      "type": "urn:pathya:error:decimal_parsing"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "decimal_type": {
+    "example": {
+      "code": "decimal_type",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Decimal type",
+      "type": "urn:pathya:error:decimal_type"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "decimal_whole_digits": {
+    "example": {
+      "code": "decimal_whole_digits",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Decimal whole digits",
+      "type": "urn:pathya:error:decimal_whole_digits"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "default_factory_not_called": {
+    "example": {
+      "code": "default_factory_not_called",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Default factory not called",
+      "type": "urn:pathya:error:default_factory_not_called"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "deletion_in_progress": {
+    "example": {
+      "code": "deletion_in_progress",
+      "detail": "This copy is being deleted. Wait for deletion to finish before uploading again.",
+      "status": 409,
+      "title": "Deletion in progress",
+      "type": "urn:pathya:error:deletion_in_progress"
+    },
+    "origin": "application",
+    "statuses": [
+      409
+    ]
+  },
+  "deletion_incomplete": {
+    "example": {
+      "code": "deletion_incomplete",
+      "detail": "Some private files could not be removed. The deletion receipt shows progress.",
+      "status": 503,
+      "title": "Deletion incomplete",
+      "type": "urn:pathya:error:deletion_incomplete"
+    },
+    "origin": "application",
+    "statuses": [
+      503
+    ]
+  },
+  "deletion_not_requested": {
+    "example": {
+      "code": "deletion_not_requested",
+      "detail": "Request deletion before purging this document.",
+      "status": 409,
+      "title": "Deletion not requested",
+      "type": "urn:pathya:error:deletion_not_requested"
+    },
+    "origin": "application",
+    "statuses": [
+      409
+    ]
+  },
+  "deque_type": {
+    "example": {
+      "code": "deque_type",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Deque type",
+      "type": "urn:pathya:error:deque_type"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "dict_type": {
+    "example": {
+      "code": "dict_type",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Dict type",
+      "type": "urn:pathya:error:dict_type"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "document_deleted": {
+    "example": {
+      "code": "document_deleted",
+      "detail": "This document was removed. Delete its offline copies.",
+      "status": 410,
+      "title": "Document deleted",
+      "type": "urn:pathya:error:document_deleted"
+    },
+    "origin": "application",
+    "statuses": [
+      410
+    ]
+  },
+  "document_not_found": {
+    "example": {
+      "code": "document_not_found",
+      "detail": "This document is unavailable.",
+      "status": 404,
+      "title": "Document not found",
+      "type": "urn:pathya:error:document_not_found"
+    },
+    "origin": "application",
+    "statuses": [
+      404
+    ]
+  },
+  "duplicate_edge": {
+    "example": {
+      "code": "duplicate_edge",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Duplicate edge",
+      "type": "urn:pathya:error:duplicate_edge"
+    },
+    "origin": "extraction_validation",
+    "statuses": [
+      422
+    ]
+  },
+  "duplicate_id": {
+    "example": {
+      "code": "duplicate_id",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Duplicate id",
+      "type": "urn:pathya:error:duplicate_id"
+    },
+    "origin": "extraction_validation",
+    "statuses": [
+      422
+    ]
+  },
+  "duplicate_page": {
+    "example": {
+      "code": "duplicate_page",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Duplicate page",
+      "type": "urn:pathya:error:duplicate_page"
+    },
+    "origin": "extraction_validation",
+    "statuses": [
+      422
+    ]
+  },
+  "ellipsis_error": {
+    "example": {
+      "code": "ellipsis_error",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Ellipsis error",
+      "type": "urn:pathya:error:ellipsis_error"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "embedding_input_too_long": {
+    "example": {
+      "code": "embedding_input_too_long",
+      "detail": "This passage exceeds the local model input limit. Split it before indexing.",
+      "status": 422,
+      "title": "Embedding input too long",
+      "type": "urn:pathya:error:embedding_input_too_long"
+    },
+    "origin": "application",
+    "statuses": [
+      422
+    ]
+  },
+  "embedding_model_invalid": {
+    "example": {
+      "code": "embedding_model_invalid",
+      "detail": "The configured model must have 384 dimensions.",
+      "status": 503,
+      "title": "Embedding model invalid",
+      "type": "urn:pathya:error:embedding_model_invalid"
+    },
+    "origin": "application",
+    "statuses": [
+      503
+    ]
+  },
+  "embeddings_unavailable": {
+    "example": {
+      "code": "embeddings_unavailable",
+      "detail": "Install the optional embeddings extra and local model first.",
+      "status": 503,
+      "title": "Embeddings unavailable",
+      "type": "urn:pathya:error:embeddings_unavailable"
+    },
+    "origin": "application",
+    "statuses": [
+      503
+    ]
+  },
+  "enum": {
+    "example": {
+      "code": "enum",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Enum",
+      "type": "urn:pathya:error:enum"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "extra_forbidden": {
+    "example": {
+      "code": "extra_forbidden",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Extra forbidden",
+      "type": "urn:pathya:error:extra_forbidden"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "extraction_integrity": {
+    "example": {
+      "code": "extraction_integrity",
+      "detail": "Extraction could not be imported. Check the contract identifiers and references.",
+      "status": 422,
+      "title": "Extraction integrity",
+      "type": "urn:pathya:error:extraction_integrity"
+    },
+    "origin": "application",
+    "statuses": [
+      422
+    ]
+  },
+  "finite_number": {
+    "example": {
+      "code": "finite_number",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Finite number",
+      "type": "urn:pathya:error:finite_number"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "float_parsing": {
+    "example": {
+      "code": "float_parsing",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Float parsing",
+      "type": "urn:pathya:error:float_parsing"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "float_type": {
+    "example": {
+      "code": "float_type",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Float type",
+      "type": "urn:pathya:error:float_type"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "fraction_parsing": {
+    "example": {
+      "code": "fraction_parsing",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Fraction parsing",
+      "type": "urn:pathya:error:fraction_parsing"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "fraction_type": {
+    "example": {
+      "code": "fraction_type",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Fraction type",
+      "type": "urn:pathya:error:fraction_type"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "frozen_dict_type": {
+    "example": {
+      "code": "frozen_dict_type",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Frozen dict type",
+      "type": "urn:pathya:error:frozen_dict_type"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "frozen_field": {
+    "example": {
+      "code": "frozen_field",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Frozen field",
+      "type": "urn:pathya:error:frozen_field"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "frozen_instance": {
+    "example": {
+      "code": "frozen_instance",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Frozen instance",
+      "type": "urn:pathya:error:frozen_instance"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "frozen_set_type": {
+    "example": {
+      "code": "frozen_set_type",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Frozen set type",
+      "type": "urn:pathya:error:frozen_set_type"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "get_attribute_error": {
+    "example": {
+      "code": "get_attribute_error",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Get attribute error",
+      "type": "urn:pathya:error:get_attribute_error"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "greater_than": {
+    "example": {
+      "code": "greater_than",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Greater than",
+      "type": "urn:pathya:error:greater_than"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "greater_than_equal": {
+    "example": {
+      "code": "greater_than_equal",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Greater than equal",
+      "type": "urn:pathya:error:greater_than_equal"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "handler_unavailable": {
+    "example": {
+      "code": "handler_unavailable",
+      "detail": "This processing stage is not implemented yet.",
+      "status": 422,
+      "title": "Handler unavailable",
+      "type": "urn:pathya:error:handler_unavailable"
+    },
+    "origin": "application",
+    "statuses": [
+      422
+    ]
+  },
+  "http_error": {
+    "example": {
+      "code": "http_error",
+      "detail": "The requested resource or method is unavailable.",
+      "status": 500,
+      "title": "Http error",
+      "type": "urn:pathya:error:http_error"
+    },
+    "origin": "application",
+    "statuses": [
+      500
+    ]
+  },
+  "https_required": {
+    "example": {
+      "code": "https_required",
+      "detail": "Use a secure HTTPS connection to sign in.",
+      "status": 400,
+      "title": "Https required",
+      "type": "urn:pathya:error:https_required"
+    },
+    "origin": "application",
+    "statuses": [
+      400
+    ]
+  },
+  "initial_already_imported": {
+    "example": {
+      "code": "initial_already_imported",
+      "detail": "This chapter already has content. Use the re-extraction reconciliation workflow.",
+      "status": 409,
+      "title": "Initial already imported",
+      "type": "urn:pathya:error:initial_already_imported"
+    },
+    "origin": "application",
+    "statuses": [
+      409
+    ]
+  },
+  "insufficient_role": {
+    "example": {
+      "code": "insufficient_role",
+      "detail": "Ask the document owner for the required permission.",
+      "status": 403,
+      "title": "Insufficient role",
+      "type": "urn:pathya:error:insufficient_role"
+    },
+    "origin": "application",
+    "statuses": [
+      403
+    ]
+  },
+  "int_from_float": {
+    "example": {
+      "code": "int_from_float",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Int from float",
+      "type": "urn:pathya:error:int_from_float"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "int_parsing": {
+    "example": {
+      "code": "int_parsing",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Int parsing",
+      "type": "urn:pathya:error:int_parsing"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "int_parsing_size": {
+    "example": {
+      "code": "int_parsing_size",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Int parsing size",
+      "type": "urn:pathya:error:int_parsing_size"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "int_type": {
+    "example": {
+      "code": "int_type",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Int type",
+      "type": "urn:pathya:error:int_type"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "internal_error": {
+    "example": {
+      "code": "internal_error",
+      "detail": "The request could not be completed. Please try again.",
+      "status": 500,
+      "title": "Internal error",
+      "type": "urn:pathya:error:internal_error"
+    },
+    "origin": "application",
+    "statuses": [
+      500
+    ]
+  },
+  "invalid_bbox": {
+    "example": {
+      "code": "invalid_bbox",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Invalid bbox",
+      "type": "urn:pathya:error:invalid_bbox"
+    },
+    "origin": "extraction_validation",
+    "statuses": [
+      422
+    ]
+  },
+  "invalid_correction": {
+    "example": {
+      "code": "invalid_correction",
+      "detail": "The correction metadata is invalid. Check the markup and references.",
+      "status": 422,
+      "title": "Invalid correction",
+      "type": "urn:pathya:error:invalid_correction"
+    },
+    "origin": "application",
+    "statuses": [
+      422
+    ]
+  },
+  "invalid_credentials": {
+    "example": {
+      "code": "invalid_credentials",
+      "detail": "The email or password is incorrect.",
+      "status": 401,
+      "title": "Invalid credentials",
+      "type": "urn:pathya:error:invalid_credentials"
+    },
+    "origin": "application",
+    "statuses": [
+      401
+    ]
+  },
+  "invalid_embedding": {
+    "example": {
+      "code": "invalid_embedding",
+      "detail": "The embedding output has an invalid dimension or value.",
+      "status": 502,
+      "title": "Invalid embedding",
+      "type": "urn:pathya:error:invalid_embedding"
+    },
+    "origin": "application",
+    "statuses": [
+      409,
+      502
+    ]
+  },
+  "invalid_extraction": {
+    "example": {
+      "code": "invalid_extraction",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Invalid extraction",
+      "type": "urn:pathya:error:invalid_extraction"
+    },
+    "origin": "application",
+    "statuses": [
+      422
+    ]
+  },
+  "invalid_header": {
+    "example": {
+      "code": "invalid_header",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Invalid header",
+      "type": "urn:pathya:error:invalid_header"
+    },
+    "origin": "extraction_validation",
+    "statuses": [
+      422
+    ]
+  },
+  "invalid_headers": {
+    "example": {
+      "code": "invalid_headers",
+      "detail": "Choose each header cell once.",
+      "status": 422,
+      "title": "Invalid headers",
+      "type": "urn:pathya:error:invalid_headers"
+    },
+    "origin": "application",
+    "statuses": [
+      422
+    ]
+  },
+  "invalid_initial_revision": {
+    "example": {
+      "code": "invalid_initial_revision",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Invalid initial revision",
+      "type": "urn:pathya:error:invalid_initial_revision"
+    },
+    "origin": "extraction_validation",
+    "statuses": [
+      422
+    ]
+  },
+  "invalid_key": {
+    "example": {
+      "code": "invalid_key",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Invalid key",
+      "type": "urn:pathya:error:invalid_key"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "invalid_merge": {
+    "example": {
+      "code": "invalid_merge",
+      "detail": "Choose another active passage with the same page, type, language and parent.",
+      "status": 422,
+      "title": "Invalid merge",
+      "type": "urn:pathya:error:invalid_merge"
+    },
+    "origin": "application",
+    "statuses": [
+      422
+    ]
+  },
+  "invalid_operation": {
+    "example": {
+      "code": "invalid_operation",
+      "detail": "Descriptions can be changed only on figure blocks.",
+      "status": 422,
+      "title": "Invalid operation",
+      "type": "urn:pathya:error:invalid_operation"
+    },
+    "origin": "application",
+    "statuses": [
+      422
+    ]
+  },
+  "invalid_order": {
+    "example": {
+      "code": "invalid_order",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Invalid order",
+      "type": "urn:pathya:error:invalid_order"
+    },
+    "origin": "extraction_validation",
+    "statuses": [
+      422
+    ]
+  },
+  "invalid_page_count": {
+    "example": {
+      "code": "invalid_page_count",
+      "detail": "This extraction request has an invalid page count.",
+      "status": 422,
+      "title": "Invalid page count",
+      "type": "urn:pathya:error:invalid_page_count"
+    },
+    "origin": "application",
+    "statuses": [
+      422
+    ]
+  },
+  "invalid_page_range": {
+    "example": {
+      "code": "invalid_page_range",
+      "detail": "The extraction adapter returned an unexpected page range.",
+      "status": 422,
+      "title": "Invalid page range",
+      "type": "urn:pathya:error:invalid_page_range"
+    },
+    "origin": "application",
+    "statuses": [
+      422
+    ]
+  },
+  "invalid_parent": {
+    "example": {
+      "code": "invalid_parent",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Invalid parent",
+      "type": "urn:pathya:error:invalid_parent"
+    },
+    "origin": "extraction_validation",
+    "statuses": [
+      422
+    ]
+  },
+  "invalid_path": {
+    "example": {
+      "code": "invalid_path",
+      "detail": "The file location is outside private storage.",
+      "status": 400,
+      "title": "Invalid path",
+      "type": "urn:pathya:error:invalid_path"
+    },
+    "origin": "application",
+    "statuses": [
+      400
+    ]
+  },
+  "invalid_question": {
+    "example": {
+      "code": "invalid_question",
+      "detail": "Use a shorter question with at least one word.",
+      "status": 422,
+      "title": "Invalid question",
+      "type": "urn:pathya:error:invalid_question"
+    },
+    "origin": "application",
+    "statuses": [
+      422
+    ]
+  },
+  "invalid_request": {
+    "example": {
+      "code": "invalid_request",
+      "detail": "Some fields are invalid. Please check the request format.",
+      "status": 422,
+      "title": "Invalid request",
+      "type": "urn:pathya:error:invalid_request"
+    },
+    "origin": "application",
+    "statuses": [
+      422
+    ]
+  },
+  "invalid_retention": {
+    "example": {
+      "code": "invalid_retention",
+      "detail": "Choose a retention period within the configured maximum.",
+      "status": 422,
+      "title": "Invalid retention",
+      "type": "urn:pathya:error:invalid_retention"
+    },
+    "origin": "application",
+    "statuses": [
+      422
+    ]
+  },
+  "invalid_search": {
+    "example": {
+      "code": "invalid_search",
+      "detail": "Use a query of 1 to 2000 characters and a result limit from 1 to 20.",
+      "status": 422,
+      "title": "Invalid search",
+      "type": "urn:pathya:error:invalid_search"
+    },
+    "origin": "application",
+    "statuses": [
+      422
+    ]
+  },
+  "invalid_source_asset": {
+    "example": {
+      "code": "invalid_source_asset",
+      "detail": "A source asset is unavailable or belongs to another document.",
+      "status": 422,
+      "title": "Invalid source asset",
+      "type": "urn:pathya:error:invalid_source_asset"
+    },
+    "origin": "application",
+    "statuses": [
+      422
+    ]
+  },
+  "invalid_speech_output": {
+    "example": {
+      "code": "invalid_speech_output",
+      "detail": "The speech adapter returned an unsupported result. Read the text while the adapter is checked.",
+      "status": 502,
+      "title": "Invalid speech output",
+      "type": "urn:pathya:error:invalid_speech_output"
+    },
+    "origin": "application",
+    "statuses": [
+      502
+    ]
+  },
+  "invalid_speech_units": {
+    "example": {
+      "code": "invalid_speech_units",
+      "detail": "The segmenter returned unsupported sentence units.",
+      "status": 502,
+      "title": "Invalid speech units",
+      "type": "urn:pathya:error:invalid_speech_units"
+    },
+    "origin": "application",
+    "statuses": [
+      502
+    ]
+  },
+  "invalid_split": {
+    "example": {
+      "code": "invalid_split",
+      "detail": "Choose unique increasing offsets inside the passage, measured in Unicode code points.",
+      "status": 422,
+      "title": "Invalid split",
+      "type": "urn:pathya:error:invalid_split"
+    },
+    "origin": "application",
+    "statuses": [
+      422
+    ]
+  },
+  "is_instance_of": {
+    "example": {
+      "code": "is_instance_of",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Is instance of",
+      "type": "urn:pathya:error:is_instance_of"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "is_subclass_of": {
+    "example": {
+      "code": "is_subclass_of",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Is subclass of",
+      "type": "urn:pathya:error:is_subclass_of"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "iterable_type": {
+    "example": {
+      "code": "iterable_type",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Iterable type",
+      "type": "urn:pathya:error:iterable_type"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "iteration_error": {
+    "example": {
+      "code": "iteration_error",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Iteration error",
+      "type": "urn:pathya:error:iteration_error"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "job_not_found": {
+    "example": {
+      "code": "job_not_found",
+      "detail": "This processing job is unavailable.",
+      "status": 404,
+      "title": "Job not found",
+      "type": "urn:pathya:error:job_not_found"
+    },
+    "origin": "application",
+    "statuses": [
+      404
+    ]
+  },
+  "json_invalid": {
+    "example": {
+      "code": "json_invalid",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Json invalid",
+      "type": "urn:pathya:error:json_invalid"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "json_type": {
+    "example": {
+      "code": "json_type",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Json type",
+      "type": "urn:pathya:error:json_type"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "less_than": {
+    "example": {
+      "code": "less_than",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Less than",
+      "type": "urn:pathya:error:less_than"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "less_than_equal": {
+    "example": {
+      "code": "less_than_equal",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Less than equal",
+      "type": "urn:pathya:error:less_than_equal"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "list_type": {
+    "example": {
+      "code": "list_type",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "List type",
+      "type": "urn:pathya:error:list_type"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "literal_error": {
+    "example": {
+      "code": "literal_error",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Literal error",
+      "type": "urn:pathya:error:literal_error"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "login_rate_limited": {
+    "example": {
+      "code": "login_rate_limited",
+      "detail": "Too many sign-in attempts. Please wait before retrying.",
+      "status": 429,
+      "title": "Login rate limited",
+      "type": "urn:pathya:error:login_rate_limited"
+    },
+    "origin": "application",
+    "statuses": [
+      429
+    ]
+  },
+  "malformed": {
+    "example": {
+      "code": "malformed",
+      "detail": "This image could not be read. Export a valid JPEG or PNG and retry.",
+      "status": 422,
+      "title": "Malformed",
+      "type": "urn:pathya:error:malformed"
+    },
+    "origin": "application",
+    "statuses": [
+      422
+    ]
+  },
+  "manifest_asset_invalid": {
+    "example": {
+      "code": "manifest_asset_invalid",
+      "detail": "An audio file is missing. Rebuild it; chapter text remains available.",
+      "status": 409,
+      "title": "Manifest asset invalid",
+      "type": "urn:pathya:error:manifest_asset_invalid"
+    },
+    "origin": "application",
+    "statuses": [
+      409
+    ]
+  },
+  "manifest_pending": {
+    "example": {
+      "code": "manifest_pending",
+      "detail": "The chapter manifest is being prepared. Its text remains available.",
+      "status": 409,
+      "title": "Manifest pending",
+      "type": "urn:pathya:error:manifest_pending"
+    },
+    "origin": "application",
+    "statuses": [
+      409
+    ]
+  },
+  "manifest_structure_invalid": {
+    "example": {
+      "code": "manifest_structure_invalid",
+      "detail": "The reading structure needs reconciliation before publication.",
+      "status": 409,
+      "title": "Manifest structure invalid",
+      "type": "urn:pathya:error:manifest_structure_invalid"
+    },
+    "origin": "application",
+    "statuses": [
+      409
+    ]
+  },
+  "mapping_type": {
+    "example": {
+      "code": "mapping_type",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Mapping type",
+      "type": "urn:pathya:error:mapping_type"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "merge_revision_conflict": {
+    "example": {
+      "code": "merge_revision_conflict",
+      "detail": "The second passage has changed. Supply its current with_base_revision.",
+      "status": 409,
+      "title": "Merge revision conflict",
+      "type": "urn:pathya:error:merge_revision_conflict"
+    },
+    "origin": "application",
+    "statuses": [
+      409
+    ]
+  },
+  "missing": {
+    "example": {
+      "code": "missing",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Missing",
+      "type": "urn:pathya:error:missing"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "missing_argument": {
+    "example": {
+      "code": "missing_argument",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Missing argument",
+      "type": "urn:pathya:error:missing_argument"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "missing_keyword_only_argument": {
+    "example": {
+      "code": "missing_keyword_only_argument",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Missing keyword only argument",
+      "type": "urn:pathya:error:missing_keyword_only_argument"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "missing_positional_only_argument": {
+    "example": {
+      "code": "missing_positional_only_argument",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Missing positional only argument",
+      "type": "urn:pathya:error:missing_positional_only_argument"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "missing_sentinel_error": {
+    "example": {
+      "code": "missing_sentinel_error",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Missing sentinel error",
+      "type": "urn:pathya:error:missing_sentinel_error"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "model_attributes_type": {
+    "example": {
+      "code": "model_attributes_type",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Model attributes type",
+      "type": "urn:pathya:error:model_attributes_type"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "model_type": {
+    "example": {
+      "code": "model_type",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Model type",
+      "type": "urn:pathya:error:model_type"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "multiple_argument_values": {
+    "example": {
+      "code": "multiple_argument_values",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Multiple argument values",
+      "type": "urn:pathya:error:multiple_argument_values"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "multiple_of": {
+    "example": {
+      "code": "multiple_of",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Multiple of",
+      "type": "urn:pathya:error:multiple_of"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "named_tuple_type": {
+    "example": {
+      "code": "named_tuple_type",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Named tuple type",
+      "type": "urn:pathya:error:named_tuple_type"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "needs_description_review": {
+    "example": {
+      "code": "needs_description_review",
+      "detail": "Add a figure description before marking it reviewed.",
+      "status": 422,
+      "title": "Needs description review",
+      "type": "urn:pathya:error:needs_description_review"
+    },
+    "origin": "application",
+    "statuses": [
+      422
+    ]
+  },
+  "needs_math_review": {
+    "example": {
+      "code": "needs_math_review",
+      "detail": "Review the equation markup and spoken fallback before marking it reviewed.",
+      "status": 422,
+      "title": "Needs math review",
+      "type": "urn:pathya:error:needs_math_review"
+    },
+    "origin": "application",
+    "statuses": [
+      422
+    ]
+  },
+  "needs_python_object": {
+    "example": {
+      "code": "needs_python_object",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Needs python object",
+      "type": "urn:pathya:error:needs_python_object"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "no_such_attribute": {
+    "example": {
+      "code": "no_such_attribute",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "No such attribute",
+      "type": "urn:pathya:error:no_such_attribute"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "none_required": {
+    "example": {
+      "code": "none_required",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "None required",
+      "type": "urn:pathya:error:none_required"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "not_ready": {
+    "example": {
+      "code": "not_ready",
+      "detail": "Storage is unavailable. Please contact the project maintainer.",
+      "status": 503,
+      "title": "Not ready",
+      "type": "urn:pathya:error:not_ready"
+    },
+    "origin": "application",
+    "statuses": [
+      503
+    ]
+  },
+  "order_conflict": {
+    "example": {
+      "code": "order_conflict",
+      "detail": "These reading positions need reconciliation before another reorder.",
+      "status": 409,
+      "title": "Order conflict",
+      "type": "urn:pathya:error:order_conflict"
+    },
+    "origin": "application",
+    "statuses": [
+      409
+    ]
+  },
+  "ordered_dict_type": {
+    "example": {
+      "code": "ordered_dict_type",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Ordered dict type",
+      "type": "urn:pathya:error:ordered_dict_type"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "package_not_found": {
+    "example": {
+      "code": "package_not_found",
+      "detail": "This package is unavailable.",
+      "status": 404,
+      "title": "Package not found",
+      "type": "urn:pathya:error:package_not_found"
+    },
+    "origin": "application",
+    "statuses": [
+      404
+    ]
+  },
+  "package_stale": {
+    "example": {
+      "code": "package_stale",
+      "detail": "This output is outdated. Request a current version or continue reading the text.",
+      "status": 409,
+      "title": "Package stale",
+      "type": "urn:pathya:error:package_stale"
+    },
+    "origin": "application",
+    "statuses": [
+      409
+    ]
+  },
+  "package_too_large": {
+    "example": {
+      "code": "package_too_large",
+      "detail": "This chapter package is too large. Choose a smaller chapter or omit audio.",
+      "status": 413,
+      "title": "Package too large",
+      "type": "urn:pathya:error:package_too_large"
+    },
+    "origin": "application",
+    "statuses": [
+      413
+    ]
+  },
+  "parent_cycle": {
+    "example": {
+      "code": "parent_cycle",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Parent cycle",
+      "type": "urn:pathya:error:parent_cycle"
+    },
+    "origin": "extraction_validation",
+    "statuses": [
+      422
+    ]
+  },
+  "password_protected": {
+    "example": {
+      "code": "password_protected",
+      "detail": "This PDF has a password. Please upload an unlocked copy.",
+      "status": 422,
+      "title": "Password protected",
+      "type": "urn:pathya:error:password_protected"
+    },
+    "origin": "application",
+    "statuses": [
+      422
+    ]
+  },
+  "phoneme_unsupported": {
+    "example": {
+      "code": "phoneme_unsupported",
+      "detail": "This adapter contract supports spoken aliases. Phoneme markup needs a separately tested provider extension.",
+      "status": 422,
+      "title": "Phoneme unsupported",
+      "type": "urn:pathya:error:phoneme_unsupported"
+    },
+    "origin": "application",
+    "statuses": [
+      422
+    ]
+  },
+  "pricing_unverified": {
+    "example": {
+      "code": "pricing_unverified",
+      "detail": "Paid speech is unavailable until its budget and verified tariff are configured. Text remains available.",
+      "status": 402,
+      "title": "Pricing unverified",
+      "type": "urn:pathya:error:pricing_unverified"
+    },
+    "origin": "application",
+    "statuses": [
+      402
+    ]
+  },
+  "question_rate_limited": {
+    "example": {
+      "code": "question_rate_limited",
+      "detail": "Too many requests for this action. Please wait before trying again.",
+      "status": 429,
+      "title": "Question rate limited",
+      "type": "urn:pathya:error:question_rate_limited"
+    },
+    "origin": "application",
+    "statuses": [
+      429
+    ]
+  },
+  "receipt_not_found": {
+    "example": {
+      "code": "receipt_not_found",
+      "detail": "This deletion receipt is unavailable.",
+      "status": 404,
+      "title": "Receipt not found",
+      "type": "urn:pathya:error:receipt_not_found"
+    },
+    "origin": "application",
+    "statuses": [
+      404,
+      409
+    ]
+  },
+  "recursion_depth_exceeded": {
+    "example": {
+      "code": "recursion_depth_exceeded",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Recursion depth exceeded",
+      "type": "urn:pathya:error:recursion_depth_exceeded"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "recursion_loop": {
+    "example": {
+      "code": "recursion_loop",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Recursion loop",
+      "type": "urn:pathya:error:recursion_loop"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "retention_not_extended": {
+    "example": {
+      "code": "retention_not_extended",
+      "detail": "Choose a date later than the current retention date.",
+      "status": 422,
+      "title": "Retention not extended",
+      "type": "urn:pathya:error:retention_not_extended"
+    },
+    "origin": "application",
+    "statuses": [
+      422
+    ]
+  },
+  "revision_conflict": {
+    "example": {
+      "code": "revision_conflict",
+      "detail": "This passage changed while you were editing. Compare both versions before retrying.",
+      "status": 409,
+      "title": "Revision conflict",
+      "type": "urn:pathya:error:revision_conflict"
+    },
+    "origin": "application",
+    "statuses": [
+      409
+    ]
+  },
+  "rights_note_required": {
+    "example": {
+      "code": "rights_note_required",
+      "detail": "Add a note confirming your permission to use this chapter.",
+      "status": 422,
+      "title": "Rights note required",
+      "type": "urn:pathya:error:rights_note_required"
+    },
+    "origin": "application",
+    "statuses": [
+      422
+    ]
+  },
+  "segmenter_configuration": {
+    "example": {
+      "code": "segmenter_configuration",
+      "detail": "The sentence segmenter could not be loaded.",
+      "status": 503,
+      "title": "Segmenter configuration",
+      "type": "urn:pathya:error:segmenter_configuration"
+    },
+    "origin": "application",
+    "statuses": [
+      503
+    ]
+  },
+  "segmenter_required": {
+    "example": {
+      "code": "segmenter_required",
+      "detail": "Configure Person 2's tested sentence segmenter before generating narration.",
+      "status": 503,
+      "title": "Segmenter required",
+      "type": "urn:pathya:error:segmenter_required"
+    },
+    "origin": "application",
+    "statuses": [
+      503
+    ]
+  },
+  "session_mode_required": {
+    "example": {
+      "code": "session_mode_required",
+      "detail": "Account sign-in is disabled in local demo mode.",
+      "status": 409,
+      "title": "Session mode required",
+      "type": "urn:pathya:error:session_mode_required"
+    },
+    "origin": "application",
+    "statuses": [
+      409
+    ]
+  },
+  "set_item_not_hashable": {
+    "example": {
+      "code": "set_item_not_hashable",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Set item not hashable",
+      "type": "urn:pathya:error:set_item_not_hashable"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "set_type": {
+    "example": {
+      "code": "set_type",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Set type",
+      "type": "urn:pathya:error:set_type"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "source_unavailable": {
+    "example": {
+      "code": "source_unavailable",
+      "detail": "The source file is missing. Upload the chapter again.",
+      "status": 404,
+      "title": "Source unavailable",
+      "type": "urn:pathya:error:source_unavailable"
+    },
+    "origin": "application",
+    "statuses": [
+      404
+    ]
+  },
+  "speech_configuration": {
+    "example": {
+      "code": "speech_configuration",
+      "detail": "Select a supported speech adapter.",
+      "status": 503,
+      "title": "Speech configuration",
+      "type": "urn:pathya:error:speech_configuration"
+    },
+    "origin": "application",
+    "statuses": [
+      503
+    ]
+  },
+  "stale_revision": {
+    "example": {
+      "code": "stale_revision",
+      "detail": "The chapter changed before publication. Rebuild the current revision.",
+      "status": 409,
+      "title": "Stale revision",
+      "type": "urn:pathya:error:stale_revision"
+    },
+    "origin": "application",
+    "statuses": [
+      409
+    ]
+  },
+  "storage_busy": {
+    "example": {
+      "code": "storage_busy",
+      "detail": "Storage is busy. Please try again shortly.",
+      "status": 503,
+      "title": "Storage busy",
+      "type": "urn:pathya:error:storage_busy"
+    },
+    "origin": "application",
+    "statuses": [
+      503
+    ]
+  },
+  "storage_full": {
+    "example": {
+      "code": "storage_full",
+      "detail": "Storage is full. Ask the maintainer to free space, then retry.",
+      "status": 507,
+      "title": "Storage full",
+      "type": "urn:pathya:error:storage_full"
+    },
+    "origin": "application",
+    "statuses": [
+      507
+    ]
+  },
+  "storage_integrity": {
+    "example": {
+      "code": "storage_integrity",
+      "detail": "Stored file verification failed. Contact the maintainer.",
+      "status": 500,
+      "title": "Storage integrity",
+      "type": "urn:pathya:error:storage_integrity"
+    },
+    "origin": "application",
+    "statuses": [
+      500
+    ]
+  },
+  "string_not_ascii": {
+    "example": {
+      "code": "string_not_ascii",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "String not ascii",
+      "type": "urn:pathya:error:string_not_ascii"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "string_pattern_mismatch": {
+    "example": {
+      "code": "string_pattern_mismatch",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "String pattern mismatch",
+      "type": "urn:pathya:error:string_pattern_mismatch"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "string_too_long": {
+    "example": {
+      "code": "string_too_long",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "String too long",
+      "type": "urn:pathya:error:string_too_long"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "string_too_short": {
+    "example": {
+      "code": "string_too_short",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "String too short",
+      "type": "urn:pathya:error:string_too_short"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "string_type": {
+    "example": {
+      "code": "string_type",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "String type",
+      "type": "urn:pathya:error:string_type"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "string_unicode": {
+    "example": {
+      "code": "string_unicode",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "String unicode",
+      "type": "urn:pathya:error:string_unicode"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "synthetic_audio_forbidden": {
+    "example": {
+      "code": "synthetic_audio_forbidden",
+      "detail": "Synthetic silent audio is for development only.",
+      "status": 503,
+      "title": "Synthetic audio forbidden",
+      "type": "urn:pathya:error:synthetic_audio_forbidden"
+    },
+    "origin": "application",
+    "statuses": [
+      503
+    ]
+  },
+  "term_not_found": {
+    "example": {
+      "code": "term_not_found",
+      "detail": "This pronunciation override is unavailable.",
+      "status": 404,
+      "title": "Term not found",
+      "type": "urn:pathya:error:term_not_found"
+    },
+    "origin": "application",
+    "statuses": [
+      404
+    ]
+  },
+  "time_delta_parsing": {
+    "example": {
+      "code": "time_delta_parsing",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Time delta parsing",
+      "type": "urn:pathya:error:time_delta_parsing"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "time_delta_type": {
+    "example": {
+      "code": "time_delta_type",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Time delta type",
+      "type": "urn:pathya:error:time_delta_type"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "time_parsing": {
+    "example": {
+      "code": "time_parsing",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Time parsing",
+      "type": "urn:pathya:error:time_parsing"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "time_type": {
+    "example": {
+      "code": "time_type",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Time type",
+      "type": "urn:pathya:error:time_type"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "timezone_aware": {
+    "example": {
+      "code": "timezone_aware",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Timezone aware",
+      "type": "urn:pathya:error:timezone_aware"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "timezone_naive": {
+    "example": {
+      "code": "timezone_naive",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Timezone naive",
+      "type": "urn:pathya:error:timezone_naive"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "timezone_offset": {
+    "example": {
+      "code": "timezone_offset",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Timezone offset",
+      "type": "urn:pathya:error:timezone_offset"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "title_required": {
+    "example": {
+      "code": "title_required",
+      "detail": "Give this chapter a short title.",
+      "status": 422,
+      "title": "Title required",
+      "type": "urn:pathya:error:title_required"
+    },
+    "origin": "application",
+    "statuses": [
+      422
+    ]
+  },
+  "too_large": {
+    "example": {
+      "code": "too_large",
+      "detail": "This file is too large. Upload a smaller chapter.",
+      "status": 413,
+      "title": "Too large",
+      "type": "urn:pathya:error:too_large"
+    },
+    "origin": "application",
+    "statuses": [
+      413
+    ]
+  },
+  "too_long": {
+    "example": {
+      "code": "too_long",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Too long",
+      "type": "urn:pathya:error:too_long"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "too_many_pages": {
+    "example": {
+      "code": "too_many_pages",
+      "detail": "This chapter has too many pages. Split it into smaller chapters.",
+      "status": 413,
+      "title": "Too many pages",
+      "type": "urn:pathya:error:too_many_pages"
+    },
+    "origin": "application",
+    "statuses": [
+      413
+    ]
+  },
+  "too_many_pixels": {
+    "example": {
+      "code": "too_many_pixels",
+      "detail": "This image has too many pixels. Reduce its dimensions before uploading.",
+      "status": 413,
+      "title": "Too many pixels",
+      "type": "urn:pathya:error:too_many_pixels"
+    },
+    "origin": "application",
+    "statuses": [
+      413
+    ]
+  },
+  "too_short": {
+    "example": {
+      "code": "too_short",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Too short",
+      "type": "urn:pathya:error:too_short"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "tuple_type": {
+    "example": {
+      "code": "tuple_type",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Tuple type",
+      "type": "urn:pathya:error:tuple_type"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "unexpected_keyword_argument": {
+    "example": {
+      "code": "unexpected_keyword_argument",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Unexpected keyword argument",
+      "type": "urn:pathya:error:unexpected_keyword_argument"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "unexpected_positional_argument": {
+    "example": {
+      "code": "unexpected_positional_argument",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Unexpected positional argument",
+      "type": "urn:pathya:error:unexpected_positional_argument"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "union_tag_invalid": {
+    "example": {
+      "code": "union_tag_invalid",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Union tag invalid",
+      "type": "urn:pathya:error:union_tag_invalid"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "union_tag_not_found": {
+    "example": {
+      "code": "union_tag_not_found",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Union tag not found",
+      "type": "urn:pathya:error:union_tag_not_found"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "unsupported_combination": {
+    "example": {
+      "code": "unsupported_combination",
+      "detail": "Submit split or merge as a separate correction.",
+      "status": 422,
+      "title": "Unsupported combination",
+      "type": "urn:pathya:error:unsupported_combination"
+    },
+    "origin": "application",
+    "statuses": [
+      422
+    ]
+  },
+  "unsupported_language": {
+    "example": {
+      "code": "unsupported_language",
+      "detail": "Select English, Hindi or both.",
+      "status": 422,
+      "title": "Unsupported language",
+      "type": "urn:pathya:error:unsupported_language"
+    },
+    "origin": "application",
+    "statuses": [
+      422
+    ]
+  },
+  "unsupported_structure": {
+    "example": {
+      "code": "unsupported_structure",
+      "detail": "Split and merge currently support text blocks without child blocks.",
+      "status": 422,
+      "title": "Unsupported structure",
+      "type": "urn:pathya:error:unsupported_structure"
+    },
+    "origin": "application",
+    "statuses": [
+      422
+    ]
+  },
+  "unsupported_table": {
+    "example": {
+      "code": "unsupported_table",
+      "detail": "Automatic header assignment supports complete rows under one header row only.",
+      "status": 422,
+      "title": "Unsupported table",
+      "type": "urn:pathya:error:unsupported_table"
+    },
+    "origin": "application",
+    "statuses": [
+      422
+    ]
+  },
+  "unsupported_type": {
+    "example": {
+      "code": "unsupported_type",
+      "detail": "Upload a PDF, JPEG or PNG chapter.",
+      "status": 415,
+      "title": "Unsupported type",
+      "type": "urn:pathya:error:unsupported_type"
+    },
+    "origin": "application",
+    "statuses": [
+      415
+    ]
+  },
+  "untrusted_origin": {
+    "example": {
+      "code": "untrusted_origin",
+      "detail": "Open this service from an approved application address.",
+      "status": 403,
+      "title": "Untrusted origin",
+      "type": "urn:pathya:error:untrusted_origin"
+    },
+    "origin": "application",
+    "statuses": [
+      403
+    ]
+  },
+  "upload_concurrency": {
+    "example": {
+      "code": "upload_concurrency",
+      "detail": "Finish or remove an existing upload before starting another.",
+      "status": 429,
+      "title": "Upload concurrency",
+      "type": "urn:pathya:error:upload_concurrency"
+    },
+    "origin": "application",
+    "statuses": [
+      429
+    ]
+  },
+  "upload_in_progress": {
+    "example": {
+      "code": "upload_in_progress",
+      "detail": "This upload is still being saved. Please retry shortly.",
+      "status": 409,
+      "title": "Upload in progress",
+      "type": "urn:pathya:error:upload_in_progress"
+    },
+    "origin": "application",
+    "statuses": [
+      409
+    ]
+  },
+  "upload_rate_limited": {
+    "example": {
+      "code": "upload_rate_limited",
+      "detail": "Too many requests for this action. Please wait before trying again.",
+      "status": 429,
+      "title": "Upload rate limited",
+      "type": "urn:pathya:error:upload_rate_limited"
+    },
+    "origin": "application",
+    "statuses": [
+      429
+    ]
+  },
+  "url_parsing": {
+    "example": {
+      "code": "url_parsing",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Url parsing",
+      "type": "urn:pathya:error:url_parsing"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "url_scheme": {
+    "example": {
+      "code": "url_scheme",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Url scheme",
+      "type": "urn:pathya:error:url_scheme"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "url_syntax_violation": {
+    "example": {
+      "code": "url_syntax_violation",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Url syntax violation",
+      "type": "urn:pathya:error:url_syntax_violation"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "url_too_long": {
+    "example": {
+      "code": "url_too_long",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Url too long",
+      "type": "urn:pathya:error:url_too_long"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "url_type": {
+    "example": {
+      "code": "url_type",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Url type",
+      "type": "urn:pathya:error:url_type"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "user_not_found": {
+    "example": {
+      "code": "user_not_found",
+      "detail": "The requested account is unavailable.",
+      "status": 404,
+      "title": "User not found",
+      "type": "urn:pathya:error:user_not_found"
+    },
+    "origin": "application",
+    "statuses": [
+      404
+    ]
+  },
+  "uuid_parsing": {
+    "example": {
+      "code": "uuid_parsing",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Uuid parsing",
+      "type": "urn:pathya:error:uuid_parsing"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "uuid_type": {
+    "example": {
+      "code": "uuid_type",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Uuid type",
+      "type": "urn:pathya:error:uuid_type"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "uuid_version": {
+    "example": {
+      "code": "uuid_version",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Uuid version",
+      "type": "urn:pathya:error:uuid_version"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "value_error": {
+    "example": {
+      "code": "value_error",
+      "detail": "Extraction content is invalid. Check the schema and referenced page/block identifiers.",
+      "status": 422,
+      "title": "Value error",
+      "type": "urn:pathya:error:value_error"
+    },
+    "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  }
+}

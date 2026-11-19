@@ -1,5 +1,5 @@
 PYTHON ?= python
-.PHONY: install dev worker test lint typecheck check openapi contracts
+.PHONY: install dev worker test lint typecheck check openapi contracts contracts-check demo demo-check
 install:
 	$(PYTHON) -m pip install -r requirements.lock
 dev:
@@ -17,3 +17,9 @@ check:
 	$(PYTHON) -m scripts.check
 openapi contracts:
 	$(PYTHON) -m scripts.export_contracts
+contracts-check:
+	$(PYTHON) -m scripts.export_contracts --check
+demo:
+	$(PYTHON) -m scripts.demo
+demo-check:
+	$(PYTHON) -m scripts.demo --smoke --port 0

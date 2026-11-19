@@ -178,3 +178,11 @@ output directory, and CSV formula-leading cells are escaped. No 60-question huma
 corpus, live model result, Hindi approval or accessibility result is invented.
 Private server-side embedding injection supports fixture tests without enabling
 an online model. No new dependency is added.
+
+### P16 backend handoff
+
+Finish the backend handoff against the existing draft extraction contract while
+teammates review the proposed producer contract. The offline demo uses an
+isolated data directory and fixed synthetic adapters. Its smoke check submits an
+indexing job through HTTP and waits for the durable worker to finish it. CI checks
+the committed contracts for staleness and runs the smoke check on a fresh checkout.

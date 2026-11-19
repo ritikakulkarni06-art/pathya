@@ -1,43 +1,83 @@
-"""Inventory installed distribution metadata; manual redistribution review remains required."""
+"""Report installed distribution metadata; this is not legal redistribution approval."""
 
-from importlib.metadata import distributions
-from pathlib import Path
+import argparse
+import importlib.metadata
+import json
+from typing import Any
+
+PURPOSES = {
+    "fastapi": "API framework",
+    "uvicorn": "Single API server",
+    "pydantic": "Strict boundary schemas",
+    "pydantic-settings": "Environment configuration",
+    "httpx": "HTTP adapter/client and API tests",
+    "argon2-cffi": "Argon2id password hashing",
+    "argon2-cffi-bindings": "Native Argon2 binding",
+    "pypdf": "Bounded PDF inspection and synthetic demo PDF creation",
+    "pillow": "Image validation and metadata stripping",
+    "python-multipart": "Bounded multipart parsing",
+    "orjson": "JSON support",
+    "pytest": "Behavioral and integration tests",
+    "pytest-asyncio": "Async integration tests",
+    "ruff": "Lint and formatting",
+    "mypy": "Strict application type checks",
+    "coverage": "Database coverage gate",
+    "jsonschema": "Contract schema checks",
+}
+
+
+def inventory() -> list[dict[str, Any]]:
+    rows = []
+    for distribution in importlib.metadata.distributions():
+        name = distribution.metadata.get("Name", "unknown")
+        license_value = (
+            distribution.metadata.get("License-Expression")
+            or distribution.metadata.get("License")
+            or ""
+        )
+        classifiers = [
+            value.rsplit(" :: ", 1)[-1]
+            for value in distribution.metadata.get_all("Classifier", [])
+            if value.startswith("License ::")
+        ]
+        if not license_value.strip() or len(license_value) > 160 or "\n" in license_value:
+            license_value = (
+                "; ".join(classifiers)
+                or "See distribution LICENSE files; normalization/review required"
+            )
+        rows.append(
+            {
+                "name": name,
+                "version": distribution.version,
+                "license": license_value.strip(),
+                "purpose": PURPOSES.get(
+                    name.lower().replace("_", "-"),
+                    "Transitive runtime, build or development dependency",
+                ),
+                "redistribution": "Review required; not automatically approved",
+            }
+        )
+    return sorted(rows, key=lambda row: row["name"].casefold())
 
 
 def main() -> None:
-    rows = [
-        "# Dependency inventory",
-        "",
-        "Resolved for Python 3.12. Versions are pinned in requirements.lock. License metadata is recorded as supplied by each distribution, not legal advice. Redistribution review: pending for every entry. Native bundled code requires separate review.",
-        "",
-        "| Distribution | Version | Declared license | Purpose | Redistribution |",
-        "| --- | --- | --- | --- | --- |",
-    ]
-    for distribution in sorted(
-        distributions(), key=lambda item: (item.metadata.get("Name") or "").lower()
-    ):
-        name = distribution.metadata.get("Name", "unknown")
-        license_text = (
-            distribution.metadata.get("License-Expression")
-            or distribution.metadata.get("License")
-            or "; ".join(
-                item.rsplit(" :: ", 1)[-1]
-                for item in distribution.metadata.get_all("Classifier", [])
-                if item.startswith("License ::")
-            )
-            or "Not declared; inspect license files"
-        )
-        license_text = " ".join(license_text.split()).replace("|", "/")[:150]
-        rows.append(
-            f"| {name} | {distribution.version} | {license_text} | Runtime, tooling or transitive dependency | Pending review |"
-        )
-    rows.extend(
-        [
-            "",
-            "Python/SQLite use the standard library; SQLite is public domain. No E5 model, numpy, eSpeak, PDFium or PDF parser is included yet. No cloud API has been enabled.",
-        ]
+    parser = argparse.ArgumentParser(
+        description="Print installed dependency/license metadata without a network request."
     )
-    Path("docs/DEPENDENCIES.md").write_text("\n".join(rows) + "\n", encoding="utf-8")
+    parser.add_argument("--json", action="store_true")
+    args = parser.parse_args()
+    rows = inventory()
+    if args.json:
+        print(json.dumps(rows, indent=2))
+    else:
+        print("Name\tVersion\tDeclared license\tPurpose\tRedistribution")
+        for row in rows:
+            print(
+                "\t".join(
+                    str(row[key])
+                    for key in ["name", "version", "license", "purpose", "redistribution"]
+                )
+            )
 
 
 if __name__ == "__main__":
