@@ -1,0 +1,1111 @@
+{
+  "producer_commit": "39331e4291d2af6b68654dead2e9e8b9595de32f",
+  "published_backend_commit": "a2ebba5ec12397cc84ae0b2d33ea28510a8554ba",
+  "local_backend_commit": "c1fd149ba54ab9c5193fa26364d521cfb84396c6",
+  "reader_commit": "346921aeb301e0b5629a8ed1f2a996cc1e1fc3a6",
+  "p1_conformance_matches": 12,
+  "p1_conformance_total": 12,
+  "valid_p1_samples": 3,
+  "valid_p1_samples_accepted_directly_by_p3": 0,
+  "legacy_p3_fixture_valid": true,
+  "integration_ready": false,
+  "teammate_approvals": "not recorded; review only",
+  "vectors": [
+    {
+      "fixture": "valid_v1_0_0_sample.json",
+      "expected_p1": {
+        "schema_1_0_0": true,
+        "schema_1_1_0": true,
+        "python": true
+      },
+      "observed_p1": {
+        "schema_1_0_0": true,
+        "schema_1_1_0": true,
+        "python": true
+      },
+      "p1_matches_expected": true,
+      "p3_direct_accepts": false,
+      "p3_error_locations": [
+        {
+          "type": "missing",
+          "location": [
+            "pages",
+            0,
+            "pdf_index_0"
+          ]
+        },
+        {
+          "type": "missing",
+          "location": [
+            "pages",
+            0,
+            "printed_label"
+          ]
+        },
+        {
+          "type": "tuple_type",
+          "location": [
+            "pages",
+            0,
+            "transform"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "document_id"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "page_index"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "page_label"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "units"
+          ]
+        },
+        {
+          "type": "missing",
+          "location": [
+            "pages",
+            1,
+            "pdf_index_0"
+          ]
+        }
+      ]
+    },
+    {
+      "fixture": "valid_v1_1_0_status_and_flags.json",
+      "expected_p1": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": true,
+        "python": true
+      },
+      "observed_p1": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": true,
+        "python": true
+      },
+      "p1_matches_expected": true,
+      "p3_direct_accepts": false,
+      "p3_error_locations": [
+        {
+          "type": "literal_error",
+          "location": [
+            "schema_version"
+          ]
+        },
+        {
+          "type": "missing",
+          "location": [
+            "pages",
+            0,
+            "pdf_index_0"
+          ]
+        },
+        {
+          "type": "missing",
+          "location": [
+            "pages",
+            0,
+            "printed_label"
+          ]
+        },
+        {
+          "type": "tuple_type",
+          "location": [
+            "pages",
+            0,
+            "transform"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "document_id"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "page_index"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "page_label"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "units"
+          ]
+        }
+      ]
+    },
+    {
+      "fixture": "valid_v1_1_0_uncertain_table.json",
+      "expected_p1": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": true,
+        "python": true
+      },
+      "observed_p1": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": true,
+        "python": true
+      },
+      "p1_matches_expected": true,
+      "p3_direct_accepts": false,
+      "p3_error_locations": [
+        {
+          "type": "literal_error",
+          "location": [
+            "schema_version"
+          ]
+        },
+        {
+          "type": "missing",
+          "location": [
+            "pages",
+            0,
+            "pdf_index_0"
+          ]
+        },
+        {
+          "type": "missing",
+          "location": [
+            "pages",
+            0,
+            "printed_label"
+          ]
+        },
+        {
+          "type": "tuple_type",
+          "location": [
+            "pages",
+            0,
+            "transform"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "document_id"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "page_index"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "page_label"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "units"
+          ]
+        }
+      ]
+    },
+    {
+      "fixture": "invalid_v1_1_0_missing_block_id.json",
+      "expected_p1": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": false,
+        "python": false
+      },
+      "observed_p1": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": false,
+        "python": false
+      },
+      "p1_matches_expected": true,
+      "p3_direct_accepts": false,
+      "p3_error_locations": [
+        {
+          "type": "literal_error",
+          "location": [
+            "schema_version"
+          ]
+        },
+        {
+          "type": "missing",
+          "location": [
+            "pages",
+            0,
+            "pdf_index_0"
+          ]
+        },
+        {
+          "type": "missing",
+          "location": [
+            "pages",
+            0,
+            "printed_label"
+          ]
+        },
+        {
+          "type": "tuple_type",
+          "location": [
+            "pages",
+            0,
+            "transform"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "document_id"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "page_index"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "page_label"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "units"
+          ]
+        }
+      ]
+    },
+    {
+      "fixture": "invalid_v1_0_0_with_1_1_flag.json",
+      "expected_p1": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": false,
+        "python": false
+      },
+      "observed_p1": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": false,
+        "python": false
+      },
+      "p1_matches_expected": true,
+      "p3_direct_accepts": false,
+      "p3_error_locations": [
+        {
+          "type": "missing",
+          "location": [
+            "pages",
+            0,
+            "pdf_index_0"
+          ]
+        },
+        {
+          "type": "missing",
+          "location": [
+            "pages",
+            0,
+            "printed_label"
+          ]
+        },
+        {
+          "type": "tuple_type",
+          "location": [
+            "pages",
+            0,
+            "transform"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "document_id"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "page_index"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "page_label"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "units"
+          ]
+        },
+        {
+          "type": "missing",
+          "location": [
+            "pages",
+            1,
+            "pdf_index_0"
+          ]
+        }
+      ]
+    },
+    {
+      "fixture": "invalid_v1_0_0_with_page_status.json",
+      "expected_p1": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": false,
+        "python": false
+      },
+      "observed_p1": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": false,
+        "python": false
+      },
+      "p1_matches_expected": true,
+      "p3_direct_accepts": false,
+      "p3_error_locations": [
+        {
+          "type": "missing",
+          "location": [
+            "pages",
+            0,
+            "pdf_index_0"
+          ]
+        },
+        {
+          "type": "missing",
+          "location": [
+            "pages",
+            0,
+            "printed_label"
+          ]
+        },
+        {
+          "type": "tuple_type",
+          "location": [
+            "pages",
+            0,
+            "transform"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "document_id"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "page_index"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "page_label"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "units"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "status"
+          ]
+        }
+      ]
+    },
+    {
+      "fixture": "invalid_v1_1_0_page_without_status.json",
+      "expected_p1": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": false,
+        "python": false
+      },
+      "observed_p1": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": false,
+        "python": false
+      },
+      "p1_matches_expected": true,
+      "p3_direct_accepts": false,
+      "p3_error_locations": [
+        {
+          "type": "literal_error",
+          "location": [
+            "schema_version"
+          ]
+        },
+        {
+          "type": "missing",
+          "location": [
+            "pages",
+            0,
+            "pdf_index_0"
+          ]
+        },
+        {
+          "type": "missing",
+          "location": [
+            "pages",
+            0,
+            "printed_label"
+          ]
+        },
+        {
+          "type": "tuple_type",
+          "location": [
+            "pages",
+            0,
+            "transform"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "document_id"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "page_index"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "page_label"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "units"
+          ]
+        }
+      ]
+    },
+    {
+      "fixture": "invalid_v1_1_0_counts_without_cells.json",
+      "expected_p1": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": false,
+        "python": false
+      },
+      "observed_p1": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": false,
+        "python": false
+      },
+      "p1_matches_expected": true,
+      "p3_direct_accepts": false,
+      "p3_error_locations": [
+        {
+          "type": "literal_error",
+          "location": [
+            "schema_version"
+          ]
+        },
+        {
+          "type": "missing",
+          "location": [
+            "pages",
+            0,
+            "pdf_index_0"
+          ]
+        },
+        {
+          "type": "missing",
+          "location": [
+            "pages",
+            0,
+            "printed_label"
+          ]
+        },
+        {
+          "type": "tuple_type",
+          "location": [
+            "pages",
+            0,
+            "transform"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "document_id"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "page_index"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "page_label"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "units"
+          ]
+        }
+      ]
+    },
+    {
+      "fixture": "invalid_unknown_version.json",
+      "expected_p1": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": false,
+        "python": false
+      },
+      "observed_p1": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": false,
+        "python": false
+      },
+      "p1_matches_expected": true,
+      "p3_direct_accepts": false,
+      "p3_error_locations": [
+        {
+          "type": "literal_error",
+          "location": [
+            "schema_version"
+          ]
+        },
+        {
+          "type": "missing",
+          "location": [
+            "pages",
+            0,
+            "pdf_index_0"
+          ]
+        },
+        {
+          "type": "missing",
+          "location": [
+            "pages",
+            0,
+            "printed_label"
+          ]
+        },
+        {
+          "type": "tuple_type",
+          "location": [
+            "pages",
+            0,
+            "transform"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "document_id"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "page_index"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "page_label"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "units"
+          ]
+        }
+      ]
+    },
+    {
+      "fixture": "invalid_python_only_reversed_bbox.json",
+      "expected_p1": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": true,
+        "python": false
+      },
+      "observed_p1": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": true,
+        "python": false
+      },
+      "p1_matches_expected": true,
+      "p3_direct_accepts": false,
+      "p3_error_locations": [
+        {
+          "type": "literal_error",
+          "location": [
+            "schema_version"
+          ]
+        },
+        {
+          "type": "missing",
+          "location": [
+            "pages",
+            0,
+            "pdf_index_0"
+          ]
+        },
+        {
+          "type": "missing",
+          "location": [
+            "pages",
+            0,
+            "printed_label"
+          ]
+        },
+        {
+          "type": "tuple_type",
+          "location": [
+            "pages",
+            0,
+            "transform"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "document_id"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "page_index"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "page_label"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "units"
+          ]
+        }
+      ]
+    },
+    {
+      "fixture": "invalid_python_only_unknown_parent.json",
+      "expected_p1": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": true,
+        "python": false
+      },
+      "observed_p1": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": true,
+        "python": false
+      },
+      "p1_matches_expected": true,
+      "p3_direct_accepts": false,
+      "p3_error_locations": [
+        {
+          "type": "literal_error",
+          "location": [
+            "schema_version"
+          ]
+        },
+        {
+          "type": "missing",
+          "location": [
+            "pages",
+            0,
+            "pdf_index_0"
+          ]
+        },
+        {
+          "type": "missing",
+          "location": [
+            "pages",
+            0,
+            "printed_label"
+          ]
+        },
+        {
+          "type": "tuple_type",
+          "location": [
+            "pages",
+            0,
+            "transform"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "document_id"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "page_index"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "page_label"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "units"
+          ]
+        }
+      ]
+    },
+    {
+      "fixture": "invalid_python_only_blank_page_with_blocks.json",
+      "expected_p1": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": true,
+        "python": false
+      },
+      "observed_p1": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": true,
+        "python": false
+      },
+      "p1_matches_expected": true,
+      "p3_direct_accepts": false,
+      "p3_error_locations": [
+        {
+          "type": "literal_error",
+          "location": [
+            "schema_version"
+          ]
+        },
+        {
+          "type": "missing",
+          "location": [
+            "pages",
+            0,
+            "pdf_index_0"
+          ]
+        },
+        {
+          "type": "missing",
+          "location": [
+            "pages",
+            0,
+            "printed_label"
+          ]
+        },
+        {
+          "type": "tuple_type",
+          "location": [
+            "pages",
+            0,
+            "transform"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "document_id"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "page_index"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "page_label"
+          ]
+        },
+        {
+          "type": "extra_forbidden",
+          "location": [
+            "pages",
+            0,
+            "units"
+          ]
+        }
+      ]
+    }
+  ],
+  "source_sha256": {
+    "contract/conformance/index.json": "ce600043fe1978bfa5d373a84f7706edbe32022578894b151f9f0126412f8522",
+    "contract/conformance/invalid_python_only_blank_page_with_blocks.json": "a997985caaccb6613fe4eb4bfdfcb35cd803776234e83f74561b0f57c36e9bc9",
+    "contract/conformance/invalid_python_only_reversed_bbox.json": "ad1da65e5ef07de402a71a5d201ff8b92d6931db2dfae8168197965787a06d11",
+    "contract/conformance/invalid_python_only_unknown_parent.json": "ff0f1fc94bc8ef7fc234810ac6d86819a1d5374b2a810e363051c8f392eac505",
+    "contract/conformance/invalid_unknown_version.json": "1840d8d7782b91a6506f653b89c8fd5d0c8d0e04123da2de0e0737a15118c9b5",
+    "contract/conformance/invalid_v1_0_0_with_1_1_flag.json": "b7143881d376c0249c2d08628ea0127e6809f427c082bea24792665a3afb1b3a",
+    "contract/conformance/invalid_v1_0_0_with_page_status.json": "049367bfb7b29f75f5f5ff1f935bd3a4504cd2b6721a14adf108c3e1ba746d0b",
+    "contract/conformance/invalid_v1_1_0_counts_without_cells.json": "9c2e4f34370ba2585e59b4522cca8becd0f1052d6a8c6c98020c6caf62ae304e",
+    "contract/conformance/invalid_v1_1_0_missing_block_id.json": "bb8908e0e6175c5b69b3f06777e410927bd22765515aa0791fab546ca81528bf",
+    "contract/conformance/invalid_v1_1_0_page_without_status.json": "b9c03b5a479e5b11687ac688027830616c62798b71f061b893a515dedd1d23dc",
+    "contract/conformance/valid_v1_0_0_sample.json": "34a414e6ddfc7f6e2b14695155a3314391bab542b82ee45c7afcd29cdb414689",
+    "contract/conformance/valid_v1_1_0_status_and_flags.json": "f44a5f3cc8515fd3d0bbb8c6a632ceb7390d037401f7be6bd80455b026e43f94",
+    "contract/conformance/valid_v1_1_0_uncertain_table.json": "83652627d9311b3ef977b576041ff301b26fd921f190c9cfb7938e551629eea4",
+    "contract/schemas/pathya_content.v1.0.0.schema.json": "5542a4e0718ce092f2fb68b5ce590bffbcac1f6f21b11011160ae250cf9ebdd3",
+    "contract/schemas/pathya_content.v1.1.0.schema.json": "1fbad2da07ec8cb155c0c5be9d6fcbc7448ebb5f8353415f9bed0683bf3c28e5",
+    "src/pathya_document_ai/__init__.py": "3e66dbc442d55da5645417e848520bcc9f99424a8b4108ecf141a0b946f36560",
+    "src/pathya_document_ai/geometry.py": "d590273debf1dbcb15c0215ccc134a155a1b00a1101675f4f22bffcefb01d19e",
+    "src/pathya_document_ai/models.py": "4d77c4b493aa657c95854c558092e1e71ac9678aa4ceb6b296c41ea7e3b0949f"
+  },
+  "p16_follow_up": {
+    "date": "2026-11-19",
+    "local_backend_commit": "786fe4763db94116b2f4fc0d149b0e316cbf99ee",
+    "reader_commit": "54493ac9966a7f6655c82f3fd9be45e3ba9edc0d",
+    "producer_files_hash_verified": 18,
+    "p1_conformance_matches": 12,
+    "p1_conformance_total": 12,
+    "valid_p1_samples": 3,
+    "valid_p1_samples_accepted_directly_by_p3": 0,
+    "legacy_p3_fixture_valid": true,
+    "p3_contract_exports_current": true,
+    "vectors": [
+      {
+        "fixture": "valid_v1_0_0_sample.json",
+        "observed_p1": {
+          "schema_1_0_0": true,
+          "schema_1_1_0": true,
+          "python": true
+        },
+        "p3_direct_accepts": false
+      },
+      {
+        "fixture": "valid_v1_1_0_status_and_flags.json",
+        "observed_p1": {
+          "schema_1_0_0": false,
+          "schema_1_1_0": true,
+          "python": true
+        },
+        "p3_direct_accepts": false
+      },
+      {
+        "fixture": "valid_v1_1_0_uncertain_table.json",
+        "observed_p1": {
+          "schema_1_0_0": false,
+          "schema_1_1_0": true,
+          "python": true
+        },
+        "p3_direct_accepts": false
+      },
+      {
+        "fixture": "invalid_v1_1_0_missing_block_id.json",
+        "observed_p1": {
+          "schema_1_0_0": false,
+          "schema_1_1_0": false,
+          "python": false
+        },
+        "p3_direct_accepts": false
+      },
+      {
+        "fixture": "invalid_v1_0_0_with_1_1_flag.json",
+        "observed_p1": {
+          "schema_1_0_0": false,
+          "schema_1_1_0": false,
+          "python": false
+        },
+        "p3_direct_accepts": false
+      },
+      {
+        "fixture": "invalid_v1_0_0_with_page_status.json",
+        "observed_p1": {
+          "schema_1_0_0": false,
+          "schema_1_1_0": false,
+          "python": false
+        },
+        "p3_direct_accepts": false
+      },
+      {
+        "fixture": "invalid_v1_1_0_page_without_status.json",
+        "observed_p1": {
+          "schema_1_0_0": false,
+          "schema_1_1_0": false,
+          "python": false
+        },
+        "p3_direct_accepts": false
+      },
+      {
+        "fixture": "invalid_v1_1_0_counts_without_cells.json",
+        "observed_p1": {
+          "schema_1_0_0": false,
+          "schema_1_1_0": false,
+          "python": false
+        },
+        "p3_direct_accepts": false
+      },
+      {
+        "fixture": "invalid_unknown_version.json",
+        "observed_p1": {
+          "schema_1_0_0": false,
+          "schema_1_1_0": false,
+          "python": false
+        },
+        "p3_direct_accepts": false
+      },
+      {
+        "fixture": "invalid_python_only_reversed_bbox.json",
+        "observed_p1": {
+          "schema_1_0_0": false,
+          "schema_1_1_0": true,
+          "python": false
+        },
+        "p3_direct_accepts": false
+      },
+      {
+        "fixture": "invalid_python_only_unknown_parent.json",
+        "observed_p1": {
+          "schema_1_0_0": false,
+          "schema_1_1_0": true,
+          "python": false
+        },
+        "p3_direct_accepts": false
+      },
+      {
+        "fixture": "invalid_python_only_blank_page_with_blocks.json",
+        "observed_p1": {
+          "schema_1_0_0": false,
+          "schema_1_1_0": true,
+          "python": false
+        },
+        "p3_direct_accepts": false
+      }
+    ]
+  }
+}

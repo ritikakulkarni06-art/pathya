@@ -1,0 +1,151 @@
+# Pathya contract reconciliation review - 18 November 2026
+
+Status: **review proposal, not an agreed contract or teammate approval**.
+The backend runtime and shared schemas have not been changed by this review.
+
+## Evidence and scope
+
+- P1: `fix/p1-pre-phase5-audit`, commit `39331e4291d2af6b68654dead2e9e8b9595de32f`.
+- Published P3: `person-3`, commit `a2ebba5ec12397cc84ae0b2d33ea28510a8554ba`.
+- Current local P3: `c1fd149ba54ab9c5193fa26364d521cfb84396c6`, with existing uncommitted work preserved.
+- P2 reader: `person-2`, commit `346921aeb301e0b5629a8ed1f2a996cc1e1fc3a6`.
+- P1 GitHub Actions run `44144339208`: Windows unit, Ubuntu unit and real Tesseract/Docling
+  jobs all completed successfully. This establishes P1 CI success, not cross-branch compatibility
+  or measured textbook accuracy.
+- A Python 3.12 probe ran all 12 pinned P1 conformance vectors through both JSON Schemas and
+  P1's semantic validator: **12/12 matched the expected outcomes**.
+- The current local P3 schema rejected **all 3 valid P1 examples**, including P1 1.0.0, P1 1.1.0
+  with page statuses/flags, and the uncertain-table example. P3's own legacy fixture still validates.
+- Detailed observed verdicts, error locations and producer-file hashes are in
+  `CONTRACT_COMPATIBILITY_20261118.json`. No OCR engine was rerun and no textbook data was used.
+
+## Actual conflicts
+
+| Area | P1 content contract | Current P3 extraction draft | Required resolution |
+|---|---|---|---|
+| Root/version | Document, source asset, languages, corrections; versions 1.0.0/1.1.0 | ExtractionResult with pages/blocks/edges/quality_flags/parser_versions; only 1.0.0 | Same version string currently names different formats. Identify the contract family as well as version; do not merely allow the 1.1.0 literal. |
+| Field names | block_type, raw_text, current_text, reading_order, language, page_index, page_label | type, text_raw, text_current, order_key, lang, pdf_index_0, printed_label | Explicit boundary mapping, not field dropping. |
+| Languages | en, hi, mul, und | en, hi | Preserve source tags. Voice selection is a separate P2 decision, not a rewrite of stored language. |
+| Text | Nullable for figures, equations and tables | Strings required | Preserve null versus an empty string in schemas, persistence and APIs. |
+| Tables | Counts, cells, row/column positions, spans, headers; uncertain null counts | Only a header-cell list | Persist the complete structure. Do not invent counts/cells or flatten away spans. |
+| Page outcome | ok/blank/needs_ocr/partial/failed plus warnings | No page status/warnings | Persist and expose outcomes; incomplete/failed pages cannot enter trusted retrieval as complete pages. |
+| Geometry | Structured transform to PDF points or image pixels, with crop/rotation/DPI | Six-number affine asserted to target original pixels | Preserve declared source space. Do not invent render DPI or reinterpret PDF points as pixels. |
+| Page labels | Nullable printed label, separate physical index | Required nonempty printed label | Preserve unknown printed labels; any physical-page fallback must be labelled as such. |
+| Confidence/review | Independent confidence origin/reason and review_status | Block status, confidence engine/flags, critical_flag | Keep scoring separate from human review. Unknown confidence must stay null. |
+| STEM metadata | Independent origins/review states for MathML, fallback and figure descriptions | Flattened metadata with block-wide review status | Preserve the separate states/origins; unreviewed generated descriptions must not become trusted source evidence. |
+| Identity/assets | UUIDs plus producer document/source-asset records | External local IDs mapped to backend UUIDs; asset access checked | Bind output to the uploaded source/hash. Producer IDs never grant ownership/access; map them explicitly. |
+| Corrections | Content-only operations and applied history in Document | Backend transactions, revisions and dependency invalidation | Backend is the sole commit authority. Separate transport validity from permission to import historical revisions. |
+
+## Recommended agreement
+
+Use **P1's versioned content Document as the canonical producer payload**, because it represents
+information the current backend draft cannot express. Keep backend storage/revision/API models
+explicitly internal, rather than declaring two different payloads to be the same shared v1.0.0.
+This is a recommendation for P1/P2/P3 agreement, not a unilateral schema switch.
+
+1. Pin the agreed producer schema, semantic invariants and conformance vectors to a specific
+   commit/hash. Support P1 1.0.0 only through its explicit, lossless version policy; reject unknown
+   versions. JSON Schema alone is insufficient for cross-references and ordered boxes.
+2. Add a lossless backend boundary and migrations: source language, nullable text/labels, typed
+   table/STEM metadata, page outcome/warnings and structured transforms must survive import,
+   storage, revision history, API responses and re-extraction. Preserve original producer
+   provenance alongside the backend's authoritative revisions and opaque identifiers.
+3. Bind the payload to the backend-owned document/source asset and source checksum. Never fetch
+   arbitrary producer URIs or treat a producer document/user identifier as authorization.
+4. Keep `critical_flag` and critical-symbol uncertainty semantics explicitly represented. Agree
+   whether these become producer fields/flags in a revised draft or a reviewed backend policy.
+   Do not map every uncertainty into a harmless display-only flag.
+5. Exclude needs_ocr/partial/failed pages and uncertain/unsupported content from trusted evidence
+   until an explicit authorized review transition. A fluent string or high OCR score is not an
+   approval. Generated annotations remain separate from source and out of trusted evidence.
+6. P1 may validate a proposed content correction; P3 alone authorizes and commits it in one
+   transaction, checks the base revision, appends history, and invalidates dependent artifacts.
+   Review/language/structure changes affecting output also need revision/dependency handling.
+   Initial machine import must not silently trust supplied correction history or revision >1.
+7. Re-extraction returns candidates for reconciliation. It cannot replace a corrected chapter
+   through initial import or silently assign old identity based on text/position.
+
+## P2 review findings
+
+`frontend/src/lib/p1.ts` accepts version labels 1.0.0/1.1.0 and has a fallback for uncertain
+tables. That is useful partial support, not full 1.1.0 conformance.
+
+- Its P1 page type and conversion retain only id/index/label: page statuses and warnings are
+  not propagated. P2 must distinguish failed/partial/needs-OCR pages from blank/complete pages.
+- Mixed/unknown language tags are guessed by script to choose a voice. Keep the original tag
+  as data and obtain P2's explicit narration policy rather than claiming an exact language label.
+- Null printed labels become a physical page number. The UI must distinguish physical index
+  from a known printed label.
+- Table spans are converted to a simple grid and flagged; confirm the required accessible
+  presentation rather than implying full merged-header semantics.
+- The reader's chapter/package contract and P3's HTTP/manifest contract are a separate handoff.
+  Agree those response mappings in addition to the extraction payload; passing producer-vector
+  checks does not prove the reader and backend endpoints interoperate.
+
+No P2 changes were made and P2 approval has not been represented as granted.
+
+## P3 support statement
+
+**Current code: not directly compatible.** P3 can implement the lossless migration above using
+the existing FastAPI/Pydantic/SQLite stack, but cannot truthfully confirm completed support
+before schema, persistence, import, retrieval and API tests pass against the agreed payload.
+The unchanged legacy backend fixture passing is not evidence of support for P1 output.
+
+## Acceptance gates before real integration
+
+- P1 and P3 select the canonical family/version and resolve critical flags and source geometry.
+- P2 confirms page failure display, warnings, null labels, uncertain tables and language policy.
+- P3 implements migrations and round-trip tests proving no information loss, correct identity/
+  asset binding, transaction-owned corrections and exclusion of unsafe pages from retrieval.
+- Run all P1 positive/negative semantic conformance vectors in consumer CI, including the cases
+  that intentionally pass JSON Schema but fail Python invariants.
+- Add a cross-branch handoff test: actual producer fixture -> backend import/read API -> reader
+  conversion, including null/mul/und, failed page, uncertain table, reviewed/generated STEM
+  annotations, corrections, re-extraction and stale derivative rejection.
+- Record actual written teammate replies with versions/commits. Keep approvals pending until
+  those replies and corresponding integration evidence exist. Do not merge solely on green P1 CI.
+
+This review does not begin P1 Phase 5, amend approved schemas, merge branches, approve peers,
+publish changes or send a message to teammates. Existing local P3 source edits are preserved.
+
+## Follow-up — 19 November 2026
+
+The P1 audit branch still points to the reviewed commit, 39331e4. The pinned probe was
+rerun against local P3 P16, 786fe47, after verifying all 18 producer file hashes.
+All 12 vectors matched the expected P1 results,
+and P3 directly accepted zero of the three valid samples. The legacy P3 fixture and
+the P16 contract export freshness check passed. The machine-readable report records
+this rerun under `p16_follow_up` and retains the original P3 snapshot. GitHub's
+`person-3` branch still points to the published P10 snapshot, a2ebba5.
+
+P2 commit [54493ac](https://github.com/ritikakulkarni06-art/pathya/commit/54493ac9966a7f6655c82f3fd9be45e3ba9edc0d)
+supersedes the earlier reader snapshot. The reader now carries page status and
+warnings, shows warnings in the page view, announces incomplete-page notices in
+the narration flow, and marks physical-page fallbacks when printed labels are
+missing. Stacked and spanning headers are converted to combined column labels.
+The converter passed its nine built-in checks and accepted all three pinned P1
+positive fixtures in Node. The three fixture checks exercise direct reader
+conversion. The P3 import, read API and reader handoff remain pending.
+
+P2 documents a script-based voice choice for mixed and unknown language. The
+reader package still retains only the selected English or Hindi voice language,
+so the handoff needs a field for the original language tag. The table grid still
+uses derived labels in place of source spans and explicit header associations.
+The converter prioritizes critical flags for review. P1 and P3 still need to
+agree on a canonical producer representation for critical uncertainty and on
+the coordinate contract. Written agreement and the shared end-to-end test
+remain pending.
+
+### Decisions for teammate review
+
+| Reviewers | Decision to record |
+|---|---|
+| P1 and P3 | Confirm the producer contract family, supported versions and pinned commit. Specify how the adapter identifies the family. |
+| P1 and P3 | Confirm which critical-symbol uncertainty flags P1 emits and which conditions require P3 to withhold a block or page from trusted retrieval. |
+| P1 and P3 | Confirm how the adapter carries PDF points, image pixels, rotation, crop and DPI through to the reader. Include a fixture for each source coordinate space. |
+| P2 and P3 | Confirm reader payload fields for the original `mul`/`und` tag, the selected voice language, and table spans and header associations. |
+
+Once these decisions are recorded, use the same pinned producer fixtures for the
+P3 import and read API checks and the P2 reader conversion. Include a negative
+case that verifies incomplete pages and unresolved critical uncertainty stay
+out of search and question evidence.
