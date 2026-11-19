@@ -495,7 +495,7 @@ def test_document_validates_against_schema(textbook: tuple[Path, Any]) -> None:
     layouts = {0: _layout(0, _single_column_regions(ex.pages[0])),
                2: _layout(2, _table_regions(page, _grid_cells(page)))}
     doc = build_layout_document(ex, layouts, source_uri="asset://t").document
-    assert doc.schema_version == "1.1.0"
+    assert doc.schema_version == "1.2.0"
     payload = json.loads(doc.model_dump_json())
     jsonschema.Draft202012Validator(build_json_schema(), format_checker=jsonschema.FormatChecker()).validate(payload)
     assert Document.model_validate(payload) == doc

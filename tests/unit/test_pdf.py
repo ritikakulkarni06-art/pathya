@@ -430,9 +430,14 @@ def test_contract_page_status_distinguishes_blank_scanned_and_text(tmp_path: Pat
     assert [p.status.value for p in doc.pages] == ["ok", "blank", "needs_ocr", "ok"]
     assert [w.code for w in doc.pages[2].warnings] == ["ocr_required"]
     assert [w.code for w in doc.pages[3].warnings] == ["ocr_recommended"]
-    assert doc.schema_version == "1.1.0"
+    assert doc.schema_version == "1.2.0"
     payload = json.loads(doc.model_dump_json())
-    jsonschema.Draft202012Validator(build_json_schema("1.1.0"), format_checker=jsonschema.FormatChecker()).validate(payload)
+    jsonschema.Draft202012Validator(build_json_schema("1.2.0"), format_checker=jsonschema.FormatChecker()).validate(payload)
+    # The same content exported for 1.1.0 consumers validates against the frozen 1.1.0 schema.
+    from pathya_document_ai.models import export_document_data
+
+    v11 = export_document_data(doc, "1.1.0")
+    jsonschema.Draft202012Validator(build_json_schema("1.1.0"), format_checker=jsonschema.FormatChecker()).validate(v11)
 
 
 def test_extraction_warnings_reach_the_contract(tmp_path: Path) -> None:

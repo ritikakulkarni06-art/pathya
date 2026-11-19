@@ -1,9 +1,10 @@
 """Regenerate the versioned contract schemas from the Pydantic models.
 
 Writes:
-  contract/schemas/pathya_content.v1.0.0.schema.json  (frozen 1.0.0 contract)
-  contract/schemas/pathya_content.v1.1.0.schema.json  (current contract)
-  contract/pathya_content.schema.json                 (latest = 1.1.0, kept for existing links)
+  contract/schemas/pathya_content.v1.0.0.schema.json  (frozen, published at 39331e4)
+  contract/schemas/pathya_content.v1.1.0.schema.json  (frozen, published at 39331e4)
+  contract/schemas/pathya_content.v1.2.0.schema.json  (current, generated from the models)
+  contract/pathya_content.schema.json                 (frozen alias of 1.1.0; never moves)
 
 Usage: python scripts/export_schema.py [--check]
 """
@@ -14,12 +15,13 @@ import argparse
 from pathlib import Path
 import sys
 
-from pathya_document_ai.models import SCHEMA_VERSION
 from pathya_document_ai.schema import SCHEMA_VERSIONS, render_json_schema
 
 ROOT = Path(__file__).resolve().parents[1]
 TARGETS = {ROOT / "contract" / "schemas" / f"pathya_content.v{v}.schema.json": v for v in SCHEMA_VERSIONS}
-TARGETS[ROOT / "contract" / "pathya_content.schema.json"] = SCHEMA_VERSION
+# The unversioned path is a frozen alias of 1.1.0 (what P2/P3 integrated against at 39331e4).
+# New consumers should use the versioned files; this alias never silently moves to a newer version.
+TARGETS[ROOT / "contract" / "pathya_content.schema.json"] = "1.1.0"
 
 
 def main() -> int:
