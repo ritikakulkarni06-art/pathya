@@ -1,0 +1,112 @@
+{
+  "vectors": [
+    {
+      "file": "valid_v1_0_0_sample.json",
+      "description": "Committed 1.0.0 sample; valid everywhere.",
+      "expected_valid": {
+        "schema_1_0_0": true,
+        "schema_1_1_0": true,
+        "python": true
+      }
+    },
+    {
+      "file": "valid_v1_1_0_status_and_flags.json",
+      "description": "1.1.0: page status/warnings and a duplicate_content flag.",
+      "expected_valid": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": true,
+        "python": true
+      }
+    },
+    {
+      "file": "valid_v1_1_0_uncertain_table.json",
+      "description": "1.1.0: table with null counts and no cells.",
+      "expected_valid": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": true,
+        "python": true
+      }
+    },
+    {
+      "file": "invalid_v1_1_0_missing_block_id.json",
+      "description": "1.1.0 requires every id.",
+      "expected_valid": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": false,
+        "python": false
+      }
+    },
+    {
+      "file": "invalid_v1_0_0_with_1_1_flag.json",
+      "description": "A 1.0.0 document may not use 1.1.0 flags.",
+      "expected_valid": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": false,
+        "python": false
+      }
+    },
+    {
+      "file": "invalid_v1_0_0_with_page_status.json",
+      "description": "A 1.0.0 document may not carry page status.",
+      "expected_valid": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": false,
+        "python": false
+      }
+    },
+    {
+      "file": "invalid_v1_1_0_page_without_status.json",
+      "description": "1.1.0 pages require a status.",
+      "expected_valid": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": false,
+        "python": false
+      }
+    },
+    {
+      "file": "invalid_v1_1_0_counts_without_cells.json",
+      "description": "A table with no cells must have null counts.",
+      "expected_valid": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": false,
+        "python": false
+      }
+    },
+    {
+      "file": "invalid_unknown_version.json",
+      "description": "Unknown schema_version.",
+      "expected_valid": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": false,
+        "python": false
+      }
+    },
+    {
+      "file": "invalid_python_only_reversed_bbox.json",
+      "description": "bbox x0 >= x1 (JSON Schema cannot compare items).",
+      "expected_valid": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": true,
+        "python": false
+      }
+    },
+    {
+      "file": "invalid_python_only_unknown_parent.json",
+      "description": "parent_id references a block that does not exist.",
+      "expected_valid": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": true,
+        "python": false
+      }
+    },
+    {
+      "file": "invalid_python_only_blank_page_with_blocks.json",
+      "description": "A blank page cannot have blocks.",
+      "expected_valid": {
+        "schema_1_0_0": false,
+        "schema_1_1_0": true,
+        "python": false
+      }
+    }
+  ]
+}

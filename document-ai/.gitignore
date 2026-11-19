@@ -1,0 +1,25 @@
+# Local environments, credentials and caches
+.venv/
+.env
+.env.*
+!.env.example
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.cache/
+.coverage
+htmlcov/
+
+# Build products and machine-local content/model data
+build/
+dist/
+*.egg-info/
+/tmp/
+/local/
+/artifacts/
+
+
+
+# Evaluation data: authorized textbook samples and raw results stay local
+/evaluation/private/
+/evaluation/results/
