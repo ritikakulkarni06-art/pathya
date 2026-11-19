@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react'
+import { useAuth } from '../state/auth'
 import { Trash2 } from 'lucide-react'
 import { Shell } from '../components/Shell'
 import { DisplayControls, Presets, Row, SpeechControls } from '../components/PrefsControls'
@@ -77,6 +78,8 @@ function Pronunciations() {
 }
 
 export default function Settings() {
+  const user = useAuth((x) => x.user)
+  const logout = useAuth((x) => x.logout)
   const prefs = usePrefs()
   return (
     <Shell title="Settings" lead="Set up reading and listening the way that works for you. Changes apply at once and are remembered on this device.">
@@ -105,6 +108,12 @@ export default function Settings() {
       <Section title="Reset" about={<p>Return every display and speech setting to its starting value. Downloads, bookmarks and pronunciations are kept.</p>}>
         <button className="btn" onClick={() => { prefs.reset(); say('Display and speech settings were reset.') }}>Reset display and speech settings</button>
       </Section>
+      {user && (
+        <Section title="Account" about={<p>Signing out does not remove chapters you downloaded to this device. On a shared computer, remove them under Downloads first.</p>}>
+          <p className="m-0">Signed in as <strong className="break-all">{user.email}</strong></p>
+          <button className="btn mt-3" onClick={() => void logout()}>Sign out</button>
+        </Section>
+      )}
       {usingMock && (
         <Section title="Sample data" about={<p>This build has no server, so the two sample chapters live in this browser. Restoring them undoes every correction, removal and upload made here.</p>}>
           <button className="btn" onClick={() => { ['pathya.mock.server.v1', 'pathya.mock.jobs.v1', 'pathya.mock.usage.v1'].forEach((k) => localStorage.removeItem(k)); say('The sample chapters are back as they first were.', 'ok') }}>Restore the sample chapters</button>

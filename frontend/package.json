@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "typecheck": "tsc -b --noEmit",
     "test:p1": "node --experimental-strip-types tools/check-p1.mjs",
-    "test:e2e": "playwright-cli open http://localhost:4173 && playwright-cli --raw run-code --filename=e2e/flow.js && playwright-cli --raw run-code --filename=e2e/add.js && playwright-cli --raw run-code --filename=e2e/audio.js && playwright-cli --raw run-code --filename=e2e/motion.js && playwright-cli --raw run-code --filename=e2e/roles.js && playwright-cli --raw run-code --filename=e2e/p1.js && playwright-cli --raw run-code --filename=e2e/axe.js && playwright-cli close",
+    "test:e2e": "playwright-cli open http://localhost:4173 && playwright-cli --raw run-code --filename=e2e/flow.js && playwright-cli --raw run-code --filename=e2e/add.js && playwright-cli --raw run-code --filename=e2e/audio.js && playwright-cli --raw run-code --filename=e2e/motion.js && playwright-cli --raw run-code --filename=e2e/roles.js && playwright-cli --raw run-code --filename=e2e/p1.js && playwright-cli --raw run-code --filename=e2e/auth.js && playwright-cli --raw run-code --filename=e2e/axe.js && playwright-cli close",
     "audio": "node tools/make-audio.mjs"
   },
   "dependencies": {

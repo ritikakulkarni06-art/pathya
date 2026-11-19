@@ -27,6 +27,7 @@ npm run test:e2e
 `e2e/motion.js` checks the animations, and that "Reduce motion" turns them off.
 `e2e/roles.js` checks the screens built for the other roles' features (24 checks, see below).
 `e2e/p1.js` checks that Role 1's contract sample opens and reads correctly (15 checks).
+`e2e/auth.js` checks sign in, create account and sign out (17 checks).
 `e2e/tour.js` only takes a screenshot of every screen.
 
 ## English narration (Piper)
@@ -89,7 +90,10 @@ reader's proposal and still need Role 3's agreement.
 | Your uploads, with cancel and try again (`/add`) | Role 3 jobs and retries | `GET /jobs`, `POST /jobs/:id/cancel`, `POST /jobs/:id/retry` |
 | Questions left today (Ask panel) | Role 3 usage limits | `GET /usage`, `usage` in each answer, HTTP 429 when used up |
 
-Not built: sign-in. It depends on how Role 3 decides to authorize users.
+Sign-in (`src/routes/SignIn.tsx`, `src/api/auth.ts`, `src/state/auth.ts`) follows Role 3's session API: `POST /auth/register`,
+`POST /auth/login`, `POST /auth/logout`, `GET /auth/me`, with the `pathya_csrf` cookie echoed in `X-CSRF-Token` on writes.
+It has only been run against the built-in stand-in, where the app starts signed in as a sample student.
+Sharing a chapter with another person (`POST /documents/:id/grants`) has no screen yet.
 
 ## Where things are
 

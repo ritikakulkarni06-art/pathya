@@ -2,6 +2,7 @@
 // without it the app runs on a mock that imitates the same contract (revisions, 409 conflicts,
 // evidence answers, abstention) using the sample chapters.
 import { SAMPLE_PACKAGES } from '../data/chapters'
+import { csrfHeader, SIGNED_OUT_EVENT } from './auth'
 import type { Answer, Block, ChapterPackage, CorrectionRequest, CorrectionResult, DocumentSummary, RevisionEntry, Usage } from '../types'
 import { splitSentences } from '../lib/sentences'
 import { tokens } from '../lib/search'
@@ -300,7 +301,12 @@ function mockAnswer(docId: string, question: string): Answer {
 function http(base: string): PathyaApi {
   const call = async <T,>(path: string, init?: RequestInit): Promise<T> => {
     online()
-    const res = await fetch(base + path, { credentials: 'include', headers: { 'Content-Type': 'application/json' }, ...init })
+    // Role 3 requires the CSRF token on every write; it is harmless on reads.
+    const res = await fetch(base + path, { credentials: 'include', headers: { 'Content-Type': 'application/json', ...csrfHeader() }, ...init })
+    if (res.status === 401) {
+      window.dispatchEvent(new Event(SIGNED_OUT_EVENT))
+      throw new Error('Your session has ended. Sign in again.')
+    }
     if (res.status === 409) return { ok: false, conflict: true, current: (await res.json()).current } as T
     if (res.status === 429) throw new LimitError((await res.json().catch(() => ({}))).limit ?? 0)
     if (res.status === 204) return undefined as T
@@ -315,7 +321,7 @@ function http(base: string): PathyaApi {
       body.set('title', input.title)
       body.set('languages', input.languages.join(','))
       body.set('rights_note', input.rights_note)
-      const res = await fetch(base + '/documents', { method: 'POST', body, credentials: 'include' })
+      const res = await fetch(base + '/documents', { method: 'POST', body, credentials: 'include', headers: csrfHeader() })
       if (!res.ok) throw new Error(`The server answered ${res.status}.`)
       return res.json()
     },

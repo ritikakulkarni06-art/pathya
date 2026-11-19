@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { NavLink, Link } from 'react-router'
-import { ClipboardCheck, Contrast, Download, FilePlus2, LibraryBig, Menu, Moon, SlidersHorizontal, Sun, WifiOff, X } from 'lucide-react'
+import { ClipboardCheck, Contrast, Download, FilePlus2, LibraryBig, LogOut, Menu, Moon, SlidersHorizontal, Sun, WifiOff, X } from 'lucide-react'
 import * as Dialog from '@radix-ui/react-dialog'
 import { refreshReviewCount, useOnline, useReviewCount } from '../state/app'
 import { usingMock } from '../api/client'
 import { usePrefs, type Theme } from '../state/prefs'
+import { useAuth } from '../state/auth'
 import { gsap, motionOK, useGSAP } from '../lib/motion'
 
 /** Where the pill sat on the previous screen, so it can slide from there. */
@@ -61,6 +62,8 @@ export function Shell({ title, lead, actions, children }: { title: string; lead?
   const theme = usePrefs((p) => p.theme)
   const setPrefs = usePrefs((p) => p.set)
   const online = useOnline()
+  const user = useAuth((s) => s.user)
+  const logout = useAuth((s) => s.logout)
   useEffect(() => void refreshReviewCount(), [online])
   useGSAP(() => {
     const active = nav.current?.querySelector<HTMLElement>('[aria-current="page"]')
@@ -87,7 +90,7 @@ export function Shell({ title, lead, actions, children }: { title: string; lead?
             </NavLink>
           ))}
         </nav>
-        <div className="mt-auto grid gap-3 px-1">
+        <div className="mt-auto grid grid-cols-[minmax(0,1fr)] gap-3 px-1">
           <div role="group" aria-label="Page colours" className="grid grid-cols-3 gap-1 rounded-control bg-raised p-1">
             {THEMES.map((t) => (
               <button key={t.id} aria-pressed={theme === t.id} aria-label={`${t.label} page colours`} title={t.label} onClick={() => setPrefs({ theme: t.id })}
@@ -96,6 +99,12 @@ export function Shell({ title, lead, actions, children }: { title: string; lead?
               </button>
             ))}
           </div>
+          {user && (
+            <div className="flex items-center gap-2 rounded-control border border-border px-3 py-2">
+              <p className="m-0 min-w-0 flex-1"><span className="block text-xs text-muted">Signed in as</span><span className="block truncate text-sm font-medium" title={user.email}>{user.email}</span></p>
+              <button className="btn btn-ghost btn-icon flex-none text-muted" aria-label="Sign out" title="Sign out" onClick={() => void logout()}><LogOut size={16} aria-hidden /></button>
+            </div>
+          )}
           <div className="flex min-h-6 flex-wrap gap-2 px-2">
             <OfflinePill />
             {usingMock && <span className="pill" title="No backend URL is configured, so the app is using the built-in sample chapters.">Sample data</span>}
