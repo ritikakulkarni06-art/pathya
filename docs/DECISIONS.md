@@ -186,3 +186,23 @@ teammates review the proposed producer contract. The offline demo uses an
 isolated data directory and fixed synthetic adapters. Its smoke check submits an
 indexing job through HTTP and waits for the durable worker to finish it. CI checks
 the committed contracts for staleness and runs the smoke check on a fresh checkout.
+
+### P1 producer validation and reader sentence ranges
+
+Pin the P1 semantic validator to `39331e4291d2af6b68654dead2e9e8b9595de32f`.
+The copied Pydantic models and geometry code use backend module paths and
+formatting. The two pinned schemas and twelve conformance vectors are test
+fixtures. The validator retains the exact producer JSON bytes alongside the
+typed payload. The initial-import check compares the source checksum with
+backend-owned metadata and rejects producer-supplied revision history.
+The extraction worker still uses the existing adapter while P1 finishes the
+full Document-producing pipeline. Durable P1 import and canonical readback
+are separate integration work.
+
+Set `SEGMENTER=pathya` to publish gap-free code-point ranges for headings,
+paragraphs and list items from the current text in the existing read APIs.
+The same option selects the backend speech segmenter and uses its own
+cache version. Compute ranges from the same read snapshot as the block
+revision, so a text edit exposes fresh offsets without waiting for audio.
+The direct Document response and the proposed critical-symbol flag still
+need the next pinned schema. No dependencies were added.

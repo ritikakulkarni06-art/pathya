@@ -1,30 +1,35 @@
-# Draft reply from Ritika / P3 - not sent
+# Draft reply to Tharun and Atul
 
-Thanks for the update. I verified the three CI jobs for commit `39331e4` and reviewed both
-contracts against the current P3 implementation.
+Thanks, Tharun. P3 will use `Document` v1.1.0 at `39331e4` as the
+current adapter target. We'll validate the pinned payload at the boundary,
+preserve its fields, and test that the data survives import and readback
+using the synthetic fixtures. Backend IDs and revisions will remain
+authoritative, and producer IDs will be scoped to the extraction run.
 
-The conflict is real: all 12 P1 conformance vectors match their expected outcomes, but the
-current P3 schema rejects all three valid P1 examples. I cannot confirm direct compatibility yet.
+We'll keep producer-version handling at the adapter boundary so we can
+add the next schema with its own conformance cases. Please send the
+verified full extraction entry point and the updated schema, version
+and fixtures when they're ready. Then we can run the joint checks.
 
-My proposal is to use P1's content Document as the canonical producer contract and update the
-backend boundary losslessly. We need to preserve mixed/unknown language tags, nullable text,
-table cells/spans, page status/warnings, structured transforms and the separate review/origin
-fields for equations and figures. The backend will retain authority for access, ID mapping,
-revision commits and invalidation; producer data must not override those controls.
+Atul, thanks for confirming the direct response and running the fixtures.
+Let's use the existing block `id` and `revision` fields for stable backend
+identity and revision. We'll test gap-free sentence ranges for headings,
+paragraphs and list items, including the examples you sent and trailing
+whitespace. Text corrections will publish fresh ranges for the new revision.
+Keep the local splitter fallback until the backend fields are available.
 
-I verified the hashes of the 18 producer files and reran all 12 vectors against
-local P16 at 786fe47. All three valid P1 samples still fail direct P3 validation.
-The latest P2 converter at 54493ac passes its nine
-checks and opens all three positive samples. It now keeps page outcomes and
-warnings, marks physical-page fallbacks, and combines stacked headers into
-column labels. It also documents how it chooses an English or Hindi voice for
-mul/und. Please confirm how we should carry the original language tags and table
-header associations through the backend-to-reader package.
+I checked your sign-in commit and ran the four auth calls against the real
+FastAPI app. Registration, login, session lookup and CSRF-protected logout
+passed in the API smoke test. Let's use a shared HTTPS origin for the browser
+test so the reader can read the host-scoped CSRF cookie.
 
-For P1, please confirm the producer contract family, versions, and commit we
-should pin. Please also confirm which critical-symbol flags the producer emits
-and how it represents PDF points, image pixels, rotation, crop, and DPI.
+I confirmed the gaps for reader job listing and retry, correction history,
+daily question usage and source previews. P16 has individual job status and
+cancellation. Cancellation returns HTTP 204, so the reader can refetch the
+job status. The reader currently calls `/manifest`; switch to the direct
+`/content` response once it is available. Let's align the reading-order
+correction operation with Tharun's updated policy before wiring that control.
 
-I have prepared a reconciliation matrix and compatibility evidence. Once the three of us agree
-on that version, I will align the P3 schemas, persistence, adapter and consumer tests. I am not
-marking the contract approved or the integration ready at this stage.
+Tharun, Atul confirmed the direct Document fields. Please send the updated
+schema version, commit and fixtures when they're ready. We'll run the
+three agreed conformance checks before marking the integration complete.

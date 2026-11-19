@@ -12,12 +12,13 @@ from app.services.auth import current_user, now_utc, require_doc_access
 from app.services.limits import rate_limit
 from app.services.manifests import artifact_current
 from app.services.revisions import correct_block
+from app.services.sentences import sentence_ranges
 from app.services.storage import FileStore
 
 router = APIRouter()
 
 
-def public_block(row: dict[str, Any]) -> dict[str, Any]:
+def public_block(row: dict[str, Any], *, include_sentences: bool = False) -> dict[str, Any]:
     body = {
         key: row[key]
         for key in (
@@ -38,6 +39,10 @@ def public_block(row: dict[str, Any]) -> dict[str, Any]:
     body["historical"] = bool(body["successor_ids"])
     body["origin"] = "source_text"
     body["synthetic"] = str(body["provenance"].get("parser", "")).startswith("synthetic")
+    if include_sentences and row["type"] in {"heading", "paragraph", "list_item"}:
+        body["sentences"] = [
+            {"start": start, "end": end} for start, end in sentence_ranges(row["text_current"])
+        ]
     return body
 
 
@@ -57,7 +62,10 @@ def chapter_content(
     return {
         "document_id": document_id,
         "revision": document["current_revision"],
-        "blocks": [public_block(row) for row in rows],
+        "blocks": [
+            public_block(row, include_sentences=request.app.state.settings.segmenter == "pathya")
+            for row in rows
+        ],
     }
 
 
@@ -75,7 +83,10 @@ def get_block(
         ).fetchone()
     if row is None:
         raise Problem(404, "block_not_found", "This passage is unavailable.")
-    return {**public_block(row), "document_revision": document["current_revision"]}
+    return {
+        **public_block(row, include_sentences=request.app.state.settings.segmenter == "pathya"),
+        "document_revision": document["current_revision"],
+    }
 
 
 @router.patch("/blocks/{block_id}")

@@ -149,3 +149,96 @@ Once these decisions are recorded, use the same pinned producer fixtures for the
 P3 import and read API checks and the P2 reader conversion. Include a negative
 case that verifies incomplete pages and unresolved critical uncertainty stay
 out of search and question evidence.
+
+### Tharun's replies
+
+Tharun selected the v1.1.0 `Document` at `39331e4` for the producer
+boundary. At that commit, `contract/pathya_content.schema.json` and
+`contract/schemas/pathya_content.v1.1.0.schema.json` have the same Git blob
+ID, `2d84b927cdb49898e85bb4020351073601c32944`. The pinned OCR module
+exports `ocr_image()` and `ocr_pdf_pages()`. The branch README describes
+the complete extraction pipeline as unfinished. See `CONTRACT_APPROVALS.md`
+for the confirmed identity and geometry rules and the remaining approval items.
+
+For the reader-facing response, P3 proposes a versioned, lossless backend
+representation with backend IDs and revisions authoritative for navigation,
+corrections and downloads. Preserve producer provenance alongside nullable
+labels and text, source languages, full table structure, page outcomes,
+warnings, transforms and review/origin metadata. Any incompatible response
+change should be explicitly versioned. Atul should review the response mapping.
+
+For speech, P3 proposes that Atul's segmenter run within the backend speech
+job and return Unicode code-point ranges into the exact current block text
+before pronunciation substitutions. The reader consumes those published ranges
+for highlighting, with conversion where browser indexing uses UTF-16.
+Atul's confirmation is pending.
+
+The current backend already exposes chapter content and manifests, block reads
+and corrections, review queues, re-extraction candidates, audio, artifacts and
+offline package routes. Compare those routes and response fields against the
+reader's actual call sites before adding a route.
+
+### Atul's reply and proposed API mapping
+
+Atul prefers one response for live reading and offline caching. Keep the
+P1 v1.1.0 Document in a `document` member and put the backend document ID,
+revision, ID mapping, sentence ranges and optional audio beside it in a
+versioned response. Atul can pass only `document` into his converter.
+The mapping gives the UI stable backend block IDs and revisions for edits.
+Serialize current corrected content and reconcile references in the same
+revision snapshot. Compare the offline behavior against the existing
+deletion and revision checks before switching the reader to this response.
+
+Use `voice_language` as optional reader metadata. Preserve source language
+and the complete producer table and cell data. Atul derives the headers and
+will keep a visible limitation for merged row headers until they are supported.
+
+Atul has no Python adapter. P3 proposes porting the tested reader sentence
+rules to a backend segmenter and publishing start-inclusive, end-exclusive
+Unicode code-point offsets into the exact current block text. Publish
+sentence boundaries even when prepared clips are unavailable. Atul can use
+device speech when selected and keep text readable if a clip fails.
+
+If prepared clips are added, use the reader's text hash as a lookup key
+inside an authorized revision-scoped package. Bind inclusion to the current
+document and block revisions and voice/segmenter configuration. The reader
+should also check the revision when reopening an offline copy after reconnecting.
+Backend generation of real clips still requires a synthesis provider.
+
+### Direct content response follow-up
+
+Tharun confirmed a direct canonical Document response and backend-managed
+sentence offsets. This supersedes the earlier P3 wrapper proposal for
+`GET /documents/{id}/content`, subject to confirming the response fields
+with Atul. Use stable backend IDs with consistent references in the
+published view and retain original producer IDs in provenance or backend
+storage. Verify that current corrected content and supported correction
+history pass the shared semantic validator, including the effect of
+backend split and merge operations on references.
+
+Pinned v1.1.0 rejects undeclared fields. To keep a direct Document and give
+Atul one response for online and offline, propose explicit optional reader
+metadata in the next version. Confirm where document revision, per-block
+sentence ranges, voice language and optional audio belong. Validate the
+output against the newly pinned schema and test that a text correction
+publishes fresh offsets and invalidates the old ranges and audio.
+
+### Reader acceptance and route review
+
+Atul accepted the direct response and proposed metadata fields. For the
+next schema, propose using the existing block `id` and `revision` fields
+for backend identity and revision in the published view. Keep producer IDs
+in the import record. Sentence ranges apply to headings, paragraphs and
+list items and cover all of `current_text` with no gaps. Keep whitespace
+after a sentence in the preceding range. Use the reader's TypeScript
+splitter and Atul's Hindi, decimal, abbreviation, numbered-list and quoted
+speech cases as the reference when implementing the Python segmenter.
+The reader may split locally if ranges are absent.
+
+| Reader feature | P16 API coverage and open work |
+|---|---|
+| Job list and retry | Per-job status and owner cancellation exist. The job list is admin-only. Reader-scoped listing and general failed-job retry are absent. The frontend currently expects a job from cancellation, which returns HTTP 204. |
+| Document correction history | Backend records correction history and exposes block edits. The reader's `GET /documents/{id}/revisions` is absent. Its `move` operation differs from the backend's anchor-based `reorder`. Align this with the agreed correction policy. |
+| Daily question usage and limit | The question API enforces a request rate window. The reader's daily quota and `GET /usage` are absent. Agree the quota and reset behavior before wiring the screen. |
+| Source preview | Authorized asset downloads exist. The review queue returns a null crop reference. Page image and crop delivery are absent. |
+| Chapter content | Atul's pushed HTTP client calls `/manifest`. Switch it to the canonical `/content` response after the updated contract is implemented and verified. |

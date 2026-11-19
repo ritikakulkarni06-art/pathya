@@ -8,6 +8,7 @@ from uuid import uuid4
 
 from app.config import Settings
 from app.errors import Problem
+from app.services.sentences import sentence_ranges
 
 
 @dataclass(frozen=True)
@@ -119,6 +120,13 @@ def provider(settings: Settings) -> SpeechProvider:
 
 
 def segment(block: dict[str, Any], settings: Settings) -> list[SpeechUnit]:
+    if settings.segmenter == "pathya":
+        text: str = block["text_current"]
+        return [
+            SpeechUnit(str(uuid4()), block["id"], text[start:end], block["lang"], start, end)
+            for start, end in sentence_ranges(text)
+            if text[start:end].strip()
+        ]
     if settings.segmenter:
         try:
             module, attribute = settings.segmenter.removeprefix("python:").split(":", 1)

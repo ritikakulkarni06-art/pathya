@@ -88,7 +88,7 @@ def get_audio(
         terms = glossary(database, document["id"], user["id"])
         selected = voice or settings.speech_voice
         key, _ = cache_key(
-            block, terms, selected, speaker.engine_version, settings.segmenter_version
+            block, terms, selected, speaker.engine_version, settings.active_segmenter_version
         )
         # Both private and shared variants are checked; source input hashes must match.
         import hashlib
@@ -101,7 +101,7 @@ def get_audio(
         for item in candidates:
             body = json.loads(item["body_json"])
             row_key, _ = cache_key(
-                block, terms, selected, item["engine_version"], settings.segmenter_version
+                block, terms, selected, item["engine_version"], settings.active_segmenter_version
             )
             if item["scope_user_id"] is not None:
                 row_key = hashlib.sha256((row_key + ":" + user["id"]).encode()).hexdigest()

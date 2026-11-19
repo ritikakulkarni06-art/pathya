@@ -232,7 +232,7 @@ def build_block(
         else None
     )
     key, glossary_hash = cache_key(
-        block, terms, voice, speaker.engine_version, settings.segmenter_version
+        block, terms, voice, speaker.engine_version, settings.active_segmenter_version
     )
     if user_id is not None and voice != settings.speech_voice:
         scope_user = user_id
@@ -430,7 +430,7 @@ def build_block(
             glossary(database, block["document_id"], user_id),
             voice,
             speaker.engine_version,
-            settings.segmenter_version,
+            settings.active_segmenter_version,
         )
         if (
             current is None

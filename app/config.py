@@ -63,6 +63,12 @@ class Settings(BaseSettings):
     extraction_command: list[str] = Field(default_factory=list)
     extraction_fixture_path: Path = Path("tests/fixtures/chapter_demo.json")
 
+    @property
+    def active_segmenter_version(self) -> str:
+        if self.segmenter == "pathya":
+            return "pathya-reader-v1"
+        return self.segmenter_version
+
     @model_validator(mode="after")
     def validate_settings(self) -> Self:
         if self.pathya_db_path is None:

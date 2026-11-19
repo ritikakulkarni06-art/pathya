@@ -1339,6 +1339,19 @@
       422
     ]
   },
+  "invalid_p1_document": {
+    "example": {
+      "code": "invalid_p1_document",
+      "detail": "The extracted chapter does not meet the supported Person 1 content contract.",
+      "status": 422,
+      "title": "Invalid p1 document",
+      "type": "urn:pathya:error:invalid_p1_document"
+    },
+    "origin": "application",
+    "statuses": [
+      422
+    ]
+  },
   "invalid_page_count": {
     "example": {
       "code": "invalid_page_count",
@@ -2054,6 +2067,19 @@
       402
     ]
   },
+  "producer_revision_history": {
+    "example": {
+      "code": "producer_revision_history",
+      "detail": "Import an unedited extraction. Apply corrections through the backend.",
+      "status": 422,
+      "title": "Producer revision history",
+      "type": "urn:pathya:error:producer_revision_history"
+    },
+    "origin": "application",
+    "statuses": [
+      422
+    ]
+  },
   "question_rate_limited": {
     "example": {
       "code": "question_rate_limited",
@@ -2207,6 +2233,19 @@
       "type": "urn:pathya:error:set_type"
     },
     "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "source_checksum_mismatch": {
+    "example": {
+      "code": "source_checksum_mismatch",
+      "detail": "Extraction refers to a different source file.",
+      "status": 422,
+      "title": "Source checksum mismatch",
+      "type": "urn:pathya:error:source_checksum_mismatch"
+    },
+    "origin": "application",
     "statuses": [
       422
     ]

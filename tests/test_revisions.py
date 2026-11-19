@@ -92,6 +92,7 @@ def seed_dependents(client, document_id, block_id):
 
 def test_correction_invalidates_dependencies_and_publishes_fallback(chapter):
     client, ids, mapping = chapter
+    client.app.state.settings.segmenter = "pathya"
     block_id = mapping["damaged-minus"]
     asset_id = seed_dependents(client, ids["document_id"], block_id)
     publish_manifest(
@@ -104,6 +105,10 @@ def test_correction_invalidates_dependencies_and_publishes_fallback(chapter):
     assert response.json()["document_revision"] == 2
     assert response.json()["block_revision"] == 2
     assert response.json()["stale"] == {"audio": 1, "chunks": 1, "embeddings": 1, "answers": 1}
+    content = client.get("/documents/" + ids["document_id"] + "/content").json()
+    current = next(block for block in content["blocks"] if block["id"] == block_id)
+    assert content["revision"] == current["revision"] == 2
+    assert current["sentences"] == [{"start": 0, "end": len("The synthetic value is -5.")}]
     with client.app.state.database.read_conn() as connection:
         assert (
             connection.execute("SELECT status FROM artifacts WHERE id='audio'").fetchone()["status"]
