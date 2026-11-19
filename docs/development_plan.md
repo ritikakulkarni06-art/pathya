@@ -38,7 +38,7 @@ be added in this phase. No textbook source files or model weights are needed.
 ## Next-phase files, not yet created
 
 `quality.py` extensions,
-`corrections.py`, `pipeline.py`, `cli.py`. (`evaluation.py` metrics and `scripts/evaluate.py` were added before Phase 5; real-sample evaluation is pending.)
+Contract 1.2.0 work (proposed, branch `feature/p1-contract-v1.2.0`) added `pipeline.py` (public entry point), `__main__.py` (CLI), `image_source.py`, `corrections.py` (apply_correction only; Phase 5 quality rules not started), `sentences.py` and `critical.py`. (`evaluation.py` metrics and `scripts/evaluate.py` were added before Phase 5; real-sample evaluation is pending.)
 Create them only in the relevant phase with tests and documentation. Approve
 the shared schema before using it as the P2/P3 integration contract; document
 every later schema change and its consumer impact.

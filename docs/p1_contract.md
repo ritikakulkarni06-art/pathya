@@ -1,6 +1,12 @@
-# P1 content contract — version 1.1.0
+# P1 content contract — versions 1.1.0 (integration baseline) and 1.2.0 (proposed)
 
-> **Status: 1.1.0 is PROPOSED, not approved. P2/P3 approval is pending.**
+> **1.2.0 is PROPOSED on branch `feature/p1-contract-v1.2.0`. It is not
+> approved; P1, P2 and P3 confirmation is pending.** P3 is integrating
+> **1.1.0** at commit `39331e4`; every 1.1.0 artifact is frozen
+> byte-for-byte. See [1.2.0 changes](#120-changes-proposed) and
+> `docs/contract_change_request_v1.2.0.md`.
+
+> **Status of 1.1.0: PROPOSED, not approved. P2/P3 approval is pending.**
 >
 > 1.1.0 is **backward-compatible** (every valid 1.0.0 document is still
 > valid) but **not forward-compatible**: a consumer that only implements
@@ -17,9 +23,11 @@ speech) and P3 (backend, storage, question answering) consume.
 | Artifact | Location |
 |---|---|
 | Pydantic models (source of truth) | `src/pathya_document_ai/models.py`, `geometry.py` |
-| JSON Schema 1.1.0 (current, Draft 2020-12, generated) | `contract/schemas/pathya_content.v1.1.0.schema.json` (also `contract/pathya_content.schema.json`) |
+| JSON Schema 1.2.0 (proposed, generated) | `contract/schemas/pathya_content.v1.2.0.schema.json` |
+| JSON Schema 1.1.0 (frozen at `39331e4`) | `contract/schemas/pathya_content.v1.1.0.schema.json`; `contract/pathya_content.schema.json` is a frozen alias of 1.1.0 that never moves |
 | JSON Schema 1.0.0 (frozen, reconstructed) | `contract/schemas/pathya_content.v1.0.0.schema.json` |
-| Conformance vectors (valid and invalid, with expected verdicts) | `contract/conformance/` |
+| Conformance vectors (valid and invalid, with expected verdicts) | `contract/conformance/` (1.0.0/1.1.0, frozen), `contract/conformance/v1.2.0/` |
+| Extraction entry point | `pathya_document_ai.extract_document()`, `python -m pathya_document_ai extract` (see below) |
 | Bilingual sample document (1.0.0) | `contract/samples/sample_document_en_hi.json` |
 | Regenerate or check | `scripts/export_schema.py [--check]`, `scripts/make_conformance.py [--check]` |
 
@@ -352,9 +360,157 @@ Documents P1 produced earlier (1.0.0) are unaffected and still validate.
   use the 1.0.0 export (which fails loudly on pages it cannot represent), or
   wait for that confirmation.
 
+## 1.2.0 changes (proposed)
+
+1.2.0 answers P3's reconciliation questions and the agreed P1/backend field
+list. It is backward-compatible (all 1.0.0/1.1.0 documents stay valid, with
+their own rules) and **not forward-compatible**: 1.1.0-only readers reject 1.2.0.
+
+### Field ownership
+
+| Field | Owner | Rule |
+|---|---|---|
+| `contract_family` (document) | P1 | Required in 1.2.0, always `"pathya.p1.content"`. Distinguishes this payload from any other format that reuses a version string. |
+| `Block.heading_level` | P1 | 1–6 on headings only; 1 is the most prominent. Derived from the relative glyph size of headings across the document. Null when unknown (no words to measure). |
+| `Block.role` | P1 | Required in 1.2.0: `body`, `page_header`, `page_footer` or `footnote`. Independent of `block_type`; a running footer is a `paragraph` with role `page_footer`. |
+| `Block.review_status` (machine output) | P1 | Pipeline rule: `needs_review` iff the block carries a review-trigger flag (`critical_symbol_uncertain`, `low_confidence`, `possible_ocr_error`, `block_type_uncertain`, `table_structure_uncertain`, `math_needs_review`, `unsupported_content`, `missing_geometry`), otherwise `unreviewed`. Producers never emit `approved` or `rejected`. |
+| `quality_flags: critical_symbol_uncertain` | P1 | See below. |
+| `Document.integration.document_revision`, `.backend_document_id` | **P3** | Producers leave `integration` null. P3 is authoritative for backend IDs, access control, revisions, commits and invalidation. |
+| `Block.integration.sentences` | **P3** (P1 provides `sentences.attach_sentences`) | Bound to the block revision and SHA-256 of `current_text`. |
+| `Block.integration.voice_language` | **P2/P3** | `en` or `hi`: the narration voice. Never replaces `Block.language` (which may be `mul`/`und`). |
+| `Block.integration.audio[]` | **P3** | Opaque URI, media type, voice, `text_revision`, `text_sha256`, optional `sentence_index`, `duration_ms`, `document_revision`. |
+
+Producer UUIDs (`Document.id`, page, block, edge ids) are scoped to one
+extraction run. They never grant ownership or access; P3 maps them to its own
+identifiers.
+
+### Sentence offsets
+
+- **Unit:** Unicode code points (Python string indices), not bytes or UTF-16.
+  JavaScript readers convert with `sentences.to_utf16_ranges` (they differ for
+  characters outside the BMP, e.g. mathematical italic letters).
+- **Text:** the exact `current_text` of the block, with no normalization.
+  Never `raw_text`.
+- **Convention:** half-open `[start, end)`, ordered, non-overlapping, trimmed of
+  surrounding whitespace.
+- **Binding:** `text_revision` equals the block's `revision`, and
+  `text_sha256` is SHA-256 of `current_text` in UTF-8. Anything else is stale
+  and the document is invalid.
+- **After a correction:** the revision increments, so ranges and audio of that
+  block are removed by `apply_correction` and must be regenerated
+  (`attach_sentences`) for the new revision. P3 may re-attach audio only by
+  re-binding it to the new revision after verifying the text hash is
+  unchanged.
+- **Segmenter:** `pathya-sentences/1`. Sentences end after `.`, `!`, `?`, `।`
+  or `॥` (plus closing quotes or brackets) before whitespace or the end of the
+  text. They do not end after listed abbreviations (`Fig.`, `e.g.` …), on
+  decimal points, or before a lowercase Latin word.
+
+### Critical-symbol uncertainty
+
+`critical_symbol_uncertain` marks a block where a sign (`+ − × ÷ = < > ≤ ≥ ±
+^`), a decimal point between digits, an exponent or super/subscript, a
+percent or degree sign, or a unit next to a number may be wrong. P1 sets it
+when:
+- an OCR token carrying such a symbol has a missing confidence or one below
+  0.90,
+- a native token with digits contains an undecodable glyph, or
+- an equation's text came from OCR at all.
+
+**Rules:**
+1. A flagged block is never `unreviewed` (schema and Python enforce this).
+   The pipeline sets `needs_review`.
+2. The flag is never removed, even after review. A human decision is recorded
+   in `review_status` through a `set_review_status` correction.
+3. P3 derives `critical_flag = true` while the flag is present and
+   `review_status` is not `approved` (`critical.critical_flag`).
+4. Not trusted evidence for search or answers until `approved`
+   (`critical.is_trusted_evidence`). The same holds for pages that are not
+   `ok`, for blocks that are `needs_review` or `rejected`, and for
+   `unsupported_content` or `block_type_uncertain`.
+5. The content and the flag stay in the document and **must remain visible**
+   to readers. The trust rule governs retrieval only.
+
+**Known gap:** a symbol that OCR dropped entirely leaves no token to flag.
+That is why OCR'd equations are always flagged.
+
+### Correction policy (proposed)
+
+P1's `corrections.apply_correction()` validates one correction and returns the
+resulting document; it persists nothing. **P3 alone authorizes and commits**
+it, checking `base_revision` and invalidating dependants.
+
+| Operation | Allowed | Effect |
+|---|---|---|
+| `replace_text` | Blocks with text (`raw_text` not null) | `current_text` replaced |
+| `set_language` | All | `language` replaced; `voice_language` untouched |
+| `set_review_status` | All | `review_status` replaced; flags kept |
+| `set_block_type` (1.2.0) | Only between `heading`, `paragraph`, `list_item` and `caption`. A caption linked by `caption_of` or `caption_block_id` is rejected until the link is resolved. | `block_type` replaced; `heading_level` becomes null |
+| `set_reading_order` (1.2.0) | Within the same page and parent | Block moved; siblings renumbered 0..n-1 **without** a revision change; `precedes` edges among those siblings rebuilt |
+
+**For every operation:**
+- **Unchanged:** block `id`, `raw_text`, `provenance` (it describes extraction)
+  and quality flags.
+- **Changed:** `revision` increments; the correction is appended to
+  `Document.corrections`; sentence ranges and audio of the block are removed.
+- **Rejected:** a stale `base_revision` (`CorrectionConflictError`).
+- **Never implicit:** review status changes only through `set_review_status`.
+
+**Not decided:** whether retyping should regenerate `heading_level`, whether
+reordering across pages is allowed, and whether P3 needs a document-level
+revision bump per correction. Those decisions are listed in the change
+request.
+
+### Version handling
+
+- `upgrade_document_data(data, target)` migrates forward only.
+  - 1.1.0 → 1.2.0 adds `contract_family` and `role`. The role is derived from
+    the layout label in provenance, otherwise `body`.
+  - `heading_level` and `integration` stay null.
+- `export_document_data(doc, "1.1.0", drop=…)` exports for 1.1.0 consumers.
+  - It fails for critical flags, integration fields and new correction
+    operations.
+  - Heading levels and non-body roles are dropped **only** if listed
+    explicitly in `drop`.
+- `required_version(doc)` gives the lowest version that represents a document
+  exactly.
+
+### Extraction entry point
+
+```python
+from pathya_document_ai import ExtractionOptions, extract_document, validate_document_json
+
+result = extract_document("chapter.pdf", ExtractionOptions(source_uri="asset://p3/123"))
+document = result.document                 # models.Document 1.2.0, validated
+payload = result.to_json()                 # the Document itself (no envelope)
+legacy = result.to_json("1.1.0", drop=("heading_level", "role"))   # explicit, loud on loss
+validate_document_json(payload)            # JSON Schema + Python rules
+```
+
+```
+python -m pathya_document_ai extract chapter.pdf -o chapter.json --source-uri asset://p3/123
+python -m pathya_document_ai extract page.png -o page.json --ocr always
+python -m pathya_document_ai validate chapter.json
+```
+
+**Inputs:** PDF, PNG, JPEG or TIFF, identified by signature.
+
+**What runs:**
+- **OCR:** `auto` OCRs pages marked `ocr_required`/`ocr_recommended`;
+  `always` OCRs every page.
+- **Layout:** Docling when available; `--layout required` fails if it is not.
+  Without layout, each page gets a `layout_not_run` warning.
+
+**Validation:** the output must pass the JSON Schema, the Python validator,
+and the producer rules (no backend fields, no corrections, revision 1,
+pipeline review status, roles set).
+
+**Exit codes:** 2 input, 3 contract, 4 engine, 5 lossy export.
+
 ## Changelog
 
 | Version | Change | Consumer impact |
 |---|---|---|
 | 1.0.0 | Initial proposed contract | P2 and P3 to review |
 | 1.1.0 | Five new quality flags, uncertain table candidates, page status and warnings, required ids, parent on the same page | Backward-compatible only; 1.0.0-only readers reject 1.1.0. **Approval pending** (see the change request). |
+| 1.2.0 (proposed) | contract_family; heading_level; role; pipeline review status; critical_symbol_uncertain; backend `integration` fields (document revision, sentence ranges, voice language, audio); set_block_type and set_reading_order corrections | Backward-compatible only; 1.1.0-only readers reject 1.2.0. 1.1.0 export with explicit `drop`. **Approval pending** (P1, P2, P3). |
