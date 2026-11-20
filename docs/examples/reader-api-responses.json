@@ -1153,6 +1153,56 @@
           }
         ]
       }
+    },
+    "library": {
+      "method": "GET",
+      "path": "/api/documents",
+      "status": 200,
+      "body": {
+        "documents": [
+          {
+            "id": "974627a3-b2b3-40cd-bd29-a0fe362108ee",
+            "title": "Synthetic chapter",
+            "rights_note": "Original synthetic content",
+            "current_revision": 2,
+            "state": "review_required",
+            "retention_until": "2026-12-20T04:05:17.664304+00:00",
+            "created_at": "2026-11-20T04:05:17.663542+00:00",
+            "updated_at": "2026-11-20T04:05:34.546462+00:00",
+            "languages": [
+              "en",
+              "hi"
+            ],
+            "counts": {
+              "pages": 2,
+              "blocks": 14
+            }
+          }
+        ]
+      }
+    },
+    "document_detail": {
+      "method": "GET",
+      "path": "/api/documents/974627a3-b2b3-40cd-bd29-a0fe362108ee",
+      "status": 200,
+      "body": {
+        "id": "974627a3-b2b3-40cd-bd29-a0fe362108ee",
+        "title": "Synthetic chapter",
+        "rights_note": "Original synthetic content",
+        "current_revision": 2,
+        "state": "review_required",
+        "retention_until": "2026-12-20T04:05:17.664304+00:00",
+        "created_at": "2026-11-20T04:05:17.663542+00:00",
+        "updated_at": "2026-11-20T04:05:34.546462+00:00",
+        "languages": [
+          "en",
+          "hi"
+        ],
+        "counts": {
+          "pages": 2,
+          "blocks": 14
+        }
+      }
     }
   }
 }

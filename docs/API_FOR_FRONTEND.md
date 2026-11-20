@@ -17,7 +17,8 @@ OpenAPI and this handoff for the HTTP envelope.
 The [reader response examples](examples/reader-api-responses.json) were captured
 from the running backend using a signed-in account and a synthetic chapter.
 They include jobs, accepted correction history, daily usage, canonical P1
-v1.1.0 content with its revision header, and the review queue.
+v1.1.0 content with its revision header, the review queue, the library list,
+and chapter detail.
 
 Local demo mode has one fixed local user and must stay on loopback. Session mode
 uses POST /auth/register, POST /auth/login, GET /auth/me and POST /auth/logout.
@@ -62,8 +63,11 @@ requests for the same failed job reuse the replacement. Cancellation
 returns HTTP 204; refetch the job to show its status.
 Failed jobs include `failed_at` when the worker recorded the step.
 
-GET /documents lists accessible active documents; GET /documents/{id} gives
-metadata/counts. GET /documents/{id}/content and GET /blocks/{id} return source
+GET /documents returns `{"documents":[...]}` for accessible active documents.
+GET /documents/{id} returns one metadata object with the same fields.
+Both include `rights_note`, `current_revision` and page/block counts. The
+backend has no `subject` field. Leave subject out when the reader has no
+local value. GET /documents/{id}/content and GET /blocks/{id} return source
 text/status/revision, flags and structured metadata. Block IDs are opaque; keep
 them unchanged. Display native not_scored markers and needs_review/critical flags.
 Generated text is separate and must never replace the displayed source.
@@ -76,6 +80,15 @@ sentence ranges with `SEGMENTER=pathya` until the next schema includes
 those fields. Legacy imports continue to use their original response shape.
 
 ## Manifests, audio and offline plans
+
+For offline text reading, an explicit download can store the canonical
+`/content` response with its `X-Document-Revision` and the chapter metadata
+from `GET /documents/{id}`. Keep it private to the signed-in account.
+On reconnect, check access and current revision before showing it as
+current. Refresh changed revisions and purge local copies if the signed-in
+account loses access or receives a deletion purge instruction. Use
+`/packages` when also downloading revision-matched shared backend audio
+with a file list, hashes and sizes.
 
 GET /documents/{id}/manifest is a deterministic JSON body with revision, pages,
 blocks, edges, artifacts and text_available. Verify SHA-256 against ETag and keep
