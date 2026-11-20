@@ -3,6 +3,7 @@
 // evidence answers, abstention) using the sample chapters.
 import { SAMPLE_PACKAGES } from '../data/chapters'
 import { csrfHeader, SIGNED_OUT_EVENT } from './auth'
+import { fromP1 } from '../lib/p1'
 import type { Answer, Block, ChapterPackage, CorrectionRequest, CorrectionResult, DocumentSummary, RevisionEntry, Usage } from '../types'
 import { splitSentences } from '../lib/sentences'
 import { tokens } from '../lib/search'
@@ -327,7 +328,21 @@ function http(base: string): PathyaApi {
     },
     getJob: (id) => call(`/jobs/${id}`),
     listDocuments: () => call('/documents'),
-    getPackage: (id) => call(`/documents/${id}/manifest`),
+    // Role 3 returns Role 1's Document unchanged; the document revision travels in a header.
+    async getPackage(id) {
+      online()
+      const res = await fetch(`${base}/documents/${id}/content`, { credentials: 'include' })
+      if (res.status === 401) {
+        window.dispatchEvent(new Event(SIGNED_OUT_EVENT))
+        throw new Error('Your session has ended. Sign in again.')
+      }
+      if (!res.ok) throw new Error(`The server answered ${res.status}.`)
+      const pkg = fromP1(await res.json(), { subject: '', rights_note: '' })
+      const revision = Number(res.headers.get('X-Document-Revision')) || 1
+      pkg.revision = pkg.document.current_revision = revision
+      for (const p of pkg.pages) p.source_asset = `${base}/documents/${id}/pages/${p.pdf_index_0}/image`
+      return pkg
+    },
     patchBlock: (_doc, req) =>
       call(`/blocks/${req.block_id}`, { method: 'PATCH', body: JSON.stringify({ base_revision: req.base_revision, reason: req.reason, operations: [
         { op: 'replace_text', text: req.text },
@@ -340,7 +355,11 @@ function http(base: string): PathyaApi {
     getHistory: (id) => call(`/documents/${id}/revisions`),
     deleteDocument: (id) => call(`/documents/${id}`, { method: 'DELETE' }),
     listJobs: () => call('/jobs'),
-    cancelJob: (id) => call(`/jobs/${id}/cancel`, { method: 'POST' }),
+    // Role 3 answers 204 with no body, so the job is read again to get its new state.
+    cancelJob: async (id) => {
+      await call(`/jobs/${id}/cancel`, { method: 'POST' })
+      return call(`/jobs/${id}`)
+    },
     retryJob: (id) => call(`/jobs/${id}/retry`, { method: 'POST' }),
   }
 }
