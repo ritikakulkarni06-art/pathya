@@ -14,6 +14,11 @@ OpenAPI and this handoff for the HTTP envelope.
 
 ## Authentication and errors
 
+The [reader response examples](examples/reader-api-responses.json) were captured
+from the running backend using a signed-in account and a synthetic chapter.
+They include jobs, accepted correction history, daily usage, canonical P1
+v1.1.0 content with its revision header, and the review queue.
+
 Local demo mode has one fixed local user and must stay on loopback. Session mode
 uses POST /auth/register, POST /auth/login, GET /auth/me and POST /auth/logout.
 Credentials are `{email,password}`. Passwords/session tokens never belong in logs
