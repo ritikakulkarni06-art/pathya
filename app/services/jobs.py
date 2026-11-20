@@ -29,7 +29,7 @@ def reap_expired(database: Database) -> int:
         for job in expired:
             failed = job["attempts"] >= job["max_attempts"]
             connection.execute(
-                "UPDATE jobs SET state=?,lease_owner=NULL,lease_expires_at=NULL,error_code='lease_expired',error_message=?,updated_at=? WHERE id=?",
+                "UPDATE jobs SET state=?,progress_json=json_set(progress_json,'$.failed_at',state),lease_owner=NULL,lease_expires_at=NULL,error_code='lease_expired',error_message=?,updated_at=? WHERE id=?",
                 (
                     "failed" if failed else "queued",
                     "The worker stopped. The attempt limit was reached."
@@ -141,7 +141,7 @@ def fail(database: Database, job_id: str, owner: str, code: str, message: str) -
             "pricing_unverified",
         }
         connection.execute(
-            "UPDATE jobs SET state=?,lease_owner=NULL,lease_expires_at=NULL,error_code=?,error_message=?,updated_at=? WHERE id=?",
+            "UPDATE jobs SET state=?,progress_json=json_set(progress_json,'$.failed_at',state),lease_owner=NULL,lease_expires_at=NULL,error_code=?,error_message=?,updated_at=? WHERE id=?",
             ("failed" if terminal else "queued", code, message, now_utc(), job_id),
         )
         if terminal and job["document_id"] and job["kind"] != "delete":

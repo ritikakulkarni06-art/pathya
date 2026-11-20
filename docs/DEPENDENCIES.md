@@ -1,5 +1,9 @@
 # Dependency inventory
 
+Optional PDF page previews use `pypdfium2==5.15.2`. Its distribution
+declares BSD-3-Clause and Apache-2.0, with separate notices for bundled
+dependencies. [pypdfium2 release](https://pypi.org/project/pypdfium2/5.15.2/)
+
 Resolved for Python 3.12. Versions are pinned in requirements.lock. License metadata is recorded as supplied by each distribution, not legal advice. Redistribution review: pending for every entry. Native bundled code requires separate review.
 
 | Distribution | Version | Declared license | Purpose | Redistribution |

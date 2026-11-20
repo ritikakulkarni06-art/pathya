@@ -1430,6 +1430,19 @@
       400
     ]
   },
+  "invalid_preview_bbox": {
+    "example": {
+      "code": "invalid_preview_bbox",
+      "detail": "Enter four ordered crop coordinates between zero and one.",
+      "status": 422,
+      "title": "Invalid preview bbox",
+      "type": "urn:pathya:error:invalid_preview_bbox"
+    },
+    "origin": "application",
+    "statuses": [
+      422
+    ]
+  },
   "invalid_question": {
     "example": {
       "code": "invalid_question",
@@ -2106,6 +2119,19 @@
       413
     ]
   },
+  "page_image_unavailable": {
+    "example": {
+      "code": "page_image_unavailable",
+      "detail": "This source image is unavailable. Open the source page or read the text.",
+      "status": 404,
+      "title": "Page image unavailable",
+      "type": "urn:pathya:error:page_image_unavailable"
+    },
+    "origin": "application",
+    "statuses": [
+      404
+    ]
+  },
   "page_not_found": {
     "example": {
       "code": "page_not_found",
@@ -2156,6 +2182,32 @@
     "origin": "application",
     "statuses": [
       422
+    ]
+  },
+  "pdf_preview_busy": {
+    "example": {
+      "code": "pdf_preview_busy",
+      "detail": "The image renderer is busy. Try again or open the original PDF page.",
+      "status": 503,
+      "title": "Pdf preview busy",
+      "type": "urn:pathya:error:pdf_preview_busy"
+    },
+    "origin": "application",
+    "statuses": [
+      503
+    ]
+  },
+  "pdf_preview_unavailable": {
+    "example": {
+      "code": "pdf_preview_unavailable",
+      "detail": "Open the original PDF page. The image renderer is unavailable.",
+      "status": 503,
+      "title": "Pdf preview unavailable",
+      "type": "urn:pathya:error:pdf_preview_unavailable"
+    },
+    "origin": "application",
+    "statuses": [
+      503
     ]
   },
   "phoneme_unsupported": {

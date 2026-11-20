@@ -586,7 +586,10 @@ def enhance_openapi(schema: dict[str, Any]) -> dict[str, Any]:
                         }
                     },
                 }
-            if path == "/blocks/{block_id}/crop":
+            if path in {
+                "/blocks/{block_id}/crop",
+                "/documents/{document_id}/pages/{page_index}/image",
+            }:
                 responses.setdefault("200", {"description": "Authorized source crop."})[
                     "content"
                 ] = {

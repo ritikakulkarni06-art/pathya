@@ -38,6 +38,11 @@ def _job_view(job: dict[str, Any], title: str) -> dict[str, Any]:
         or "Waiting for a worker.",
         "pages_total": progress.get("pages_total", 0),
         "pages_done": progress.get("pages_done", 0),
+        **(
+            {"failed_at": progress["failed_at"]}
+            if job["state"] == "failed" and "failed_at" in progress
+            else {}
+        ),
         "progress": progress,
     }
 
@@ -47,7 +52,7 @@ def list_jobs(
     request: Request,
     user: dict[str, Any] = Depends(current_user),
     limit: int = Query(default=50, ge=1, le=100),
-    offset: int = Query(default=0, ge=0),
+    offset: int = Query(default=0, ge=0, le=2_147_483_647),
 ) -> list[dict[str, Any]]:
     with request.app.state.database.read_conn() as connection:
         rows = connection.execute(

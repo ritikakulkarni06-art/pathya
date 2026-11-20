@@ -55,6 +55,7 @@ the requester can retry their own private narration job. A retry returns
 the new job with HTTP 202. The failed job remains in history, and repeated
 requests for the same failed job reuse the replacement. Cancellation
 returns HTTP 204; refetch the job to show its status.
+Failed jobs include `failed_at` when the worker recorded the step.
 
 GET /documents lists accessible active documents; GET /documents/{id} gives
 metadata/counts. GET /documents/{id}/content and GET /blocks/{id} return source
@@ -120,6 +121,12 @@ with a physical-page fragment. Image uploads may show a sanitized PNG and
 an authorized crop from `GET /blocks/{id}/crop`. If crop geometry is
 unavailable, keep the text visible and link to the source page. Resolve
 relative asset URLs against the configured API base path.
+
+For a rendered page use `GET /documents/{id}/pages/{page_index}/image`
+with the zero-based physical index. The optional query parameter
+`bbox=x0,y0,x1,y1` selects a normalized, top-left crop. Both return PNGs,
+respect conditional requests with an ETag, and require current chapter
+access. Use the original PDF link if PDF rendering is unavailable.
 
 GET /documents/{id}/review-queue returns `{blocks:[...]}` with reason, flags, page
 labels and crop_reference (currently nullable). Owners/reviewers can PATCH

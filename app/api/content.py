@@ -1,3 +1,4 @@
+import hashlib
 import io
 import json
 import math
@@ -15,6 +16,7 @@ from app.services.auth import current_user, now_utc, require_doc_access
 from app.services.limits import rate_limit
 from app.services.manifests import artifact_current
 from app.services.p1_content import canonical_content
+from app.services.page_images import parse_bbox, render_page
 from app.services.revisions import correct_block
 from app.services.sentences import sentence_ranges
 from app.services.storage import FileStore
@@ -190,7 +192,7 @@ def correction_history(
     request: Request,
     document: dict[str, Any] = Depends(require_doc_access("reader")),
     limit: int = Query(default=50, ge=1, le=100),
-    offset: int = Query(default=0, ge=0),
+    offset: int = Query(default=0, ge=0, le=2_147_483_647),
 ) -> list[dict[str, Any]]:
     user_id = document["_access_user_id"]
     with request.app.state.database.read_conn() as connection:
@@ -216,13 +218,37 @@ def correction_history(
             "reason": row["reason"],
             "before": row["before_text"],
             "after": row["after_text"],
-            "changes": [operation["op"] for operation in json.loads(row["operations_json"])],
+            "changes": _correction_changes(json.loads(row["operations_json"])),
         }
         for row in rows
     ]
 
 
-def _preview_info(connection: Any, document_id: str, page: dict[str, Any]) -> dict[str, Any]:
+def _correction_changes(operations: list[dict[str, Any]]) -> list[str]:
+    labels = {
+        "set_type": "Changed the passage type.",
+        "reorder": "Changed the reading order.",
+        "split": "Split the passage.",
+        "merge": "Merged passages.",
+        "mark_reviewed": "Marked the passage reviewed.",
+        "set_alt_text": "Updated the image description.",
+        "set_mathml": "Updated the equation and its spoken description.",
+        "set_table_headers": "Updated the table headers.",
+    }
+    changes = []
+    for operation in operations:
+        kind = operation["op"]
+        if kind == "set_language":
+            language = "Hindi" if operation["lang"] == "hi" else "English"
+            changes.append(f"Changed the language to {language}.")
+        elif kind in labels:
+            changes.append(labels[kind])
+    return changes
+
+
+def _preview_info(
+    connection: Any, document_id: str, page: dict[str, Any], *, pdf_preview: bool = False
+) -> dict[str, Any]:
     rows = connection.execute(
         """
         SELECT id,kind,mime,private_path FROM assets
@@ -234,10 +260,13 @@ def _preview_info(connection: Any, document_id: str, page: dict[str, Any]) -> di
     source = next((item for item in rows if item["kind"] == "source"), None)
     image = next((item for item in rows if item["kind"] == "crop"), None)
     number = page["pdf_index_0"] + 1
+    image_url = f"/assets/{image['id']}" if image and number == 1 else None
+    if pdf_preview and source and source["mime"] == "application/pdf":
+        image_url = f"/documents/{document_id}/pages/{page['pdf_index_0']}/image"
     return {
         "page_id": page["id"],
         "page_index": page["pdf_index_0"],
-        "image_url": f"/assets/{image['id']}" if image and number == 1 else None,
+        "image_url": image_url,
         "source_url": (
             f"/assets/{source['id']}"
             + (f"#page={number}" if source["mime"] == "application/pdf" else "")
@@ -263,9 +292,62 @@ def page_preview(
         ).fetchone()
         if page is None:
             raise Problem(404, "page_not_found", "This source page is unavailable.")
-        preview = _preview_info(connection, document_id, page)
+        preview = _preview_info(
+            connection,
+            document_id,
+            page,
+            pdf_preview=request.app.state.settings.pdf_preview_enabled,
+        )
     preview.pop("image")
     return preview
+
+
+@router.get("/documents/{document_id}/pages/{page_index}/image", response_class=Response)
+def page_image(
+    document_id: str,
+    page_index: int,
+    request: Request,
+    document: dict[str, Any] = Depends(require_doc_access("reader")),
+    bbox: str | None = Query(default=None, max_length=128),
+) -> Response:
+    box = parse_bbox(bbox)
+    database = request.app.state.database
+    settings = request.app.state.settings
+    user_id = document["_access_user_id"]
+    with database.read_conn() as connection:
+        connection.execute("BEGIN")
+        check_document(connection, document_id, user_id)
+        page = connection.execute(
+            "SELECT id FROM pages WHERE document_id=? AND pdf_index_0=?", (document_id, page_index)
+        ).fetchone()
+        if page is None:
+            raise Problem(404, "page_not_found", "This source page is unavailable.")
+        asset = connection.execute(
+            """
+            SELECT mime,private_path FROM assets WHERE document_id=? AND deleted_at IS NULL
+            AND ((kind='source' AND mime='application/pdf')
+                OR (kind='crop' AND mime='image/png' AND ?=0 AND private_path LIKE '%/working-image/%'))
+            ORDER BY kind LIMIT 1
+            """,
+            (document_id, page_index),
+        ).fetchone()
+    if asset is None:
+        raise Problem(
+            404,
+            "page_image_unavailable",
+            "This source image is unavailable. Open the source page or read the text.",
+        )
+    store = FileStore(settings.pathya_data_dir, database, min_free_bytes=0)
+    path = store.safe_path(*asset["private_path"].split("/"))
+    data = render_page(path, asset["mime"], page_index, box, settings)
+    with database.read_conn() as connection:
+        check_document(connection, document_id, user_id)
+    tag = '"' + hashlib.sha256(data).hexdigest() + '"'
+    headers = {"ETag": tag, "Cache-Control": "private, no-cache"}
+    validators = request.headers.get("If-None-Match", "").split(",")
+    if any(value.strip().removeprefix("W/") in {tag, "*"} for value in validators):
+        return Response(status_code=304, headers=headers)
+    return Response(data, media_type="image/png", headers=headers)
 
 
 @router.get("/blocks/{block_id}/crop", response_class=Response)

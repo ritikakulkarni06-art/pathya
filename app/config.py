@@ -10,11 +10,15 @@ class Settings(BaseSettings):
     pathya_env: Literal["dev", "test", "prod"] = "dev"
     pathya_data_dir: Path = Path("data")
     pathya_db_path: Path | None = None
+    reader_dist: Path | None = None
     auth_mode: Literal["local", "session"] = "local"
     session_secret: SecretStr = SecretStr("")
     max_upload_mb: int = Field(default=25, ge=1, le=250)
     max_pages: int = Field(default=60, ge=1)
     max_pixels: int = Field(default=40_000_000, ge=1)
+    preview_max_side: int = Field(default=1200, ge=100, le=1600)
+    pdf_preview_enabled: bool = False
+    preview_render_timeout: float = Field(default=20, gt=0, le=60)
     max_json_body_bytes: int = Field(default=262144, ge=1024, le=1048576)
     request_rate_window_seconds: int = Field(default=60, ge=1)
     upload_rate_limit: int = Field(default=30, ge=1)

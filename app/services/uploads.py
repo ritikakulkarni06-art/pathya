@@ -74,7 +74,6 @@ def inspect_upload(stream: BinaryIO, filename: str | None, settings: Settings) -
         finally:
             stream.seek(0)
         return InspectedUpload(mime, pages)
-    Image.MAX_IMAGE_PIXELS = settings.max_pixels
     try:
         with warnings.catch_warnings():
             warnings.simplefilter("error", Image.DecompressionBombWarning)

@@ -2,15 +2,26 @@
 
 ## Shared HTTPS preview
 
-Use a team-approved hostname with a trusted TLS certificate. Serve the
-reader build and proxy the API through the same origin, for example with
-the API under `/api` and `VITE_API_URL=/api`. The proxy strips that prefix
-before forwarding to the loopback API. The reader resolves returned asset
-paths against its API base so those requests also pass through the proxy.
-Enable session authentication and configure a secret through the deployment
-environment. Use a separate preview data directory and authorized or
-synthetic chapters. Exercise registration, login, `/auth/me`, an
-authenticated write, and logout through the browser before sharing the URL.
+Build Atul's reader with `VITE_API_URL=/api`. Point `READER_DIST` at the
+built `frontend/dist` directory and enable session authentication with a
+secret from the deployment environment. Keep the database, data files
+and backups outside the reader build. Start the combined app with
+`python -m uvicorn app.preview:create_app --factory --host 127.0.0.1
+--port 8000 --no-access-log`. Run the worker separately as usual.
+
+Use a team-approved hostname with a trusted TLS certificate. The HTTPS
+proxy forwards to the combined app with the original host and HTTPS
+scheme. Leave the `/api` prefix intact. The reader resolves returned
+asset paths against its API base. Use separate preview data and
+authorized or synthetic chapters. Exercise registration, login,
+`/auth/me`, an authenticated write, and logout through the browser before
+sharing the URL.
+
+Install the optional renderer with `python -m pip install --only-binary=:all:
+pypdfium2==5.15.2` and set `PDF_PREVIEW_ENABLED=true` for PDF page images.
+Production rendering requires the existing Linux network namespace and
+resource limits. Keep the original source-page link available when the
+renderer is disabled or unavailable.
 
 Maintenance owner after the project: **unassigned; team/institution must name one**.
 This is a single-API/single-durable-worker backend. Real adapter contracts, host
