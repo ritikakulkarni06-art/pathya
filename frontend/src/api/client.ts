@@ -4,7 +4,7 @@
 import { SAMPLE_PACKAGES } from '../data/chapters'
 import { csrfHeader, SIGNED_OUT_EVENT } from './auth'
 import { fromP1 } from '../lib/p1'
-import type { Answer, Block, ChapterPackage, CorrectionRequest, CorrectionResult, DocumentSummary, RevisionEntry, Usage } from '../types'
+import type { Answer, Block, ChapterPackage, CorrectionRequest, CorrectionResult, DocumentSummary, Lang, RevisionEntry, Usage } from '../types'
 import { splitSentences } from '../lib/sentences'
 import { tokens } from '../lib/search'
 
@@ -299,6 +299,23 @@ function mockAnswer(docId: string, question: string): Answer {
 }
 
 // ---------- real backend (Role 3) ----------
+/** A library entry as Role 3 sends it (GET /documents and GET /documents/{id}). */
+interface BackendDocument {
+  id: string
+  title: string
+  rights_note: string
+  current_revision: number
+  state: string
+  updated_at: string
+  languages: Lang[]
+  counts: { pages: number; blocks: number }
+}
+// Role 3 has no subject, printed page range or count of passages to review in the list, so those stay empty here.
+const summary = (d: BackendDocument): DocumentSummary => ({
+  id: d.id, title: d.title, subject: '', languages: d.languages, page_count: d.counts.pages, printed_range: '',
+  current_revision: d.current_revision, review_count: 0, needs_review: d.state === 'review_required',
+  rights_note: d.rights_note, updated_at: d.updated_at,
+})
 function http(base: string): PathyaApi {
   const call = async <T,>(path: string, init?: RequestInit): Promise<T> => {
     online()
@@ -327,7 +344,7 @@ function http(base: string): PathyaApi {
       return res.json()
     },
     getJob: (id) => call(`/jobs/${id}`),
-    listDocuments: () => call('/documents'),
+    listDocuments: async () => (await call<{ documents: BackendDocument[] }>('/documents')).documents.map(summary),
     // Role 3 returns Role 1's Document unchanged; the document revision travels in a header.
     async getPackage(id) {
       online()
@@ -337,7 +354,9 @@ function http(base: string): PathyaApi {
         throw new Error('Your session has ended. Sign in again.')
       }
       if (!res.ok) throw new Error(`The server answered ${res.status}.`)
-      const pkg = fromP1(await res.json(), { subject: '', rights_note: '' })
+      const meta = await call<BackendDocument>(`/documents/${id}`).catch(() => null)
+      const pkg = fromP1(await res.json(), { subject: '', rights_note: meta?.rights_note ?? '' })
+      if (meta) pkg.document.title = meta.title
       const revision = Number(res.headers.get('X-Document-Revision')) || 1
       pkg.revision = pkg.document.current_revision = revision
       for (const p of pkg.pages) p.source_asset = `${base}/documents/${id}/pages/${p.pdf_index_0}/image`

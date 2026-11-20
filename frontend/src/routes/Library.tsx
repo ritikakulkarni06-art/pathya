@@ -19,7 +19,7 @@ export function Cover({ doc, index }: { doc: DocumentSummary; index: number }) {
       <div className="book-board absolute inset-0 flex flex-col justify-between rounded-[10px] p-3 text-white" style={{ background: FIELDS[index % FIELDS.length] }}>
         <span className="text-xs opacity-85">{doc.subject.split(' · ')[0]}</span>
         <span className="text-4xl font-bold leading-none">{[...doc.title][0]}</span>
-        <span className="text-xs opacity-85" lang="en">pp. {doc.printed_range}</span>
+        <span className="text-xs opacity-85" lang="en">{doc.printed_range ? `pp. ${doc.printed_range}` : `${doc.page_count} pages`}</span>
       </div>
     </div>
   )
@@ -172,10 +172,10 @@ export default function Library() {
                   <Link viewTransition to={`/read/${row.doc.id}`} className="hover:underline">{row.doc.title}</Link>
                 </h3>
                 <p className="m-0 mt-0.5 text-muted">
-                  <span lang={row.doc.languages[0]}>{row.doc.subject}</span> · {row.doc.languages.map((l) => (l === 'hi' ? 'Hindi' : 'English')).join(' and ')}
+                  {row.doc.subject && <><span lang={row.doc.languages[0]}>{row.doc.subject}</span> · </>}{row.doc.languages.map((l) => (l === 'hi' ? 'Hindi' : 'English')).join(' and ')}
                 </p>
                 <p className="m-0 mt-2 flex flex-wrap items-center gap-2">
-                  {row.doc.review_count > 0 ? <span className="pill pill-warn">{row.doc.review_count} to review</span> : <span className="pill pill-ok">Reviewed</span>}
+                  {row.doc.review_count > 0 ? <span className="pill pill-warn">{row.doc.review_count} to review</span> : row.doc.needs_review ? <span className="pill pill-warn">Needs review</span> : <span className="pill pill-ok">Reviewed</span>}
                   <span className="pill">Revision {row.doc.current_revision}</span>
                 </p>
                 {row.position ? (

@@ -105,7 +105,7 @@ export default function Chapter() {
   return (
     <Shell
       title={doc.title}
-      lead={<><span lang={doc.languages[0]}>{doc.subject}</span> · printed pages {doc.printed_range} · revision {pkg.revision} · updated {when(doc.updated_at)}</>}
+      lead={<>{doc.subject && <><span lang={doc.languages[0]}>{doc.subject}</span> · </>}{doc.printed_range ? `printed pages ${doc.printed_range}` : `${doc.page_count} pages`} · revision {pkg.revision} · updated {when(doc.updated_at)}</>}
       actions={<Link to={`/read/${docId}`} viewTransition className="btn btn-primary min-h-11 px-5 text-base"><BookOpen size={18} aria-hidden /> Read</Link>}
     >
       <div className="grid items-start gap-4 lg:grid-cols-2">

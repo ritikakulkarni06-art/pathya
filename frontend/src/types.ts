@@ -75,6 +75,8 @@ export interface DocumentSummary {
   printed_range: string
   current_revision: number
   review_count: number
+  /** Set when the backend says review is pending but gives no count. */
+  needs_review?: boolean
   rights_note: string
   updated_at: string
 }
