@@ -1,6 +1,6 @@
 // Everything the student keeps on this device. Structured text lives in IndexedDB;
 // immutable audio and page images live in Cache Storage (report p.18).
-import { openDB, type IDBPDatabase } from 'idb'
+import { deleteDB, openDB, type IDBPDatabase } from 'idb'
 import type { AnswerRecord, Bookmark, ChapterPackage, PendingCorrection, Pronunciation } from '../types'
 
 export interface StoredPackage extends ChapterPackage {
@@ -18,9 +18,23 @@ export interface Position {
   progress?: number
 }
 
+// Each account gets its own database and asset cache, so one person's downloads, bookmarks and
+// queued corrections are never shown to the next person who signs in on a shared device.
+// The sample student keeps the original names so existing sample data stays where it was.
+let owner = ''
+const scoped = (name: string) => (owner ? `${name}.${owner}` : name)
+/** Point the store at one account's data. Call before anything reads or writes. */
+export function setOwner(userId: string | null) {
+  const next = !userId || userId === 'sample-student' ? '' : userId
+  if (next === owner) return
+  owner = next
+  void dbp?.then((d) => d.close())
+  dbp = null
+}
+
 let dbp: Promise<IDBPDatabase> | null = null
 function db() {
-  dbp ??= openDB('pathya', 1, {
+  dbp ??= openDB(scoped('pathya'), 1, {
     upgrade(d) {
       d.createObjectStore('packages', { keyPath: 'document.id' })
       d.createObjectStore('positions', { keyPath: 'doc_id' })
@@ -33,7 +47,7 @@ function db() {
   return dbp
 }
 
-const ASSET_CACHE = 'pathya-assets-v1'
+const assetCache = () => scoped('pathya-assets-v1')
 const assetUrls = (p: ChapterPackage) => [...p.audio.map((a) => a.url), ...p.pages.flatMap((pg) => (pg.source_asset ? [pg.source_asset] : []))]
 
 export const store = {
@@ -49,7 +63,7 @@ export const store = {
     const urls = assetUrls(pkg)
     const missing: string[] = []
     if (urls.length && 'caches' in window) {
-      const cache = await caches.open(ASSET_CACHE)
+      const cache = await caches.open(assetCache())
       let done = 0
       for (const url of urls) {
         try {
@@ -66,11 +80,19 @@ export const store = {
     await (await db()).put('packages', stored)
     return stored
   },
+  /** Remove everything this account keeps on the device: downloads, places, bookmarks, answers, queued corrections. */
+  async purgeAll() {
+    const name = scoped('pathya')
+    await (await dbp?.catch(() => null))?.close()
+    dbp = null
+    await deleteDB(name)
+    if ('caches' in window) await caches.delete(assetCache())
+  },
   async deletePackage(id: string) {
     const d = await db()
     const pkg: StoredPackage | undefined = await d.get('packages', id)
     if (pkg && 'caches' in window) {
-      const cache = await caches.open(ASSET_CACHE)
+      const cache = await caches.open(assetCache())
       await Promise.all(assetUrls(pkg).map((u) => cache.delete(u)))
     }
     await d.delete('packages', id)

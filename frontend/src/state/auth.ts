@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { authApi, SIGNED_OUT_EVENT, type User } from '../api/auth'
+import { setOwner, store } from '../lib/db'
 
 // The last person who signed in on this device. It lets downloaded chapters open with no connection;
 // it is not proof of identity, and the server checks the real session on every request.
@@ -8,6 +9,7 @@ const remembered = (): User | null => {
   try { return JSON.parse(localStorage.getItem(REMEMBERED) ?? 'null') } catch { return null }
 }
 const remember = (user: User | null) => {
+  if (user) setOwner(user.id)
   try {
     if (user) localStorage.setItem(REMEMBERED, JSON.stringify(user))
     else localStorage.removeItem(REMEMBERED)
@@ -36,6 +38,7 @@ export const useAuth = create<AuthState>((set) => ({
       set({ status: user ? 'in' : 'out', user, offline: false })
     } catch {
       const user = remembered()
+      if (user) setOwner(user.id)
       set({ status: user ? 'in' : 'out', user, offline: !!user })
     }
   },
@@ -52,6 +55,8 @@ export const useAuth = create<AuthState>((set) => ({
   async logout() {
     // Leave this device signed out even if the server cannot be told right now.
     await authApi.logout().catch(() => {})
+    // Signing out on purpose clears this account's copies, so a shared device keeps nothing private.
+    await store.purgeAll().catch(() => {})
     remember(null)
     set({ status: 'out', user: null, offline: false })
   },

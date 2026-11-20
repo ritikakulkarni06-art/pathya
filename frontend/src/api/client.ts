@@ -14,6 +14,13 @@ export class OfflineError extends Error {
   }
 }
 
+/** The chapter was removed, or this account may no longer open it. Copies on this device must be deleted. */
+export class GoneError extends Error {
+  constructor() {
+    super('This chapter is no longer available to you.')
+  }
+}
+
 /** The daily question limit is used up. */
 export class LimitError extends Error {
   limit: number
@@ -166,6 +173,7 @@ const mock: PathyaApi = {
   async getPackage(docId) {
     online()
     await wait(350)
+    if (loadOverrides()[docId]?.deleted) throw new GoneError()
     const pkg = current(docId)
     // Prepared narration clips, if tools/make-audio.mjs has produced them for this chapter.
     try {
@@ -353,6 +361,8 @@ function http(base: string): PathyaApi {
         window.dispatchEvent(new Event(SIGNED_OUT_EVENT))
         throw new Error('Your session has ended. Sign in again.')
       }
+      // 403/404: access was taken away. 410: the owner deleted it and asks for local copies to be purged.
+      if ([403, 404, 410].includes(res.status)) throw new GoneError()
       if (!res.ok) throw new Error(`The server answered ${res.status}.`)
       const meta = await call<BackendDocument>(`/documents/${id}`).catch(() => null)
       const pkg = fromP1(await res.json(), { subject: '', rights_note: meta?.rights_note ?? '' })

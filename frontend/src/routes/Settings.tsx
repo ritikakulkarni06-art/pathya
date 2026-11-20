@@ -111,6 +111,7 @@ export default function Settings() {
       {user && (
         <Section title="Account" about={<p>Signing out does not remove chapters you downloaded to this device. On a shared computer, remove them under Downloads first.</p>}>
           <p className="m-0">Signed in as <strong className="break-all">{user.email}</strong></p>
+          <p className="m-0 mt-2 text-sm text-muted">Signing out deletes this account's downloaded chapters, bookmarks and saved places from this device.</p>
           <button className="btn mt-3" onClick={() => void logout()}>Sign out</button>
         </Section>
       )}

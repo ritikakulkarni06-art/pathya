@@ -4,6 +4,7 @@ import { applyRootPrefs, usePrefs } from './state/prefs'
 import { Notices } from './components/Notices'
 import Library from './routes/Library'
 import { useAuth } from './state/auth'
+import { revalidateDownloads, useOnline } from './state/app'
 
 const Reader = lazy(() => import('./routes/Reader'))
 const Downloads = lazy(() => import('./routes/Downloads'))
@@ -21,6 +22,8 @@ export default function App() {
   const auth = useAuth((s) => s.status)
   const check = useAuth((s) => s.check)
   useEffect(() => void check(), [check])
+  const online = useOnline()
+  useEffect(() => { if (auth === 'in' && online) void revalidateDownloads() }, [auth, online])
 
   return (
     <>

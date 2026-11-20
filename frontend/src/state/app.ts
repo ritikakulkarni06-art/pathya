@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
-import { api, OfflineError } from '../api/client'
+import { api, GoneError, OfflineError } from '../api/client'
 import { store, uid, type StoredPackage } from '../lib/db'
 import type { Block, ChapterPackage, CorrectionRequest } from '../types'
 export type { Block }
@@ -71,6 +71,12 @@ export function useChapter(docId: string) {
         if (live) setState({ pkg, source: 'network', downloaded, error: null, loading: false })
       } catch (e) {
         if (!live) return
+        if (e instanceof GoneError) {
+          // Access was lost or the chapter was deleted: the copy on this device goes too.
+          await store.deletePackage(docId)
+          setState({ pkg: null, source: null, downloaded: null, error: 'failed', loading: false })
+          return
+        }
         if (downloaded) setState({ pkg: downloaded, source: 'device', downloaded, error: null, loading: false })
         else setState({ pkg: null, source: null, downloaded: null, error: e instanceof OfflineError ? 'offline_not_downloaded' : 'failed', loading: false })
       }
@@ -83,6 +89,36 @@ export function useChapter(docId: string) {
   const reload = useCallback(() => setTick((t) => t + 1), [])
   const setDownloaded = useCallback((d: StoredPackage | null) => setState((s) => ({ ...s, downloaded: d })), [])
   return { ...state, reload, setDownloaded }
+}
+
+// ---- downloaded chapters are checked against the server after signing in and on reconnecting ----
+let checking = false
+export async function revalidateDownloads(): Promise<void> {
+  if (checking || !navigator.onLine) return
+  checking = true
+  let removed = 0
+  let updated = 0
+  try {
+    for (const local of await store.listPackages()) {
+      try {
+        const fresh = await api.getPackage(local.document.id)
+        if (fresh.revision !== local.revision) {
+          await store.savePackage(fresh)
+          updated++
+        }
+      } catch (e) {
+        if (e instanceof GoneError) {
+          await store.deletePackage(local.document.id)
+          removed++
+        } else if (e instanceof OfflineError) break
+        // Any other failure: keep the copy and try again next time.
+      }
+    }
+  } finally {
+    checking = false
+  }
+  if (removed) say(removed === 1 ? 'One downloaded chapter is no longer available to you, so its copy on this device was deleted.' : `${removed} downloaded chapters are no longer available to you, so their copies on this device were deleted.`)
+  if (updated) say(updated === 1 ? 'One downloaded chapter was updated to the latest revision.' : `${updated} downloaded chapters were updated to the latest revision.`, 'ok')
 }
 
 // ---- corrections: send now, or queue with the base revision while offline ----
