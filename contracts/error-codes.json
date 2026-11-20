@@ -350,6 +350,19 @@
       422
     ]
   },
+  "crop_unavailable": {
+    "example": {
+      "code": "crop_unavailable",
+      "detail": "This crop is unavailable. Open the source page or read the text.",
+      "status": 404,
+      "title": "Crop unavailable",
+      "type": "urn:pathya:error:crop_unavailable"
+    },
+    "origin": "application",
+    "statuses": [
+      404
+    ]
+  },
   "csrf_failed": {
     "example": {
       "code": "csrf_failed",
@@ -370,6 +383,19 @@
       "status": 429,
       "title": "Daily page quota",
       "type": "urn:pathya:error:daily_page_quota"
+    },
+    "origin": "application",
+    "statuses": [
+      429
+    ]
+  },
+  "daily_question_limit": {
+    "example": {
+      "code": "daily_question_limit",
+      "detail": "The daily question limit is reached.",
+      "status": 429,
+      "title": "Daily question limit",
+      "type": "urn:pathya:error:daily_question_limit"
     },
     "origin": "application",
     "statuses": [
@@ -1368,7 +1394,7 @@
   "invalid_page_range": {
     "example": {
       "code": "invalid_page_range",
-      "detail": "The extraction adapter returned an unexpected page range.",
+      "detail": "The extractor must report an outcome for every page.",
       "status": 422,
       "title": "Invalid page range",
       "type": "urn:pathya:error:invalid_page_range"
@@ -1571,6 +1597,32 @@
     "origin": "application",
     "statuses": [
       404
+    ]
+  },
+  "job_not_retryable": {
+    "example": {
+      "code": "job_not_retryable",
+      "detail": "Only a failed processing job can be retried.",
+      "status": 409,
+      "title": "Job not retryable",
+      "type": "urn:pathya:error:job_not_retryable"
+    },
+    "origin": "application",
+    "statuses": [
+      409
+    ]
+  },
+  "job_revision_stale": {
+    "example": {
+      "code": "job_revision_stale",
+      "detail": "This job is for an older chapter revision.",
+      "status": 409,
+      "title": "Job revision stale",
+      "type": "urn:pathya:error:job_revision_stale"
+    },
+    "origin": "application",
+    "statuses": [
+      409
     ]
   },
   "json_invalid": {
@@ -1976,6 +2028,45 @@
       422
     ]
   },
+  "p1_correction_unsupported": {
+    "example": {
+      "code": "p1_correction_unsupported",
+      "detail": "This chapter supports text, language, and review corrections on text passages.",
+      "status": 422,
+      "title": "P1 correction unsupported",
+      "type": "urn:pathya:error:p1_correction_unsupported"
+    },
+    "origin": "application",
+    "statuses": [
+      422
+    ]
+  },
+  "p1_extractor_unavailable": {
+    "example": {
+      "code": "p1_extractor_unavailable",
+      "detail": "Configure the verified Person 1 extractor.",
+      "status": 503,
+      "title": "P1 extractor unavailable",
+      "type": "urn:pathya:error:p1_extractor_unavailable"
+    },
+    "origin": "application",
+    "statuses": [
+      503
+    ]
+  },
+  "p1_output_invalid": {
+    "example": {
+      "code": "p1_output_invalid",
+      "detail": "The extractor returned an invalid or oversized chapter.",
+      "status": 422,
+      "title": "P1 output invalid",
+      "type": "urn:pathya:error:p1_output_invalid"
+    },
+    "origin": "application",
+    "statuses": [
+      422
+    ]
+  },
   "package_not_found": {
     "example": {
       "code": "package_not_found",
@@ -2013,6 +2104,32 @@
     "origin": "application",
     "statuses": [
       413
+    ]
+  },
+  "page_not_found": {
+    "example": {
+      "code": "page_not_found",
+      "detail": "This source page is unavailable.",
+      "status": 404,
+      "title": "Page not found",
+      "type": "urn:pathya:error:page_not_found"
+    },
+    "origin": "application",
+    "statuses": [
+      404
+    ]
+  },
+  "page_review_required": {
+    "example": {
+      "code": "page_review_required",
+      "detail": "Review the incomplete source page before approving this passage.",
+      "status": 422,
+      "title": "Page review required",
+      "type": "urn:pathya:error:page_review_required"
+    },
+    "origin": "application",
+    "statuses": [
+      422
     ]
   },
   "parent_cycle": {

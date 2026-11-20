@@ -87,6 +87,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         ],
         expose_headers=[
             "ETag",
+            "X-Document-Revision",
             "Content-Range",
             "Accept-Ranges",
             "X-Request-ID",

@@ -8,6 +8,7 @@ from app.config import Settings
 from app.db.connection import Database
 from app.db.repos import jobs
 from app.errors import Problem
+from app.services.access import check_document
 
 ACTIVE = {"validating", "extracting", "building"}
 
@@ -155,11 +156,15 @@ def fail(database: Database, job_id: str, owner: str, code: str, message: str) -
             )
 
 
-def cancel(database: Database, job_id: str) -> None:
+def cancel(database: Database, job_id: str, *, user_id: str | None = None) -> None:
     with database.write_tx() as connection:
         job = jobs.get_job(connection, job_id)
         if job is None:
             raise Problem(404, "job_not_found", "This processing job is unavailable.")
+        if user_id is not None:
+            check_document(connection, job["document_id"], user_id, "owner")
+            if json.loads(job["payload_json"]).get("user_id") not in (None, user_id):
+                raise Problem(404, "job_not_found", "This processing job is unavailable.")
         if job["state"] in {"ready", "review_required", "failed", "cancelled"}:
             return
         connection.execute(

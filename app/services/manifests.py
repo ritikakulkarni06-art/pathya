@@ -7,6 +7,7 @@ from uuid import uuid4
 
 from app.clock import now_utc
 from app.db.connection import Database
+from app.db.repos.extraction import has_incomplete_p1_pages
 from app.errors import Problem
 from app.services.jobs import LeaseLost
 from app.services.storage import FileStore
@@ -246,7 +247,7 @@ def publish_manifest(
             "INSERT INTO manifests VALUES (?,?,?,?,?,?,?)",
             (manifest_id, document_id, revision, sequence, encoded, sha256, now_utc()),
         )
-        review = any(
+        review = has_incomplete_p1_pages(connection, document_id) or any(
             block["critical_flag"] or block["status"] == "needs_review" for block in blocks
         )
         connection.execute(

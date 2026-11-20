@@ -1,4 +1,6 @@
+import importlib
 from dataclasses import dataclass
+from pathlib import Path
 
 from pydantic import ValidationError
 
@@ -41,3 +43,22 @@ def validate_p1_initial_import(payload: bytes, owned_source_sha256: str) -> P1Pa
             "Import an unedited extraction. Apply corrections through the backend.",
         )
     return parsed
+
+
+def run_p1_extractor(specification: str, path: Path, languages: list[str], max_bytes: int) -> bytes:
+    """Call the configured trusted whole-document producer inside the worker."""
+    try:
+        module, name = specification.removeprefix("p1:").rsplit(":", 1)
+        extract = getattr(importlib.import_module(module), name)
+    except (ValueError, ImportError, AttributeError):
+        raise Problem(
+            503, "p1_extractor_unavailable", "Configure the verified Person 1 extractor."
+        ) from None
+    if not callable(extract):
+        raise Problem(503, "p1_extractor_unavailable", "Configure the verified Person 1 extractor.")
+    payload = extract(path, languages)
+    if not isinstance(payload, bytes) or len(payload) > max_bytes:
+        raise Problem(
+            422, "p1_output_invalid", "The extractor returned an invalid or oversized chapter."
+        )
+    return payload

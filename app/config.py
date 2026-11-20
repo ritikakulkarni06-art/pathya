@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     request_rate_window_seconds: int = Field(default=60, ge=1)
     upload_rate_limit: int = Field(default=30, ge=1)
     question_rate_limit: int = Field(default=60, ge=1)
+    daily_question_limit: int = Field(default=20, ge=1)
     correction_rate_limit: int = Field(default=120, ge=1)
     max_concurrent_uploads: int = Field(default=2, ge=1, le=20)
     daily_page_quota: int = Field(default=120, ge=1)
@@ -60,6 +61,7 @@ class Settings(BaseSettings):
     max_audio_clip_mb: int = Field(default=10, ge=1)
     package_max_mb: int = Field(default=50, ge=1)
     extraction_adapter: str = "fixture"
+    p1_max_output_bytes: int = Field(default=10_000_000, ge=1024, le=50_000_000)
     extraction_command: list[str] = Field(default_factory=list)
     extraction_fixture_path: Path = Path("tests/fixtures/chapter_demo.json")
 

@@ -1,8 +1,11 @@
+import io
 import json
+import math
 from typing import Any
 
 from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import FileResponse, Response
+from PIL import Image
 
 from app.db.repos import jobs
 from app.errors import Problem
@@ -11,6 +14,7 @@ from app.services.access import check_document
 from app.services.auth import current_user, now_utc, require_doc_access
 from app.services.limits import rate_limit
 from app.services.manifests import artifact_current
+from app.services.p1_content import canonical_content
 from app.services.revisions import correct_block
 from app.services.sentences import sentence_ranges
 from app.services.storage import FileStore
@@ -50,6 +54,7 @@ def public_block(row: dict[str, Any], *, include_sentences: bool = False) -> dic
 def chapter_content(
     document_id: str,
     request: Request,
+    response: Response,
     document: dict[str, Any] = Depends(require_doc_access("reader")),
 ) -> dict[str, Any]:
     with request.app.state.database.read_conn() as connection:
@@ -59,6 +64,10 @@ def chapter_content(
             "SELECT blocks.* FROM blocks JOIN pages ON pages.id=blocks.page_id WHERE blocks.document_id=? AND json_array_length(successor_ids_json)=0 ORDER BY pages.pdf_index_0,order_key,blocks.id",
             (document_id,),
         ).fetchall()
+        canonical = canonical_content(connection, document_id, rows)
+    if canonical is not None:
+        response.headers["X-Document-Revision"] = str(document["current_revision"])
+        return canonical
     return {
         "document_id": document_id,
         "revision": document["current_revision"],
@@ -148,9 +157,16 @@ def review_queue(
         connection.execute("BEGIN")
         document = check_document(connection, document_id, document["_access_user_id"], "reviewer")
         rows = connection.execute(
-            "SELECT blocks.*,pages.printed_label,pages.pdf_index_0 FROM blocks JOIN pages ON pages.id=blocks.page_id WHERE blocks.document_id=? AND json_array_length(successor_ids_json)=0 AND (critical_flag=1 OR status='needs_review') ORDER BY pages.pdf_index_0,order_key",
+            "SELECT blocks.*,pages.printed_label,pages.pdf_index_0,pages.rotation FROM blocks JOIN pages ON pages.id=blocks.page_id WHERE blocks.document_id=? AND json_array_length(successor_ids_json)=0 AND (critical_flag=1 OR status='needs_review') ORDER BY pages.pdf_index_0,order_key",
             (document_id,),
         ).fetchall()
+        has_image = (
+            connection.execute(
+                "SELECT 1 FROM assets WHERE document_id=? AND kind='crop' AND deleted_at IS NULL AND private_path LIKE '%/working-image/%'",
+                (document_id,),
+            ).fetchone()
+            is not None
+        )
     return {
         "blocks": [
             {
@@ -159,11 +175,162 @@ def review_queue(
                 "reason": "A critical extraction symbol needs review."
                 if row["critical_flag"]
                 else "The extracted passage needs review.",
-                "crop_reference": None,
+                "crop_reference": f"/blocks/{row['id']}/crop"
+                if has_image and row["pdf_index_0"] == 0 and row["rotation"] == 0
+                else None,
             }
             for row in rows
         ]
     }
+
+
+@router.get("/documents/{document_id}/revisions")
+def correction_history(
+    document_id: str,
+    request: Request,
+    document: dict[str, Any] = Depends(require_doc_access("reader")),
+    limit: int = Query(default=50, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+) -> list[dict[str, Any]]:
+    user_id = document["_access_user_id"]
+    with request.app.state.database.read_conn() as connection:
+        connection.execute("BEGIN")
+        check_document(connection, document_id, user_id)
+        rows = connection.execute(
+            """
+            SELECT c.*, old.text AS before_text, new.text AS after_text
+            FROM corrections c
+            LEFT JOIN block_versions old ON old.block_id=c.block_id AND old.revision=c.base_revision
+            LEFT JOIN block_versions new ON new.block_id=c.block_id AND new.document_revision=c.accepted_revision
+            WHERE c.document_id=? AND c.state='accepted'
+            ORDER BY c.accepted_revision DESC,c.id DESC LIMIT ? OFFSET ?
+            """,
+            (document_id, limit, offset),
+        ).fetchall()
+    return [
+        {
+            "revision": row["accepted_revision"],
+            "block_id": row["block_id"],
+            "at": row["created_at"],
+            "by": "You" if row["author_id"] == user_id else "Reviewer",
+            "reason": row["reason"],
+            "before": row["before_text"],
+            "after": row["after_text"],
+            "changes": [operation["op"] for operation in json.loads(row["operations_json"])],
+        }
+        for row in rows
+    ]
+
+
+def _preview_info(connection: Any, document_id: str, page: dict[str, Any]) -> dict[str, Any]:
+    rows = connection.execute(
+        """
+        SELECT id,kind,mime,private_path FROM assets
+        WHERE document_id=? AND deleted_at IS NULL
+          AND (kind='source' OR (kind='crop' AND private_path LIKE '%/working-image/%'))
+        """,
+        (document_id,),
+    ).fetchall()
+    source = next((item for item in rows if item["kind"] == "source"), None)
+    image = next((item for item in rows if item["kind"] == "crop"), None)
+    number = page["pdf_index_0"] + 1
+    return {
+        "page_id": page["id"],
+        "page_index": page["pdf_index_0"],
+        "image_url": f"/assets/{image['id']}" if image and number == 1 else None,
+        "source_url": (
+            f"/assets/{source['id']}"
+            + (f"#page={number}" if source["mime"] == "application/pdf" else "")
+            if source
+            else None
+        ),
+        "image": image if number == 1 else None,
+    }
+
+
+@router.get("/documents/{document_id}/pages/{page_id}/preview")
+def page_preview(
+    document_id: str,
+    page_id: str,
+    request: Request,
+    document: dict[str, Any] = Depends(require_doc_access("reader")),
+) -> dict[str, Any]:
+    with request.app.state.database.read_conn() as connection:
+        connection.execute("BEGIN")
+        check_document(connection, document_id, document["_access_user_id"])
+        page = connection.execute(
+            "SELECT * FROM pages WHERE id=? AND document_id=?", (page_id, document_id)
+        ).fetchone()
+        if page is None:
+            raise Problem(404, "page_not_found", "This source page is unavailable.")
+        preview = _preview_info(connection, document_id, page)
+    preview.pop("image")
+    return preview
+
+
+@router.get("/blocks/{block_id}/crop", response_class=Response)
+def block_crop(
+    block_id: str,
+    request: Request,
+    document: dict[str, Any] = Depends(require_doc_access("reader")),
+) -> Response:
+    with request.app.state.database.read_conn() as connection:
+        connection.execute("BEGIN")
+        check_document(connection, document["id"], document["_access_user_id"])
+        row = connection.execute(
+            """
+            SELECT p.*,b.bbox_json,EXISTS(
+                SELECT 1 FROM extraction_imports i
+                WHERE i.document_id=p.document_id AND i.p1_source_json IS NOT NULL
+            ) AS p1 FROM blocks b JOIN pages p ON p.id=b.page_id
+            WHERE b.id=? AND b.document_id=? AND json_array_length(b.successor_ids_json)=0
+            """,
+            (block_id, document["id"]),
+        ).fetchone()
+        page = None if row is None else _preview_info(connection, document["id"], row)["image"]
+    if (
+        row is None
+        or page is None
+        or row["rotation"] != 0
+        or row["p1"]
+        and json.loads(row["transform_json"]) != [row["width"], 0, 0, row["height"], 0, 0]
+    ):
+        raise Problem(
+            404,
+            "crop_unavailable",
+            "This crop is unavailable. Open the source page or read the text.",
+        )
+    settings = request.app.state.settings
+    store = FileStore(settings.pathya_data_dir, request.app.state.database, min_free_bytes=0)
+    try:
+        with Image.open(store.safe_path(*page["private_path"].split("/"))) as image:
+            if image.size != (row["width"], row["height"]):
+                raise Problem(
+                    404,
+                    "crop_unavailable",
+                    "This crop is unavailable. Open the source page or read the text.",
+                )
+            left, top, right, bottom = json.loads(row["bbox_json"])
+            cropped = image.crop(
+                (
+                    math.floor(left * image.width),
+                    math.floor(top * image.height),
+                    math.ceil(right * image.width),
+                    math.ceil(bottom * image.height),
+                )
+            )
+            cropped.thumbnail((1600, 1600))
+            output = io.BytesIO()
+            cropped.save(output, format="PNG")
+    except (OSError, ValueError):
+        raise Problem(
+            404,
+            "crop_unavailable",
+            "This crop is unavailable. Open the source page or read the text.",
+        ) from None
+    return Response(
+        output.getvalue(), media_type="image/png", headers={"Cache-Control": "private, no-store"}
+    )
 
 
 @router.get("/assets/{asset_id}")

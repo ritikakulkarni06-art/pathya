@@ -242,3 +242,13 @@ The reader may split locally if ranges are absent.
 | Daily question usage and limit | The question API enforces a request rate window. The reader's daily quota and `GET /usage` are absent. Agree the quota and reset behavior before wiring the screen. |
 | Source preview | Authorized asset downloads exist. The review queue returns a null crop reference. Page image and crop delivery are absent. |
 | Chapter content | Atul's pushed HTTP client calls `/manifest`. Switch it to the canonical `/content` response after the updated contract is implemented and verified. |
+
+The backend now supports the pinned whole-document import through a
+configured producer, canonical readback, and the reader routes in the
+frontend handoff. Backend HTTP responses for all three pinned synthetic
+fixtures opened in Atul's converter at `6142588` after import as fresh
+chapters. A local same-origin HTTPS smoke test with the built reader at
+`6142588` passed registration and login in Chrome. Its browser session
+also passed authenticated lookup, missing-CSRF rejection and logout.
+Shared schema extensions, the live extractor and Atul's browser
+test against a deployed HTTPS preview remain pending.

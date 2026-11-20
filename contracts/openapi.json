@@ -1923,6 +1923,79 @@
         "summary": "Request Audio"
       }
     },
+    "/blocks/{block_id}/crop": {
+      "get": {
+        "operationId": "block_crop_blocks__block_id__crop_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "block_id",
+            "required": true,
+            "schema": {
+              "title": "Block Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "image/png": {
+                "example": "PNG image bytes.",
+                "schema": {
+                  "format": "binary",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "examples": {
+                  "invalid_request": {
+                    "value": {
+                      "code": "invalid_request",
+                      "detail": "Some fields are invalid. Please check the request format.",
+                      "status": 422,
+                      "title": "Invalid request",
+                      "type": "urn:pathya:error:invalid_request"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Safe field validation problem; input values are not echoed."
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "examples": {
+                  "problem": {
+                    "value": {
+                      "code": "invalid_request",
+                      "detail": "Some fields are invalid. Please check the request format.",
+                      "status": 422,
+                      "title": "Invalid request",
+                      "type": "urn:pathya:error:invalid_request"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "RFC 7807-style problem. Consult x-pathya-error-catalog and the frontend handoff for operation-specific codes."
+          }
+        },
+        "summary": "Block Crop"
+      }
+    },
     "/deletions/{receipt_id}": {
       "get": {
         "operationId": "deletion_status_deletions__receipt_id__get",
@@ -3446,6 +3519,99 @@
         "summary": "Get Package"
       }
     },
+    "/documents/{document_id}/pages/{page_id}/preview": {
+      "get": {
+        "operationId": "page_preview_documents__document_id__pages__page_id__preview_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "document_id",
+            "required": true,
+            "schema": {
+              "title": "Document Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "page_id",
+            "required": true,
+            "schema": {
+              "title": "Page Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "synthetic": {
+                    "summary": "Synthetic structural response; populated workflow examples are in docs/API_FOR_FRONTEND.md.",
+                    "value": {
+                      "image_url": null,
+                      "page_id": "33333333-3333-4333-8333-333333333333",
+                      "page_index": 0,
+                      "source_url": "/assets/33333333-3333-4333-8333-333333333333#page=1"
+                    }
+                  }
+                },
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Page Preview Documents  Document Id  Pages  Page Id  Preview Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "examples": {
+                  "invalid_request": {
+                    "value": {
+                      "code": "invalid_request",
+                      "detail": "Some fields are invalid. Please check the request format.",
+                      "status": 422,
+                      "title": "Invalid request",
+                      "type": "urn:pathya:error:invalid_request"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Safe field validation problem; input values are not echoed."
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "examples": {
+                  "problem": {
+                    "value": {
+                      "code": "invalid_request",
+                      "detail": "Some fields are invalid. Please check the request format.",
+                      "status": 422,
+                      "title": "Invalid request",
+                      "type": "urn:pathya:error:invalid_request"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "RFC 7807-style problem. Consult x-pathya-error-catalog and the frontend handoff for operation-specific codes."
+          }
+        },
+        "summary": "Page Preview"
+      }
+    },
     "/documents/{document_id}/reextract": {
       "post": {
         "operationId": "reextract_documents__document_id__reextract_post",
@@ -3822,6 +3988,124 @@
         "summary": "Review Queue"
       }
     },
+    "/documents/{document_id}/revisions": {
+      "get": {
+        "operationId": "correction_history_documents__document_id__revisions_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "document_id",
+            "required": true,
+            "schema": {
+              "title": "Document Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "synthetic": {
+                    "summary": "Synthetic structural response; populated workflow examples are in docs/API_FOR_FRONTEND.md.",
+                    "value": [
+                      {
+                        "after": "Corrected synthetic passage.",
+                        "at": "2026-11-18T00:00:00Z",
+                        "before": "Synthetic authorized passage.",
+                        "block_id": "22222222-2222-4222-8222-222222222222",
+                        "by": "Reviewer",
+                        "changes": [
+                          "replace_text"
+                        ],
+                        "reason": "Verified against the source page.",
+                        "revision": 2
+                      }
+                    ]
+                  }
+                },
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response Correction History Documents  Document Id  Revisions Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "examples": {
+                  "invalid_request": {
+                    "value": {
+                      "code": "invalid_request",
+                      "detail": "Some fields are invalid. Please check the request format.",
+                      "status": 422,
+                      "title": "Invalid request",
+                      "type": "urn:pathya:error:invalid_request"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Safe field validation problem; input values are not echoed."
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "examples": {
+                  "problem": {
+                    "value": {
+                      "code": "invalid_request",
+                      "detail": "Some fields are invalid. Please check the request format.",
+                      "status": 422,
+                      "title": "Invalid request",
+                      "type": "urn:pathya:error:invalid_request"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "RFC 7807-style problem. Consult x-pathya-error-catalog and the frontend handoff for operation-specific codes."
+          }
+        },
+        "summary": "Correction History"
+      }
+    },
     "/documents/{document_id}/search": {
       "get": {
         "operationId": "search_chapter_documents__document_id__search_get",
@@ -4049,6 +4333,121 @@
         "summary": "Health"
       }
     },
+    "/jobs": {
+      "get": {
+        "operationId": "list_jobs_jobs_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "synthetic": {
+                    "summary": "Synthetic structural response; populated workflow examples are in docs/API_FOR_FRONTEND.md.",
+                    "value": [
+                      {
+                        "attempts": 1,
+                        "created_at": "2026-11-18T00:00:00Z",
+                        "document_id": "11111111-1111-4111-8111-111111111111",
+                        "id": "33333333-3333-4333-8333-333333333333",
+                        "kind": "extract",
+                        "last_error_code": null,
+                        "max_attempts": 3,
+                        "pages_done": 10,
+                        "pages_total": 10,
+                        "progress": {
+                          "pages_done": 10,
+                          "pages_total": 10
+                        },
+                        "reason": "A critical extraction symbol needs review.",
+                        "state": "review_required",
+                        "title": "Synthetic chapter"
+                      }
+                    ]
+                  }
+                },
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response List Jobs Jobs Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "examples": {
+                  "invalid_request": {
+                    "value": {
+                      "code": "invalid_request",
+                      "detail": "Some fields are invalid. Please check the request format.",
+                      "status": 422,
+                      "title": "Invalid request",
+                      "type": "urn:pathya:error:invalid_request"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Safe field validation problem; input values are not echoed."
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "examples": {
+                  "problem": {
+                    "value": {
+                      "code": "invalid_request",
+                      "detail": "Some fields are invalid. Please check the request format.",
+                      "status": 422,
+                      "title": "Invalid request",
+                      "type": "urn:pathya:error:invalid_request"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "RFC 7807-style problem. Consult x-pathya-error-catalog and the frontend handoff for operation-specific codes."
+          }
+        },
+        "summary": "List Jobs"
+      }
+    },
     "/jobs/{job_id}": {
       "get": {
         "operationId": "job_status_jobs__job_id__get",
@@ -4072,16 +4471,21 @@
                     "summary": "Synthetic structural response; populated workflow examples are in docs/API_FOR_FRONTEND.md.",
                     "value": {
                       "attempts": 1,
+                      "created_at": "2026-11-18T00:00:00Z",
                       "document_id": "11111111-1111-4111-8111-111111111111",
                       "id": "33333333-3333-4333-8333-333333333333",
+                      "kind": "extract",
                       "last_error_code": null,
                       "max_attempts": 3,
+                      "pages_done": 10,
+                      "pages_total": 10,
                       "progress": {
                         "pages_done": 10,
                         "pages_total": 10
                       },
                       "reason": "A critical extraction symbol needs review.",
-                      "state": "review_required"
+                      "state": "review_required",
+                      "title": "Synthetic chapter"
                     }
                   }
                 },
@@ -4202,6 +4606,99 @@
           }
         },
         "summary": "Cancel Job"
+      }
+    },
+    "/jobs/{job_id}/retry": {
+      "post": {
+        "operationId": "retry_job_jobs__job_id__retry_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true,
+            "schema": {
+              "title": "Job Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "synthetic": {
+                    "summary": "Synthetic structural response; populated workflow examples are in docs/API_FOR_FRONTEND.md.",
+                    "value": {
+                      "attempts": 0,
+                      "created_at": "2026-11-18T00:00:00Z",
+                      "document_id": "11111111-1111-4111-8111-111111111111",
+                      "id": "33333333-3333-4333-8333-333333333333",
+                      "kind": "extract",
+                      "last_error_code": null,
+                      "max_attempts": 3,
+                      "pages_done": 0,
+                      "pages_total": 0,
+                      "progress": {},
+                      "reason": "Waiting for a worker.",
+                      "state": "queued",
+                      "title": "Synthetic chapter"
+                    }
+                  }
+                },
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Retry Job Jobs  Job Id  Retry Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "examples": {
+                  "invalid_request": {
+                    "value": {
+                      "code": "invalid_request",
+                      "detail": "Some fields are invalid. Please check the request format.",
+                      "status": 422,
+                      "title": "Invalid request",
+                      "type": "urn:pathya:error:invalid_request"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Safe field validation problem; input values are not echoed."
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "examples": {
+                  "problem": {
+                    "value": {
+                      "code": "invalid_request",
+                      "detail": "Some fields are invalid. Please check the request format.",
+                      "status": 422,
+                      "title": "Invalid request",
+                      "type": "urn:pathya:error:invalid_request"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "RFC 7807-style problem. Consult x-pathya-error-catalog and the frontend handoff for operation-specific codes."
+          }
+        },
+        "summary": "Retry Job"
       }
     },
     "/questions": {
@@ -4436,6 +4933,58 @@
           }
         },
         "summary": "Ready"
+      }
+    },
+    "/usage": {
+      "get": {
+        "operationId": "usage_usage_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "synthetic": {
+                    "summary": "Synthetic structural response; populated workflow examples are in docs/API_FOR_FRONTEND.md.",
+                    "value": {
+                      "limit": 20,
+                      "remaining": 19
+                    }
+                  }
+                },
+                "schema": {
+                  "additionalProperties": {
+                    "type": "integer"
+                  },
+                  "title": "Response Usage Usage Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "examples": {
+                  "problem": {
+                    "value": {
+                      "code": "invalid_request",
+                      "detail": "Some fields are invalid. Please check the request format.",
+                      "status": 422,
+                      "title": "Invalid request",
+                      "type": "urn:pathya:error:invalid_request"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "RFC 7807-style problem. Consult x-pathya-error-catalog and the frontend handoff for operation-specific codes."
+          }
+        },
+        "summary": "Usage"
       }
     }
   },
@@ -4802,6 +5351,19 @@
         422
       ]
     },
+    "crop_unavailable": {
+      "example": {
+        "code": "crop_unavailable",
+        "detail": "This crop is unavailable. Open the source page or read the text.",
+        "status": 404,
+        "title": "Crop unavailable",
+        "type": "urn:pathya:error:crop_unavailable"
+      },
+      "origin": "application",
+      "statuses": [
+        404
+      ]
+    },
     "csrf_failed": {
       "example": {
         "code": "csrf_failed",
@@ -4822,6 +5384,19 @@
         "status": 429,
         "title": "Daily page quota",
         "type": "urn:pathya:error:daily_page_quota"
+      },
+      "origin": "application",
+      "statuses": [
+        429
+      ]
+    },
+    "daily_question_limit": {
+      "example": {
+        "code": "daily_question_limit",
+        "detail": "The daily question limit is reached.",
+        "status": 429,
+        "title": "Daily question limit",
+        "type": "urn:pathya:error:daily_question_limit"
       },
       "origin": "application",
       "statuses": [
@@ -5820,7 +6395,7 @@
     "invalid_page_range": {
       "example": {
         "code": "invalid_page_range",
-        "detail": "The extraction adapter returned an unexpected page range.",
+        "detail": "The extractor must report an outcome for every page.",
         "status": 422,
         "title": "Invalid page range",
         "type": "urn:pathya:error:invalid_page_range"
@@ -6023,6 +6598,32 @@
       "origin": "application",
       "statuses": [
         404
+      ]
+    },
+    "job_not_retryable": {
+      "example": {
+        "code": "job_not_retryable",
+        "detail": "Only a failed processing job can be retried.",
+        "status": 409,
+        "title": "Job not retryable",
+        "type": "urn:pathya:error:job_not_retryable"
+      },
+      "origin": "application",
+      "statuses": [
+        409
+      ]
+    },
+    "job_revision_stale": {
+      "example": {
+        "code": "job_revision_stale",
+        "detail": "This job is for an older chapter revision.",
+        "status": 409,
+        "title": "Job revision stale",
+        "type": "urn:pathya:error:job_revision_stale"
+      },
+      "origin": "application",
+      "statuses": [
+        409
       ]
     },
     "json_invalid": {
@@ -6428,6 +7029,45 @@
         422
       ]
     },
+    "p1_correction_unsupported": {
+      "example": {
+        "code": "p1_correction_unsupported",
+        "detail": "This chapter supports text, language, and review corrections on text passages.",
+        "status": 422,
+        "title": "P1 correction unsupported",
+        "type": "urn:pathya:error:p1_correction_unsupported"
+      },
+      "origin": "application",
+      "statuses": [
+        422
+      ]
+    },
+    "p1_extractor_unavailable": {
+      "example": {
+        "code": "p1_extractor_unavailable",
+        "detail": "Configure the verified Person 1 extractor.",
+        "status": 503,
+        "title": "P1 extractor unavailable",
+        "type": "urn:pathya:error:p1_extractor_unavailable"
+      },
+      "origin": "application",
+      "statuses": [
+        503
+      ]
+    },
+    "p1_output_invalid": {
+      "example": {
+        "code": "p1_output_invalid",
+        "detail": "The extractor returned an invalid or oversized chapter.",
+        "status": 422,
+        "title": "P1 output invalid",
+        "type": "urn:pathya:error:p1_output_invalid"
+      },
+      "origin": "application",
+      "statuses": [
+        422
+      ]
+    },
     "package_not_found": {
       "example": {
         "code": "package_not_found",
@@ -6465,6 +7105,32 @@
       "origin": "application",
       "statuses": [
         413
+      ]
+    },
+    "page_not_found": {
+      "example": {
+        "code": "page_not_found",
+        "detail": "This source page is unavailable.",
+        "status": 404,
+        "title": "Page not found",
+        "type": "urn:pathya:error:page_not_found"
+      },
+      "origin": "application",
+      "statuses": [
+        404
+      ]
+    },
+    "page_review_required": {
+      "example": {
+        "code": "page_review_required",
+        "detail": "Review the incomplete source page before approving this passage.",
+        "status": 422,
+        "title": "Page review required",
+        "type": "urn:pathya:error:page_review_required"
+      },
+      "origin": "application",
+      "statuses": [
+        422
       ]
     },
     "parent_cycle": {

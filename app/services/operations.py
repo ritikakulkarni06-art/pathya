@@ -33,6 +33,7 @@ def prune_metrics(database: Database) -> None:
     with database.write_tx() as c:
         c.execute("DELETE FROM job_metrics WHERE created_at<?", (cutoff,))
         c.execute("DELETE FROM upload_usage WHERE day<?", (cutoff[:10],))
+        c.execute("DELETE FROM question_usage WHERE day<?", (cutoff[:10],))
 
 
 def job_statuses(database: Database) -> list[dict[str, Any]]:

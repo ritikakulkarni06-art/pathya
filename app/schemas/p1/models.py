@@ -632,7 +632,10 @@ def _missing_ids(data: dict) -> list[str]:  # type: ignore[type-arg]
     if isinstance(asset, dict) and "id" not in asset:
         missing.append("source_asset.id")
     for key in ("pages", "blocks", "edges", "corrections"):
-        for n, item in enumerate(data.get(key) or []):
+        items = data.get(key)
+        if not isinstance(items, list):
+            continue
+        for n, item in enumerate(items):
             if isinstance(item, dict) and "id" not in item:
                 missing.append(f"{key}[{n}].id")
     return missing

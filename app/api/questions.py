@@ -1,3 +1,4 @@
+from datetime import UTC, datetime
 from typing import Any
 
 from fastapi import APIRouter, Depends, Request
@@ -5,9 +6,20 @@ from fastapi import APIRouter, Depends, Request
 from app.schemas.answers import QuestionRequest
 from app.services.answers import ask, get_answer
 from app.services.auth import current_user, require_doc_access
-from app.services.limits import rate_limit
+from app.services.limits import question_usage, rate_limit
 
 router = APIRouter()
+
+
+@router.get("/usage")
+def usage(request: Request, user: dict[str, Any] = Depends(current_user)) -> dict[str, int]:
+    with request.app.state.database.read_conn() as connection:
+        return question_usage(
+            connection,
+            user["id"],
+            request.app.state.settings.daily_question_limit,
+            datetime.now(UTC),
+        )
 
 
 @router.post("/questions")

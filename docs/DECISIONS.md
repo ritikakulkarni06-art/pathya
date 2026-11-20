@@ -195,9 +195,15 @@ formatting. The two pinned schemas and twelve conformance vectors are test
 fixtures. The validator retains the exact producer JSON bytes alongside the
 typed payload. The initial-import check compares the source checksum with
 backend-owned metadata and rejects producer-supplied revision history.
-The extraction worker still uses the existing adapter while P1 finishes the
-full Document-producing pipeline. Durable P1 import and canonical readback
-are separate integration work.
+The whole-document worker path is opt-in until P1 supplies a verified
+entry point. It commits the exact producer JSON, source binding and
+backend identifiers in the same transaction as the initial projection.
+The existing search and job pipelines use this projection. The canonical
+read response uses the saved producer content and overlays backend IDs,
+current source edits and accepted corrections. It exposes authorized asset
+links. Incomplete pages stay outside trusted retrieval and retain their
+review state. For P1 chapters, support text, language and explicit review
+corrections on text passages until the shared structural policy is pinned.
 
 Set `SEGMENTER=pathya` to publish gap-free code-point ranges for headings,
 paragraphs and list items from the current text in the existing read APIs.
@@ -206,3 +212,16 @@ cache version. Compute ranges from the same read snapshot as the block
 revision, so a text edit exposes fresh offsets without waiting for audio.
 The direct Document response and the proposed critical-symbol flag still
 need the next pinned schema. No dependencies were added.
+
+### Remaining reader API contracts
+
+Use authenticated job visibility tied to document access and private
+requester scope. Keep failed jobs immutable for display and make an explicit
+retry produce one replacement job per failed job. Question usage is a
+per-user, UTC-day counter with a default limit of 20 from the reader mock.
+Charge authorized, well-formed requests before expensive processing and
+prune old counts through the existing operational-retention job.
+
+Use the existing sanitized image for image previews and compatible crops.
+Use authorized PDF source-page links for PDF previews. PDF rasterization
+can be added when the team confirms the preview artifact contract.

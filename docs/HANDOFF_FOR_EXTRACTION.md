@@ -6,6 +6,16 @@ Please reply in writing with approval or concrete changes to: required fields, q
 
 ## Integration options
 
+For a whole-document P1 producer, set
+`EXTRACTION_ADAPTER=p1:your_package.module:extract_document` after verifying
+the pipeline. The trusted callable accepts `(source_path, languages)` and
+returns UTF-8 JSON bytes for the pinned Document. A thin wrapper can adapt
+the upstream signature. The worker requires an outcome for every physical
+page, enforces `P1_MAX_OUTPUT_BYTES`, checks the original source checksum
+and media type, and rejects producer-supplied correction history on import.
+Re-extraction creates a separate review candidate. Synthetic integration
+tests use a fixture callable until the verified pipeline is available.
+
 - `EXTRACTION_ADAPTER=fixture`: synthetic canned content for dev/test only; never OCR and refused in production.
 - `EXTRACTION_ADAPTER=python:your_package.module:YourAdapter`: trusted installed Python adapter with a no-argument constructor and the contract's `extract` method. This executes trusted teammate code inside the worker; it is not a security sandbox.
 - `EXTRACTION_ADAPTER=subprocess`, `EXTRACTION_COMMAND=["/absolute/path/to/python","your_extractor.py"]`: Linux only. The wrapper uses an unprivileged user/network namespace, CPU/address-space/file-size/file-descriptor limits, bounded output and process-group timeout termination. If namespaces are unavailable, extraction fails instead of running unsandboxed. Network isolation must be smoke-tested on the deployment host. The current Windows host cannot run this mode; use fixture/trusted Python mode for development.

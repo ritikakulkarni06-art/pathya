@@ -1,6 +1,7 @@
 import hashlib
 import json
 import re
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Protocol
 from uuid import uuid4
@@ -17,6 +18,7 @@ from app.logging import log_event
 from app.schemas.answers import GeneratedAnswer, QuestionRequest
 from app.services.access import check_document
 from app.services.costs import BudgetExhausted
+from app.services.limits import question_usage
 from app.services.retrieval.chunker import words
 from app.services.retrieval.eligibility import is_eligible
 from app.services.retrieval.search import search_snapshot
@@ -182,10 +184,13 @@ def ask(
     checker: EntailmentChecker | None = None,
     embedder: EmbeddingProvider | None = None,
 ) -> dict[str, Any]:
-    with database.read_conn() as connection:
-        doc = check_document(connection, request.document_id, user_id)
     if len(request.question) > settings.question_max_chars or not request.question.strip():
         raise Problem(422, "invalid_question", "Use a shorter question with at least one word.")
+    with database.write_tx() as connection:
+        doc = check_document(connection, request.document_id, user_id)
+        usage = question_usage(
+            connection, user_id, settings.daily_question_limit, datetime.now(UTC), spend=True
+        )
     revision = doc["current_revision"]
     body: dict[str, Any] = {
         "id": str(uuid4()),
@@ -201,6 +206,7 @@ def ask(
         "prompt_version": PROMPT_VERSION,
         "needs_human_check": False,
         "status": "current",
+        "usage": usage,
         "stale": False,
         "return_token": {
             "id": str(uuid4()),

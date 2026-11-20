@@ -10,10 +10,11 @@ from app.clock import now_utc
 from app.config import Settings
 from app.db.connection import Database
 from app.db.repos import audit, jobs
+from app.db.repos.extraction import has_incomplete_p1_pages
 from app.errors import Problem
 from app.schemas.content import BlockMetadata
 from app.schemas.corrections import CorrectionRequest
-from app.services.access import require_document
+from app.services.access import check_document
 
 TEXT_TYPES = {"heading", "paragraph", "list_item", "caption"}
 
@@ -509,7 +510,35 @@ def correct_block(
             block = connection.execute("SELECT * FROM blocks WHERE id=?", (block_id,)).fetchone()
             if block is None:
                 raise Problem(404, "block_not_found", "This passage is unavailable.")
-            document = require_document(database, block["document_id"], user_id, "reviewer")
+            document = check_document(connection, block["document_id"], user_id, "reviewer")
+            p1 = (
+                connection.execute(
+                    "SELECT 1 FROM extraction_imports WHERE document_id=? AND p1_source_json IS NOT NULL",
+                    (block["document_id"],),
+                ).fetchone()
+                is not None
+            )
+            if p1 and (
+                block["type"] not in {"heading", "paragraph", "list_item", "caption"}
+                or any(
+                    op.op not in {"replace_text", "set_language", "mark_reviewed"}
+                    for op in request.operations
+                )
+            ):
+                raise Problem(
+                    422,
+                    "p1_correction_unsupported",
+                    "This chapter supports text, language, and review corrections on text passages.",
+                )
+            incomplete_page = p1 and (
+                json.loads(block["provenance_json"]).get("parser") == "p1_incomplete_page"
+            )
+            if incomplete_page and any(op.op == "mark_reviewed" for op in request.operations):
+                raise Problem(
+                    422,
+                    "page_review_required",
+                    "Review the incomplete source page before approving this passage.",
+                )
             if json.loads(block["successor_ids_json"]):
                 raise Problem(
                     409,
@@ -544,10 +573,17 @@ def correct_block(
                     ],
                 }
             else:
+                original_status = block["status"]
+                original_critical = block["critical_flag"]
                 block["status"] = "corrected"
                 changed = {block_id: block}
                 created: set[str] = set()
                 structural = _apply(connection, block, request, changed, created)
+                if p1 and (
+                    incomplete_page
+                    or (original_status == "needs_review" and block["status"] != "reviewed")
+                ):
+                    block.update(status="needs_review", critical_flag=original_critical)
                 if structural:
                     _refresh_structure(connection, document["id"], changed)
                 document_revision = int(document["current_revision"]) + 1
@@ -623,7 +659,9 @@ def correct_block(
                     "UPDATE documents SET current_revision=?,state=?,updated_at=? WHERE id=?",
                     (
                         document_revision,
-                        "review_required" if pending else "building",
+                        "review_required"
+                        if pending or has_incomplete_p1_pages(connection, document["id"])
+                        else "building",
                         now_utc(),
                         document["id"],
                     ),

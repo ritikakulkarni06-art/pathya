@@ -64,6 +64,7 @@ def propose_candidate(
     result: ExtractionResult,
     *,
     lease: tuple[str, str] | None = None,
+    producer_document: dict[str, Any] | None = None,
 ) -> str:
     with database.write_tx() as connection:
         assert_job_lease(connection, lease)
@@ -89,6 +90,8 @@ def propose_candidate(
             "extraction": copy.deepcopy(result.model_dump(mode="json")),
             "reconciliation": reconcile(existing, result),
         }
+        if producer_document is not None:
+            body["producer_document"] = producer_document
         candidate_id = str(uuid4())
         connection.execute(
             "INSERT INTO reextraction_candidates(id,document_id,base_revision,proposed_revision,body_json,state,created_at,job_id) VALUES (?,?,?,?,?,'review_required',?,?)",

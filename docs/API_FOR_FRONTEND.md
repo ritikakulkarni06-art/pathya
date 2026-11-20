@@ -47,13 +47,27 @@ review_required, failed and cancelled. Last four are terminal for that job.
 Attempts/max_attempts and last_error_code make retries visible. Review-required
 is a usable source/review state, not fabricated extraction success. Derivative
 jobs can still be pending after the extraction job finishes. Owners can POST
-/jobs/{job_id}/cancel; there is no generic public job-retry endpoint.
+/jobs/{job_id}/cancel.
+
+Use `GET /jobs?limit=50&offset=0` for jobs visible to the signed-in user.
+An owner can retry a failed shared job with `POST /jobs/{job_id}/retry`;
+the requester can retry their own private narration job. A retry returns
+the new job with HTTP 202. The failed job remains in history, and repeated
+requests for the same failed job reuse the replacement. Cancellation
+returns HTTP 204; refetch the job to show its status.
 
 GET /documents lists accessible active documents; GET /documents/{id} gives
 metadata/counts. GET /documents/{id}/content and GET /blocks/{id} return source
 text/status/revision, flags and structured metadata. Block IDs are opaque; keep
 them unchanged. Display native not_scored markers and needs_review/critical flags.
 Generated text is separate and must never replace the displayed source.
+
+Chapters imported with the P1 adapter return the canonical Document in
+the content response, with `X-Document-Revision` and stable backend IDs.
+The original producer JSON is retained privately. The pinned shared schema
+does not allow reader extensions. Use the per-block read endpoint for
+sentence ranges with `SEGMENTER=pathya` until the next schema includes
+those fields. Legacy imports continue to use their original response shape.
 
 ## Manifests, audio and offline plans
 
@@ -92,6 +106,20 @@ For a code-point offset `n`, convert before slicing with
 applying offsets or hashes.
 
 ## Review and corrections
+
+`GET /documents/{id}/revisions` returns accepted correction history,
+newest first, with `limit` and `offset`. Structural edits may have no
+single after-text. `GET /usage` returns the signed-in user's daily question
+`limit` and `remaining` count. Questions charge a slot after authorization
+and validation, including requests that abstain. The quota resets at UTC
+midnight. Successful question responses include updated usage.
+
+`GET /documents/{id}/pages/{page_id}/preview` returns an authorized
+`source_url` and an optional `image_url`. PDFs use the original source
+with a physical-page fragment. Image uploads may show a sanitized PNG and
+an authorized crop from `GET /blocks/{id}/crop`. If crop geometry is
+unavailable, keep the text visible and link to the source page. Resolve
+relative asset URLs against the configured API base path.
 
 GET /documents/{id}/review-queue returns `{blocks:[...]}` with reason, flags, page
 labels and crop_reference (currently nullable). Owners/reviewers can PATCH

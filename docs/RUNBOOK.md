@@ -1,5 +1,17 @@
 # Backend operations runbook
 
+## Shared HTTPS preview
+
+Use a team-approved hostname with a trusted TLS certificate. Serve the
+reader build and proxy the API through the same origin, for example with
+the API under `/api` and `VITE_API_URL=/api`. The proxy strips that prefix
+before forwarding to the loopback API. The reader resolves returned asset
+paths against its API base so those requests also pass through the proxy.
+Enable session authentication and configure a secret through the deployment
+environment. Use a separate preview data directory and authorized or
+synthetic chapters. Exercise registration, login, `/auth/me`, an
+authenticated write, and logout through the browser before sharing the URL.
+
 Maintenance owner after the project: **unassigned; team/institution must name one**.
 This is a single-API/single-durable-worker backend. Real adapter contracts, host
 security, HTTPS, participant wording and human evaluation remain manual gates.

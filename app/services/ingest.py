@@ -5,12 +5,14 @@ from dataclasses import dataclass
 from typing import Any
 from uuid import uuid4
 
+from app.adapters.p1 import validate_p1_initial_import
 from app.clock import now_utc
 from app.db.connection import Database
 from app.db.repos import documents, extraction
 from app.errors import Problem
 from app.schemas.content import ExtractionResult, parse_extraction
 from app.services.jobs import LeaseLost
+from app.services.p1_content import INCOMPLETE_STATES, project_p1
 
 
 @dataclass(frozen=True)
@@ -22,13 +24,10 @@ class ImportResult:
 def import_extraction(
     database: Database,
     document_id: str,
-    result: ExtractionResult | dict[str, Any],
+    result: ExtractionResult | dict[str, Any] | bytes,
     *,
     lease: tuple[str, str] | None = None,
 ) -> ImportResult:
-    validated = parse_extraction(result)
-    encoded = json.dumps(validated.model_dump(mode="json"), sort_keys=True, separators=(",", ":"))
-    digest = hashlib.sha256(encoded.encode()).hexdigest()
     try:
         with database.write_tx() as connection:
             if lease is not None:
@@ -44,6 +43,35 @@ def import_extraction(
             document = documents.get_document(connection, document_id)
             if document is None or document["state"] in {"deleting", "deleted"}:
                 raise Problem(404, "document_not_found", "This document is unavailable.")
+            producer_json = result if isinstance(result, bytes) else None
+            producer_version: str | None = None
+            needs_review = False
+            if isinstance(result, bytes):
+                source = connection.execute(
+                    "SELECT id,sha256,mime FROM assets WHERE document_id=? AND kind='source' AND deleted_at IS NULL",
+                    (document_id,),
+                ).fetchone()
+                if source is None or source["sha256"] != document["source_sha256"]:
+                    raise Problem(
+                        422, "invalid_source_asset", "The original chapter file is unavailable."
+                    )
+                parsed = validate_p1_initial_import(result, source["sha256"])
+                if parsed.document.source_asset.media_type != source["mime"]:
+                    raise Problem(
+                        422, "invalid_source_asset", "Extraction refers to a different source type."
+                    )
+                validated = project_p1(parsed.document, source["id"])
+                producer_version = parsed.document.schema_version
+                needs_review = any(
+                    page.status in INCOMPLETE_STATES for page in parsed.document.pages
+                )
+                digest = hashlib.sha256(result).hexdigest()
+            else:
+                validated = parse_extraction(result)
+                encoded = json.dumps(
+                    validated.model_dump(mode="json"), sort_keys=True, separators=(",", ":")
+                )
+                digest = hashlib.sha256(encoded.encode()).hexdigest()
             existing = extraction.receipt(connection, document_id)
             if existing is not None and existing["payload_sha256"] == digest:
                 return ImportResult(1, extraction.identifier_map(connection, document_id))
@@ -66,7 +94,16 @@ def import_extraction(
                 )
             for edge in validated.edges:
                 extraction.insert_edge(connection, document_id, edge, ids)
-            extraction.finish_import(connection, document_id, validated, digest, now)
+            extraction.finish_import(
+                connection,
+                document_id,
+                validated,
+                digest,
+                now,
+                producer_json=producer_json,
+                producer_version=producer_version,
+                needs_review=needs_review,
+            )
     except sqlite3.IntegrityError:
         raise Problem(
             422,

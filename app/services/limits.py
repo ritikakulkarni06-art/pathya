@@ -33,6 +33,41 @@ class ActionLimiter:
             ) from None
 
 
+def question_usage(
+    connection: sqlite3.Connection,
+    user_id: str,
+    limit: int,
+    instant: datetime,
+    *,
+    spend: bool = False,
+) -> dict[str, int]:
+    day = instant.date().isoformat()
+    if spend:
+        updated = connection.execute(
+            """
+            INSERT INTO question_usage(user_id,day,count) VALUES (?,?,1)
+            ON CONFLICT(user_id,day) DO UPDATE SET count=count+1 WHERE count<?
+            """,
+            (user_id, day, limit),
+        )
+        if updated.rowcount == 0:
+            reset = datetime.combine(instant.date() + timedelta(days=1), datetime.min.time(), UTC)
+            raise Problem(
+                429,
+                "daily_question_limit",
+                "The daily question limit is reached.",
+                extra={
+                    "limit": limit,
+                    "remaining": 0,
+                    "retry_after": int((reset - instant).total_seconds()) + 1,
+                },
+            )
+    row = connection.execute(
+        "SELECT count FROM question_usage WHERE user_id=? AND day=?", (user_id, day)
+    ).fetchone()
+    return {"limit": limit, "remaining": max(0, limit - (row["count"] if row else 0))}
+
+
 def rate_limit(action: str) -> Callable[..., None]:
     def dependency(request: Request, user: dict[str, Any] = Depends(current_user)) -> None:
         ip = request.client.host if request.client else "unknown"

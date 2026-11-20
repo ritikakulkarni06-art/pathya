@@ -28,7 +28,7 @@ def is_eligible(block: dict[str, Any], expected_revision: int | None = None) -> 
         or block.get("critical_flag")
         or successors
         or block.get("origin") in {"ai_explanation", "teacher_note"}
-        or provenance.get("parser") in {"ai_explanation", "teacher_note"}
+        or provenance.get("parser") in {"ai_explanation", "teacher_note", "p1_incomplete_page"}
         or (expected_revision is not None and block["revision"] != expected_revision)
     ):
         return False

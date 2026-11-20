@@ -12,6 +12,21 @@ def receipt(connection: sqlite3.Connection, document_id: str) -> dict[str, Any] 
     return row
 
 
+def has_incomplete_p1_pages(connection: sqlite3.Connection, document_id: str) -> bool:
+    return (
+        connection.execute(
+            """
+        SELECT 1 FROM extraction_imports i,
+        json_each(CAST(i.p1_source_json AS TEXT),'$.pages') p
+        WHERE i.document_id=? AND json_extract(p.value,'$.status') IN ('needs_ocr','partial','failed')
+        LIMIT 1
+        """,
+            (document_id,),
+        ).fetchone()
+        is not None
+    )
+
+
 def insert_revision(
     connection: sqlite3.Connection, document_id: str, author_id: str, now: str
 ) -> None:
@@ -99,22 +114,29 @@ def finish_import(
     result: ExtractionResult,
     digest: str,
     now: str,
+    *,
+    producer_json: bytes | None = None,
+    producer_version: str | None = None,
+    needs_review: bool = False,
 ) -> None:
-    review = any(block.critical_flag or block.status == "needs_review" for block in result.blocks)
+    review = needs_review or any(
+        block.critical_flag or block.status == "needs_review" for block in result.blocks
+    )
     connection.execute(
         "UPDATE documents SET current_revision=1,state=?,updated_at=? WHERE id=?",
         ("review_required" if review else "building", now, document_id),
     )
     connection.execute(
-        "INSERT INTO extraction_imports VALUES (?,?,?,?,?)",
+        "INSERT INTO extraction_imports(document_id,schema_version,payload_sha256,metadata_json,created_at,p1_source_json) VALUES (?,?,?,?,?,?)",
         (
             document_id,
-            result.schema_version,
+            producer_version or result.schema_version,
             digest,
             json.dumps(
                 {"quality_flags": result.quality_flags, "parser_versions": result.parser_versions}
             ),
             now,
+            producer_json,
         ),
     )
 

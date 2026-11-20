@@ -345,6 +345,28 @@ def enhance_openapi(schema: dict[str, Any]) -> dict[str, Any]:
                             }
                         ]
                     }
+                elif path == "/documents/{document_id}/revisions":
+                    value = [
+                        {
+                            "revision": 2,
+                            "block_id": BLOCK,
+                            "at": "2026-11-18T00:00:00Z",
+                            "by": "Reviewer",
+                            "reason": "Verified against the source page.",
+                            "before": TEXT,
+                            "after": "Corrected synthetic passage.",
+                            "changes": ["replace_text"],
+                        }
+                    ]
+                elif path == "/documents/{document_id}/pages/{page_id}/preview":
+                    value = {
+                        "page_id": ITEM,
+                        "page_index": 0,
+                        "image_url": None,
+                        "source_url": "/assets/" + ITEM + "#page=1",
+                    }
+                elif path == "/usage":
+                    value = {"limit": 20, "remaining": 19}
                 elif path == "/documents/{document_id}/manifest":
                     value = {
                         "demo_mode": True,
@@ -441,17 +463,32 @@ def enhance_openapi(schema: dict[str, Any]) -> dict[str, Any]:
                         "by_day": [],
                         "by_call": [],
                     }
-                elif path == "/jobs/{job_id}":
-                    value = {
+                elif path in {"/jobs", "/jobs/{job_id}", "/jobs/{job_id}/retry"}:
+                    job = {
                         "id": ITEM,
                         "document_id": DOC,
+                        "title": "Synthetic chapter",
+                        "created_at": "2026-11-18T00:00:00Z",
+                        "kind": "extract",
                         "state": "review_required",
                         "attempts": 1,
                         "max_attempts": 3,
                         "last_error_code": None,
                         "reason": "A critical extraction symbol needs review.",
+                        "pages_total": 10,
+                        "pages_done": 10,
                         "progress": {"pages_total": 10, "pages_done": 10},
                     }
+                    if path.endswith("/retry"):
+                        job.update(
+                            state="queued",
+                            attempts=0,
+                            reason="Waiting for a worker.",
+                            pages_total=0,
+                            pages_done=0,
+                            progress={},
+                        )
+                    value = [job] if path == "/jobs" else job
                 elif path == "/blocks/{block_id}" and method == "patch":
                     value = {
                         "document_revision": 2,
@@ -548,6 +585,15 @@ def enhance_openapi(schema: dict[str, Any]) -> dict[str, Any]:
                             }
                         }
                     },
+                }
+            if path == "/blocks/{block_id}/crop":
+                responses.setdefault("200", {"description": "Authorized source crop."})[
+                    "content"
+                ] = {
+                    "image/png": {
+                        "schema": {"type": "string", "format": "binary"},
+                        "example": "PNG image bytes.",
+                    }
                 }
             if path in {"/assets/{asset_id}", "/artifacts/{artifact_id}"}:
                 responses["200"]["content"] = {
