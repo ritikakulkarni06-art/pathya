@@ -225,3 +225,16 @@ prune old counts through the existing operational-retention job.
 Use the existing sanitized image for image previews and compatible crops.
 Use authorized PDF source-page links for PDF previews. PDF rasterization
 can be added when the team confirms the preview artifact contract.
+
+### Library review count and bulk sentence ranges
+
+Use the same current-block predicate for the review queue and the library
+badge. Return physical page count in library metadata. Published source
+pages carry printed labels where available.
+
+The bulk sentence route uses the existing `pathya-reader-v1` algorithm
+independently of speech configuration. Each response covers one authorized
+document revision and carries all current block IDs with hashes, including
+blocks for which the reader does not split text into sentences. Ready audio
+identifies its own segmenter so the reader can check compatibility. Adopt
+`pathya-sentences/3` once the reference rules and fixtures are available.

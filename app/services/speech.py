@@ -403,6 +403,8 @@ def build_block(
         "status": "ready",
         "block_id": block_id,
         "block_revision": block["revision"],
+        "text_sha256": hashlib.sha256(block["text_current"].encode("utf-8")).hexdigest(),
+        "segmenter": settings.active_segmenter_version,
         "voice": voice,
         "language": block["lang"],
         "engine_version": speaker.engine_version,

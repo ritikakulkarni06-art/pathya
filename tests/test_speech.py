@@ -1,3 +1,4 @@
+import hashlib
 import io
 import wave
 
@@ -49,7 +50,14 @@ def test_cache_sentence_offsets_wave_and_range(chapter):
     assert ranged.status_code == 206
     assert ranged.content == downloaded.content[:16]
     assert ranged.headers["content-range"].startswith("bytes 0-15/")
-    assert client.get("/blocks/" + block + "/audio").status_code == 200
+    ready = client.get("/blocks/" + block + "/audio")
+    assert ready.status_code == 200
+    assert (
+        ready.json()["text_sha256"]
+        == first["text_sha256"]
+        == hashlib.sha256(source.encode()).hexdigest()
+    )
+    assert ready.json()["segmenter"] == first["segmenter"] == settings.active_segmenter_version
     assert edit(client, block, 1, "The synthetic sunlight value changed.").status_code == 200
     assert client.get("/blocks/" + block + "/audio").status_code == 409
     assert client.get("/assets/" + unit["clip_asset_id"]).status_code == 409

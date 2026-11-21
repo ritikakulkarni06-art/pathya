@@ -4,6 +4,8 @@ from typing import Literal, Self
 from pydantic import Field, SecretStr, ValidationError, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from app.services.sentences import READER_SEGMENTER_VERSION
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
@@ -72,7 +74,7 @@ class Settings(BaseSettings):
     @property
     def active_segmenter_version(self) -> str:
         if self.segmenter == "pathya":
-            return "pathya-reader-v1"
+            return READER_SEGMENTER_VERSION
         return self.segmenter_version
 
     @model_validator(mode="after")

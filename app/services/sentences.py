@@ -1,5 +1,8 @@
 import re
 
+READER_SEGMENTER_VERSION = "pathya-reader-v1"
+SENTENCE_BLOCK_TYPES = frozenset({"heading", "paragraph", "list_item"})
+
 _BOUNDARY = re.compile(r"""[.!?।॥]+["'”’»)}\]]*\s+""")
 _ABBREVIATION = re.compile(r"\b(?:e\.g|i\.e|etc|vs|fig|eq|no|dr|mr|mrs|ms|approx|cf)\.$", re.I)
 _LIST_NUMBER = re.compile(r"\s*[0-9]+\.")

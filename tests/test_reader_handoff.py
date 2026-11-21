@@ -1,3 +1,4 @@
+import hashlib
 import io
 import json
 from pathlib import Path
@@ -75,6 +76,49 @@ def test_usage_is_private_and_durable_and_history_only_shows_accepted_edits(sess
         assert client.get("/documents/d/revisions").status_code == 404
 
 
+def test_library_review_count_matches_current_queue(session_app):
+    with session_app.state.database.write_tx() as connection:
+        connection.execute("UPDATE blocks SET critical_flag=1 WHERE id='b'")
+    with signed_client(session_app, "reader") as client:
+        assert client.get("/documents").json()["documents"][0]["counts"]["review"] == 1
+        assert client.get("/documents/d/review-queue").status_code == 403
+    with signed_client(session_app, "other") as client:
+        assert client.get("/documents").json()["documents"] == []
+        assert client.get("/documents/d").status_code == 404
+    with signed_client(session_app, "u") as client:
+        assert client.get("/documents/d").json()["counts"] == {"pages": 1, "blocks": 1, "review": 1}
+        assert len(client.get("/documents/d/review-queue").json()["blocks"]) == 1
+        assert edit(client, "b", 1, "Verified text.").status_code == 200
+        assert client.get("/documents/d").json()["counts"]["review"] == 0
+        assert client.get("/documents/d/review-queue").json()["blocks"] == []
+
+
+def test_bulk_sentences_check_document_access_and_refresh_after_correction(session_app):
+    route = "/documents/d/sentence-ranges"
+    for user_id, status in [(None, 401), ("other", 404), ("reader", 200), ("reviewer", 200)]:
+        with signed_client(session_app, user_id) as client:
+            assert client.get(route).status_code == status
+    with signed_client(session_app, "u") as client:
+        before = client.get(route)
+        assert before.headers["X-Document-Revision"] == "1"
+        text = "\U0001f4da First.  Second."
+        assert edit(client, "b", 1, text).status_code == 200
+        after = client.get(route)
+        assert after.headers["X-Document-Revision"] == "2"
+        assert after.headers["Cache-Control"] == "private, no-store"
+        assert after.json() == {
+            "document_revision": 2,
+            "blocks": [
+                {
+                    "block_id": "b",
+                    "text_sha256": hashlib.sha256(text.encode()).hexdigest(),
+                    "segmenter": "pathya-reader-v1",
+                    "ranges": [{"start": 0, "end": 10}, {"start": 10, "end": 17}],
+                }
+            ],
+        }
+
+
 def test_source_image_preview_and_crop_use_the_uploaded_working_image(upload_client):
     doc = upload(upload_client, image_bytes(), name="page.png").json()["document_id"]
     db = upload_client.app.state.database
@@ -144,6 +188,18 @@ def test_p1_worker_import_current_content_revision_and_uncertain_pages(worker_cl
         {"start": 0, "end": 8},
         {"start": 8, "end": 15},
     ]
+    bulk = worker_client.get(f"/documents/{doc_id}/sentence-ranges")
+    assert bulk.headers["X-Document-Revision"] == newer.headers["X-Document-Revision"]
+    by_id = {item["block_id"]: item for item in bulk.json()["blocks"]}
+    assert set(by_id) == {item["id"] for item in newer.json()["blocks"]}
+    for item in newer.json()["blocks"]:
+        entry = by_id[item["id"]]
+        assert (
+            entry["text_sha256"]
+            == hashlib.sha256((item["current_text"] or "").encode()).hexdigest()
+        )
+        if item["block_type"] not in {"heading", "paragraph", "list_item"}:
+            assert entry["ranges"] == []
     build_index(db, settings, doc_id)
     with db.read_conn() as connection:
         chunks = connection.execute(

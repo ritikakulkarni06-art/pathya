@@ -8,8 +8,9 @@ from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import FileResponse, Response
 from PIL import Image
 
-from app.db.repos import jobs
+from app.db.repos import content, jobs
 from app.errors import Problem
+from app.schemas.content import DocumentSentenceRanges
 from app.schemas.corrections import CorrectionRequest
 from app.services.access import check_document
 from app.services.auth import current_user, now_utc, require_doc_access
@@ -18,10 +19,16 @@ from app.services.manifests import artifact_current
 from app.services.p1_content import canonical_content
 from app.services.page_images import parse_bbox, render_page
 from app.services.revisions import correct_block
-from app.services.sentences import sentence_ranges
+from app.services.sentences import READER_SEGMENTER_VERSION, SENTENCE_BLOCK_TYPES, sentence_ranges
 from app.services.storage import FileStore
 
 router = APIRouter()
+
+
+def block_ranges(row: dict[str, Any]) -> list[dict[str, int]]:
+    if row["type"] not in SENTENCE_BLOCK_TYPES:
+        return []
+    return [{"start": start, "end": end} for start, end in sentence_ranges(row["text_current"])]
 
 
 def public_block(row: dict[str, Any], *, include_sentences: bool = False) -> dict[str, Any]:
@@ -45,10 +52,9 @@ def public_block(row: dict[str, Any], *, include_sentences: bool = False) -> dic
     body["historical"] = bool(body["successor_ids"])
     body["origin"] = "source_text"
     body["synthetic"] = str(body["provenance"].get("parser", "")).startswith("synthetic")
-    if include_sentences and row["type"] in {"heading", "paragraph", "list_item"}:
-        body["sentences"] = [
-            {"start": start, "end": end} for start, end in sentence_ranges(row["text_current"])
-        ]
+    if include_sentences and row["type"] in SENTENCE_BLOCK_TYPES:
+        body["sentences"] = block_ranges(row)
+        body["segmenter"] = READER_SEGMENTER_VERSION
     return body
 
 
@@ -62,10 +68,7 @@ def chapter_content(
     with request.app.state.database.read_conn() as connection:
         connection.execute("BEGIN")
         document = check_document(connection, document_id, document["_access_user_id"])
-        rows = connection.execute(
-            "SELECT blocks.* FROM blocks JOIN pages ON pages.id=blocks.page_id WHERE blocks.document_id=? AND json_array_length(successor_ids_json)=0 ORDER BY pages.pdf_index_0,order_key,blocks.id",
-            (document_id,),
-        ).fetchall()
+        rows = content.current_blocks(connection, document_id)
         canonical = canonical_content(connection, document_id, rows)
     if canonical is not None:
         response.headers["X-Document-Revision"] = str(document["current_revision"])
@@ -75,6 +78,35 @@ def chapter_content(
         "revision": document["current_revision"],
         "blocks": [
             public_block(row, include_sentences=request.app.state.settings.segmenter == "pathya")
+            for row in rows
+        ],
+    }
+
+
+@router.get("/documents/{document_id}/sentence-ranges", response_model=DocumentSentenceRanges)
+def document_sentence_ranges(
+    document_id: str,
+    request: Request,
+    response: Response,
+    document: dict[str, Any] = Depends(require_doc_access("reader")),
+) -> dict[str, Any]:
+    """Return reader offsets and text hashes for one current chapter snapshot."""
+    with request.app.state.database.read_conn() as connection:
+        connection.execute("BEGIN")
+        document = check_document(connection, document_id, document["_access_user_id"])
+        rows = content.current_blocks(connection, document_id)
+    revision = document["current_revision"]
+    response.headers["X-Document-Revision"] = str(revision)
+    response.headers["Cache-Control"] = "private, no-store"
+    return {
+        "document_revision": revision,
+        "blocks": [
+            {
+                "block_id": row["id"],
+                "text_sha256": hashlib.sha256(row["text_current"].encode("utf-8")).hexdigest(),
+                "segmenter": READER_SEGMENTER_VERSION,
+                "ranges": block_ranges(row),
+            }
             for row in rows
         ],
     }
@@ -97,6 +129,7 @@ def get_block(
     return {
         **public_block(row, include_sentences=request.app.state.settings.segmenter == "pathya"),
         "document_revision": document["current_revision"],
+        "text_sha256": hashlib.sha256(row["text_current"].encode("utf-8")).hexdigest(),
     }
 
 
@@ -159,7 +192,10 @@ def review_queue(
         connection.execute("BEGIN")
         document = check_document(connection, document_id, document["_access_user_id"], "reviewer")
         rows = connection.execute(
-            "SELECT blocks.*,pages.printed_label,pages.pdf_index_0,pages.rotation FROM blocks JOIN pages ON pages.id=blocks.page_id WHERE blocks.document_id=? AND json_array_length(successor_ids_json)=0 AND (critical_flag=1 OR status='needs_review') ORDER BY pages.pdf_index_0,order_key",
+            f"""SELECT blocks.*,pages.printed_label,pages.pdf_index_0,pages.rotation
+            FROM blocks JOIN pages ON pages.id=blocks.page_id
+            WHERE blocks.document_id=? AND {content.NEEDS_REVIEW}
+            ORDER BY pages.pdf_index_0, blocks.order_key""",
             (document_id,),
         ).fetchall()
         has_image = (

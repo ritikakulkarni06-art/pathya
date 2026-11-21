@@ -12,6 +12,7 @@ from fastapi.responses import JSONResponse
 from app.config import Settings
 from app.db.repos import audit, documents, jobs
 from app.errors import Problem
+from app.services.access import check_document
 from app.services.auth import current_user, now_utc, require_doc_access
 from app.services.limits import rate_limit, reserve_upload
 from app.services.storage import FileStore
@@ -35,7 +36,11 @@ def public_document(row: dict[str, Any]) -> dict[str, Any]:
         )
     }
     result["languages"] = json.loads(row["languages_json"])
-    result["counts"] = {"pages": row.get("pages_count", 0), "blocks": row.get("blocks_count", 0)}
+    result["counts"] = {
+        "pages": row["pages_count"],
+        "blocks": row["blocks_count"],
+        "review": row["review_count"],
+    }
     return result
 
 
@@ -186,6 +191,8 @@ def get_document(
     document: dict[str, Any] = Depends(require_doc_access("reader")),
 ) -> dict[str, Any]:
     with request.app.state.database.read_conn() as connection:
+        connection.execute("BEGIN")
+        check_document(connection, document["id"], document["_access_user_id"])
         row = documents.with_counts(connection, document_id)
     assert row is not None
     return public_document(row)

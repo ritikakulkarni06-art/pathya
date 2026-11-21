@@ -1,3 +1,4 @@
+import hashlib
 import json
 from typing import Any
 
@@ -91,8 +92,6 @@ def get_audio(
             block, terms, selected, speaker.engine_version, settings.active_segmenter_version
         )
         # Both private and shared variants are checked; source input hashes must match.
-        import hashlib
-
         private_key = hashlib.sha256((key + ":" + user["id"]).encode()).hexdigest()
         candidates = connection.execute(
             "SELECT artifacts.*,audio_manifests.body_json FROM artifacts JOIN audio_manifests ON audio_manifests.artifact_id=artifacts.id WHERE block_id=? AND voice=? AND (scope_user_id IS NULL OR scope_user_id=?) ORDER BY artifacts.created_at DESC",
@@ -113,7 +112,13 @@ def get_audio(
                 and stored["cache_key"] == row_key
                 and artifact_current(connection, item)
             ):
-                return dict(body)
+                return {
+                    **body,
+                    "text_sha256": hashlib.sha256(
+                        block["text_current"].encode("utf-8")
+                    ).hexdigest(),
+                    "segmenter": settings.active_segmenter_version,
+                }
         fallback = connection.execute(
             "SELECT * FROM artifacts WHERE block_id=? AND kind='audio_block' AND status='failed' AND voice=? AND (scope_user_id IS NULL OR scope_user_id=?) ORDER BY updated_at DESC LIMIT 1",
             (block_id, selected, user["id"]),

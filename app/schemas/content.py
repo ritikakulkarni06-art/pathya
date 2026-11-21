@@ -21,6 +21,23 @@ class ContentModel(BaseModel):
     model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
 
 
+class SentenceRange(ContentModel):
+    start: int = Field(ge=0)
+    end: int = Field(gt=0)
+
+
+class BlockSentenceRanges(ContentModel):
+    block_id: Identifier
+    text_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    segmenter: str
+    ranges: list[SentenceRange]
+
+
+class DocumentSentenceRanges(ContentModel):
+    document_revision: int = Field(ge=0)
+    blocks: list[BlockSentenceRanges]
+
+
 class Confidence(ContentModel):
     engine: str = Field(min_length=1, max_length=128)
     score: float | None = Field(ge=0, le=1)

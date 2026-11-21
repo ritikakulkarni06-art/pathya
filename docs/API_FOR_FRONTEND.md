@@ -65,7 +65,10 @@ Failed jobs include `failed_at` when the worker recorded the step.
 
 GET /documents returns `{"documents":[...]}` for accessible active documents.
 GET /documents/{id} returns one metadata object with the same fields.
-Both include `rights_note`, `current_revision` and page/block counts. The
+Both include `rights_note`, `current_revision` and `counts` with `pages`,
+`blocks` and `review`. `counts.review` counts current passages flagged for
+review or marked as critically uncertain, using the same criteria as the
+review queue. Use `counts.pages` for the library page count. The
 backend has no `subject` field. Leave subject out when the reader has no
 local value. GET /documents/{id}/content and GET /blocks/{id} return source
 text/status/revision, flags and structured metadata. Block IDs are opaque; keep
@@ -75,15 +78,27 @@ Generated text is separate and must never replace the displayed source.
 Chapters imported with the P1 adapter return the canonical Document in
 the content response, with `X-Document-Revision` and stable backend IDs.
 The original producer JSON is retained privately. The pinned shared schema
-does not allow reader extensions. Use the per-block read endpoint for
-sentence ranges with `SEGMENTER=pathya` until the next schema includes
-those fields. Legacy imports continue to use their original response shape.
+does not allow reader extensions. Legacy imports continue to use their
+original response shape.
+
+GET /documents/{id}/sentence-ranges returns `document_revision` and `blocks`
+in reading order. Each entry contains `block_id`, `text_sha256`, `segmenter`
+and `ranges` with `start` and `end`. The hash is lowercase SHA-256 of the
+exact UTF-8 passage text. Offsets are start-inclusive and end-exclusive
+Unicode code points. Ranges cover text in headings, paragraphs and list
+items. Other blocks and empty passages have an empty range list. The
+current reader segmenter is `pathya-reader-v1`. The response also carries
+`X-Document-Revision`. GET /blocks/{id} returns the same text hash and
+includes `sentences` and `segmenter` for supported blocks when
+`SEGMENTER=pathya` is configured.
 
 ## Manifests, audio and offline plans
 
 For offline text reading, an explicit download can store the canonical
 `/content` response with its `X-Document-Revision` and the chapter metadata
-from `GET /documents/{id}`. Keep it private to the signed-in account.
+from `GET /documents/{id}`. Save bulk sentence ranges with the snapshot only
+when their `document_revision` matches that content revision. Keep all
+downloaded data private to the signed-in account.
 On reconnect, check access and current revision before showing it as
 current. Refresh changed revisions and purge local copies if the signed-in
 account loses access or receives a deletion purge instruction. Use
@@ -98,6 +113,7 @@ Do not mix an old manifest's artifacts with a new document revision.
 POST /blocks/{id}/audio with `{}` or `{voice:"..."}` schedules a job (202).
 GET /blocks/{id}/audio returns current sentence units or explicit text_only
 fallback. Silent fixture WAVs have synthetic:true; never call them real narration.
+Ready audio reports the source `text_sha256` and the segmenter used to build it.
 Units carry source code-point offsets, hashes, byte sizes and durations. Glossary
 overrides affect spoken input while displayed text/offsets stay unchanged.
 Document glossary edits require reviewer access; personal terms/audio stay private

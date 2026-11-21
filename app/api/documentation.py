@@ -1,11 +1,14 @@
 """Deterministic, synthetic OpenAPI examples and application-wide problem catalog."""
 
 import ast
+import hashlib
 import re
 from pathlib import Path
 from typing import Any, get_args
 
 from pydantic_core.core_schema import ErrorType
+
+from app.services.sentences import READER_SEGMENTER_VERSION
 
 DOC = "11111111-1111-4111-8111-111111111111"
 BLOCK = "22222222-2222-4222-8222-222222222222"
@@ -228,7 +231,7 @@ def document_example() -> dict[str, Any]:
         "retention_until": "2026-12-18T00:00:00Z",
         "created_at": "2026-11-18T00:00:00Z",
         "updated_at": "2026-11-18T00:00:00Z",
-        "counts": {"pages": 1, "blocks": 1},
+        "counts": {"pages": 1, "blocks": 1, "review": 1},
     }
 
 
@@ -330,8 +333,28 @@ def enhance_openapi(schema: dict[str, Any]) -> dict[str, Any]:
                     value = document_example()
                 elif path == "/documents/{document_id}/content":
                     value = {"document_id": DOC, "revision": 1, "blocks": [block_example()]}
+                elif path == "/documents/{document_id}/sentence-ranges":
+                    value = {
+                        "document_revision": 1,
+                        "blocks": [
+                            {
+                                "block_id": BLOCK,
+                                "text_sha256": hashlib.sha256(TEXT.encode()).hexdigest(),
+                                "segmenter": READER_SEGMENTER_VERSION,
+                                "ranges": [{"start": 0, "end": len(TEXT)}],
+                            }
+                        ],
+                    }
+                    response.setdefault("headers", {})["X-Document-Revision"] = {
+                        "description": "Revision of the chapter snapshot used for these ranges.",
+                        "schema": {"type": "integer", "minimum": 0},
+                    }
                 elif path == "/blocks/{block_id}" and method == "get":
-                    value = {**block_example(), "document_revision": 1}
+                    value = {
+                        **block_example(),
+                        "document_revision": 1,
+                        "text_sha256": hashlib.sha256(TEXT.encode()).hexdigest(),
+                    }
                 elif path == "/documents/{document_id}/review-queue":
                     value = {
                         "blocks": [

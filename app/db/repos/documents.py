@@ -1,6 +1,17 @@
 import sqlite3
 from typing import Any
 
+from app.db.repos.content import NEEDS_REVIEW
+
+DOCUMENT_COUNTS = f"""
+SELECT documents.*,
+    (SELECT count(*) FROM pages WHERE pages.document_id=documents.id) AS pages_count,
+    (SELECT count(*) FROM blocks WHERE blocks.document_id=documents.id) AS blocks_count,
+    (SELECT count(*) FROM blocks WHERE blocks.document_id=documents.id
+        AND {NEEDS_REVIEW}) AS review_count
+FROM documents
+"""
+
 
 def get_document(connection: sqlite3.Connection, document_id: str) -> dict[str, Any] | None:
     row: dict[str, Any] | None = connection.execute(
@@ -64,7 +75,10 @@ def set_state(connection: sqlite3.Connection, document_id: str, state: str, now:
 def accessible(connection: sqlite3.Connection, user_id: str) -> list[dict[str, Any]]:
     return list(
         connection.execute(
-            "SELECT documents.*, (SELECT count(*) FROM pages WHERE pages.document_id=documents.id) AS pages_count,(SELECT count(*) FROM blocks WHERE blocks.document_id=documents.id) AS blocks_count FROM documents WHERE state NOT IN ('deleting','deleted') AND (owner_id=? OR EXISTS (SELECT 1 FROM document_grants WHERE document_grants.document_id=documents.id AND user_id=?)) ORDER BY created_at DESC",
+            DOCUMENT_COUNTS
+            + """WHERE state NOT IN ('deleting','deleted') AND (owner_id=? OR EXISTS (
+                SELECT 1 FROM document_grants WHERE document_grants.document_id=documents.id
+                AND user_id=?)) ORDER BY created_at DESC""",
             (user_id, user_id),
         )
     )
@@ -72,7 +86,7 @@ def accessible(connection: sqlite3.Connection, user_id: str) -> list[dict[str, A
 
 def with_counts(connection: sqlite3.Connection, document_id: str) -> dict[str, Any] | None:
     row: dict[str, Any] | None = connection.execute(
-        "SELECT documents.*, (SELECT count(*) FROM pages WHERE pages.document_id=documents.id) AS pages_count,(SELECT count(*) FROM blocks WHERE blocks.document_id=documents.id) AS blocks_count FROM documents WHERE id=?",
+        DOCUMENT_COUNTS + "WHERE id=?",
         (document_id,),
     ).fetchone()
     return row
