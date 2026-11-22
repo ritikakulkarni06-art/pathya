@@ -3,7 +3,7 @@
 import { readFileSync } from 'node:fs'
 import { fromP1 } from '../src/lib/p1.ts'
 import { pageAnnouncements, sentencesOf, toSentenceStarts, unitsFor } from '../src/lib/sentences.ts'
-import { clipsFor } from '../src/lib/audio.ts'
+import { clipsFor, withKeptClips } from '../src/lib/audio.ts'
 import { unitClipKey } from '../src/lib/hash.ts'
 
 const extra = { subject: 'check', rights_note: 'check' }
@@ -137,6 +137,14 @@ ok('ranges that do not fit the text are ignored', toSentenceStarts('short', [cut
   ok('silent test clips are never used', (await clipsFor(block(), await file({ synthetic: true }), url)).length === 0)
   ok('clips cut at other sentence boundaries are not used', (await clipsFor({ ...block(), sentence_starts: [0, 5] }, await file(), url)).length === 0)
   ok('clips in another voice language are not used', (await clipsFor({ ...block(), source_lang: undefined }, await file({ language: 'en' }), url)).length === 0)
+
+  // Manifest still pending for a new revision: clips saved earlier are kept only while the text is unchanged.
+  const pkgOf = (blk, audio, pending) => ({ document: { id: 'd' }, blocks: [blk], pages: [], audio, bytes: 0, audio_pending: pending })
+  const saved = pkgOf(block(), clips, false)
+  const kept = await withKeptClips(pkgOf({ ...block(), status: 'reviewed' }, [], true), saved)
+  ok('while the manifest is pending, a review-only change keeps the saved clips', kept.audio.length === 2 && kept.bytes === 200)
+  ok('while the manifest is pending, edited text keeps no old clips', (await withKeptClips(pkgOf({ ...block(), text_current: text + ' नया' }, [], true), saved)).audio.length === 0)
+  ok('once the manifest is ready, only its own clips are used', (await withKeptClips(pkgOf(block(), [], false), saved)).audio.length === 0)
 }
 
 for (const f of process.argv.slice(2)) {

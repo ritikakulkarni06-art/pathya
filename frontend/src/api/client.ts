@@ -355,8 +355,12 @@ function http(base: string): PathyaApi {
   /** Prepared narration from Role 3. A clip is kept only when its passage text, sentence and voice language
    *  match what the reader will say; everything else uses the device voice. Silent test clips are skipped. */
   async function backendAudio(pkg: ChapterPackage, revision: number) {
+    // 409 manifest_pending, or a manifest for another revision: audio for this revision is not ready yet.
     const manifest = await call<Manifest>(`/documents/${pkg.document.id}/manifest`)
-    if (manifest.revision !== revision) return
+    if (manifest?.revision !== revision) {
+      pkg.audio_pending = true
+      return
+    }
     const blocks = new Map(pkg.blocks.map((b) => [b.id, b]))
     for (const entry of manifest.artifacts) {
       const b = blocks.get(entry.block_id)
@@ -416,6 +420,8 @@ function http(base: string): PathyaApi {
       }
       await backendAudio(pkg, revision).catch((e) => {
         if (e instanceof OfflineError) throw e
+        // Audio could not be checked this time: treat it as not ready, so saved clips are not thrown away.
+        pkg.audio_pending = true
       })
       return pkg
     },

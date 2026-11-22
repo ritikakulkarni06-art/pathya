@@ -3,6 +3,7 @@
 import { deleteDB, openDB, type IDBPDatabase } from 'idb'
 import type { AnswerRecord, Bookmark, ChapterPackage, PendingCorrection, Pronunciation } from '../types'
 import { sha256 } from './hash'
+import { withKeptClips } from './audio'
 
 export interface StoredPackage extends ChapterPackage {
   downloaded_at: string
@@ -60,7 +61,8 @@ export const store = {
     return (await db()).getAll('packages')
   },
   /** Download a chapter. The old package stays until every part of the new one is stored. */
-  async savePackage(pkg: ChapterPackage, onProgress?: (done: number, total: number) => void): Promise<StoredPackage> {
+  async savePackage(next: ChapterPackage, onProgress?: (done: number, total: number) => void): Promise<StoredPackage> {
+    const pkg = await withKeptClips(next, await (await db()).get('packages', next.document.id))
     const urls = assetUrls(pkg)
     const hashes = new Map(pkg.audio.filter((a) => a.sha256).map((a) => [a.url, a.sha256!]))
     const missing: string[] = []

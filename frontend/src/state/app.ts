@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
 import { api, GoneError, OfflineError } from '../api/client'
 import { store, uid, type StoredPackage } from '../lib/db'
+import { withKeptClips } from '../lib/audio'
 import type { Block, ChapterPackage, CorrectionRequest } from '../types'
 export type { Block }
 
@@ -67,7 +68,7 @@ export function useChapter(docId: string) {
       // Show the device copy at once so reading resumes without waiting for the network.
       if (downloaded && live) setState({ pkg: downloaded, source: 'device', downloaded, error: null, loading: false })
       try {
-        const pkg = await api.getPackage(docId)
+        const pkg = await withKeptClips(await api.getPackage(docId), downloaded)
         if (live) setState({ pkg, source: 'network', downloaded, error: null, loading: false })
       } catch (e) {
         if (!live) return
@@ -102,7 +103,8 @@ export async function revalidateDownloads(): Promise<void> {
     for (const local of await store.listPackages()) {
       try {
         const fresh = await api.getPackage(local.document.id)
-        if (fresh.revision !== local.revision) {
+        // A new revision, or the audio that was still being built when this copy was saved is now ready.
+        if (fresh.revision !== local.revision || (local.audio_pending && !fresh.audio_pending)) {
           await store.savePackage(fresh)
           updated++
         }

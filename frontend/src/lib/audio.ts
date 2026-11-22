@@ -1,7 +1,7 @@
 // Role 3 prepared narration: which backend clips the reader may play for a passage.
 import type { Block, ChapterPackage } from '../types'
-import { clipKey, sha256 } from './hash'
-import { toSentenceStarts } from './sentences'
+import { clipKey, sha256, unitClipKey } from './hash'
+import { toSentenceStarts, unitsFor } from './sentences'
 
 /** One passage's audio file from Role 3: a clip per sentence, offsets in code points of the current text. */
 export interface AudioUnits {
@@ -27,4 +27,16 @@ export async function clipsFor(block: Block, a: AudioUnits, assetUrl: (id: strin
   if (!starts || (block.sentence_starts && block.sentence_starts.join() !== starts.join())) return []
   block.sentence_starts ??= starts
   return a.units.map((u, i) => ({ key: clipKey(block.id, textSha, i, block.lang), url: assetUrl(u.clip_asset_id), bytes: u.bytes, sha256: u.hash }))
+}
+
+/** While Role 3's manifest for a new revision is still being built (`audio_pending`), clips from the earlier copy
+ *  are kept when they still match this revision. The key holds the passage text hash, so a clip for edited text
+ *  can never be kept; a review-only change keeps them all. */
+export async function withKeptClips(fresh: ChapterPackage, old: ChapterPackage | null | undefined): Promise<ChapterPackage> {
+  if (!fresh.audio_pending || !old?.audio.length) return fresh
+  const valid = new Set<string>()
+  for (const b of fresh.blocks) for (const u of unitsFor(b, false)) valid.add(await unitClipKey(u, b.text_current))
+  const have = new Set(fresh.audio.map((a) => a.key))
+  const kept = old.audio.filter((a) => valid.has(a.key) && !have.has(a.key))
+  return { ...fresh, audio: [...fresh.audio, ...kept], bytes: fresh.bytes + kept.reduce((n, a) => n + a.bytes, 0) }
 }

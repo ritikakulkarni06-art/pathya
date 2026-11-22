@@ -94,6 +94,8 @@ export interface ChapterPackage {
   blocks: Block[]
   /** Prepared sentence audio from the backend. Empty means the reader uses the device voice. */
   audio: { key: string; url: string; bytes: number; sha256?: string }[]
+  /** Role 3 is still building audio for this revision; earlier clips that still match may be kept. */
+  audio_pending?: boolean
   /** Name of the voice that made the clips, shown to the student. */
   audio_voice?: string
   bytes: number
