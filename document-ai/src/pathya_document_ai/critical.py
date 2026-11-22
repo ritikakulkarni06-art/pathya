@@ -72,11 +72,19 @@ def critical_uncertain(tokens: list[tuple[str, str, float | None]], *, equation:
 def is_trusted_evidence(block: Any, page: Any) -> bool:
     """Whether a block may be used as trusted evidence for search and answers (1.2.0 policy).
 
-    False when the page is not ``ok``; when the block is ``needs_review`` or
-    ``rejected``; when it carries ``critical_symbol_uncertain``,
-    ``unsupported_content`` or ``block_type_uncertain`` and has not been
-    ``approved`` by a human. Uncertain content stays in the document and must
-    remain visible to readers; this only governs retrieval and answering.
+    Approved by P2 and P3 (21 Nov 2026). A block is **not** trusted evidence when:
+
+    * its page is not ``ok`` (``needs_ocr``, ``partial``, ``failed``; ``blank``
+      pages have no blocks);
+    * it is ``needs_review`` or ``rejected``;
+    * it carries ``unsupported_content`` and has not been ``approved``;
+      approval permits eligibility but preserves the flag and review marker;
+    * it carries ``block_type_uncertain`` and the type has not been verified,
+      i.e. a human has not ``approved`` the block (``mark_reviewed`` in P3);
+    * it carries ``critical_symbol_uncertain`` and has not been ``approved``.
+
+    This governs retrieval and answering only. Every block stays in the
+    Document and the reader still displays it, with the warning for its flags.
     """
     from pathya_document_ai import models as m
 
@@ -84,9 +92,9 @@ def is_trusted_evidence(block: Any, page: Any) -> bool:
         return False
     if block.review_status in (m.ReviewStatus.NEEDS_REVIEW, m.ReviewStatus.REJECTED):
         return False
-    gated = {m.QualityFlag.CRITICAL_SYMBOL_UNCERTAIN, m.QualityFlag.UNSUPPORTED_CONTENT,
-             m.QualityFlag.BLOCK_TYPE_UNCERTAIN}
-    if gated.intersection(block.quality_flags) and block.review_status is not m.ReviewStatus.APPROVED:
+    gated_until_approved = {m.QualityFlag.CRITICAL_SYMBOL_UNCERTAIN, m.QualityFlag.BLOCK_TYPE_UNCERTAIN,
+                            m.QualityFlag.UNSUPPORTED_CONTENT}
+    if gated_until_approved.intersection(block.quality_flags) and block.review_status is not m.ReviewStatus.APPROVED:
         return False
     return True
 

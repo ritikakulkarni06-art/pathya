@@ -1,0 +1,118 @@
+{
+  "document_revision": 3,
+  "blocks": [
+    {
+      "block_id": "7d1e4c52-0000-4000-8000-0000000000a1",
+      "text_sha256": "0729f9d04360823ea4e52127b6a031f28629e5206d5b5bcfa4af66eee51e5b57",
+      "segmenter": "pathya-sentences/3",
+      "ranges": [
+        {
+          "start": 0,
+          "end": 23
+        }
+      ]
+    },
+    {
+      "block_id": "7d1e4c52-0000-4000-8000-0000000000a2",
+      "text_sha256": "b4fff080751df794204041c501d78f73639e5b9f7a8ff201b2450417a1b717d4",
+      "segmenter": "pathya-sentences/3",
+      "ranges": [
+        {
+          "start": 0,
+          "end": 165
+        }
+      ]
+    },
+    {
+      "block_id": "7d1e4c52-0000-4000-8000-0000000000a3",
+      "text_sha256": "64a24b3dda50696586d3b6ab8959fa3d02d7bac55a78d3a5588099bf95a58156",
+      "segmenter": "pathya-sentences/3",
+      "ranges": []
+    },
+    {
+      "block_id": "7d1e4c52-0000-4000-8000-0000000000a4",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "segmenter": "pathya-sentences/3",
+      "ranges": []
+    },
+    {
+      "block_id": "7d1e4c52-0000-4000-8000-0000000000a5",
+      "text_sha256": "822bab8d41bca8d7976cd69963d93a335ee21fa46160c4b866e0df7ea4b33196",
+      "segmenter": "pathya-sentences/3",
+      "ranges": []
+    },
+    {
+      "block_id": "7d1e4c52-0000-4000-8000-0000000000a6",
+      "text_sha256": "27453b78c058de136030b2994defc65d31f7564aed621100d51d8d446b0ede9f",
+      "segmenter": "pathya-sentences/3",
+      "ranges": []
+    },
+    {
+      "block_id": "7d1e4c52-0000-4000-8000-0000000000a7",
+      "text_sha256": "91663a8e5fa01cd7f12af537c0807f85c27e38769f5053c839bb02541d927bc2",
+      "segmenter": "pathya-sentences/3",
+      "ranges": []
+    },
+    {
+      "block_id": "7d1e4c52-0000-4000-8000-0000000000a8",
+      "text_sha256": "2c2314c3dc675c1121c7396fac09a8389df5b23d16163ce8e025b19f20e4002b",
+      "segmenter": "pathya-sentences/3",
+      "ranges": []
+    },
+    {
+      "block_id": "7d1e4c52-0000-4000-8000-0000000000a9",
+      "text_sha256": "7dcdeb709b656819df15541d37d678f5709a5ebec2f88e6e77586fca2c686b7f",
+      "segmenter": "pathya-sentences/3",
+      "ranges": []
+    },
+    {
+      "block_id": "7d1e4c52-0000-4000-8000-0000000000b1",
+      "text_sha256": "aa4b613444d48dfa212a7c6155a90fde0667e955414362e7113b0c9fdecd71ac",
+      "segmenter": "pathya-sentences/3",
+      "ranges": [
+        {
+          "start": 0,
+          "end": 30
+        }
+      ]
+    },
+    {
+      "block_id": "7d1e4c52-0000-4000-8000-0000000000b2",
+      "text_sha256": "29a84a487f3c51b1df93ed5969853a0ef340185e81423249aa9081545b83c77e",
+      "segmenter": "pathya-sentences/3",
+      "ranges": [
+        {
+          "start": 0,
+          "end": 61
+        },
+        {
+          "start": 61,
+          "end": 112
+        }
+      ]
+    },
+    {
+      "block_id": "7d1e4c52-0000-4000-8000-0000000000b3",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "segmenter": "pathya-sentences/3",
+      "ranges": []
+    },
+    {
+      "block_id": "7d1e4c52-0000-4000-8000-0000000000b4",
+      "text_sha256": "a10a8e077f9855c729db904c11cc008a2dd14624bbbcd327ad2155158758d34e",
+      "segmenter": "pathya-sentences/3",
+      "ranges": []
+    },
+    {
+      "block_id": "7d1e4c52-0000-4000-8000-0000000000b5",
+      "text_sha256": "3c9420898de0abf82185704a4d030133dd118798e9bac8f62c332e4936090467",
+      "segmenter": "pathya-sentences/3",
+      "ranges": [
+        {
+          "start": 0,
+          "end": 48
+        }
+      ]
+    }
+  ]
+}

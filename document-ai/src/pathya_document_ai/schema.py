@@ -23,11 +23,9 @@ from typing import Any
 
 from pathya_document_ai.models import (
     CONTRACT_FAMILY,
-    CORRECTION_OPERATIONS_ADDED_IN_1_2,
     QUALITY_FLAGS_ADDED_IN_1_1,
     QUALITY_FLAGS_ADDED_IN_1_2,
     SCHEMA_VERSION,
-    CorrectionOperation,
     Document,
     QualityFlag,
 )
@@ -50,12 +48,8 @@ PYTHON_ONLY_INVARIANTS = [
     "Revision 1 blocks have current_text == raw_text; correction base_revision < block revision.",
     "A page with status 'blank' has no blocks.",
     "Confidence: origin 'not_available' iff score is null; null score and heuristic origin need a reason.",
-    "1.2.0: integration.sentences and every audio reference carry the block's current revision and the "
-    "SHA-256 of its exact current_text (otherwise stale); sentence ranges appear only on headings, "
-    "paragraphs and list items and cover current_text contiguously from 0 to its length in code points; "
-    "audio keys are unique within a block.",
-    "1.0.0/1.1.0 documents use no 1.2.0 feature (role other than body, heading_level, integration, "
-    "critical_symbol_uncertain, set_block_type/set_reading_order corrections).",
+    "1.0.0/1.1.0 documents use no 1.2.0 feature (role other than body, heading_level, "
+    "critical_symbol_uncertain).",
 ]
 
 
@@ -77,9 +71,8 @@ def _v1_2() -> dict[str, Any]:
             node["required"].append("id")
     # Fields introduced after 1.0.0 may be absent in older documents; per-version rules below.
     _drop_required(defs["Page"], "status", "warnings")
-    _drop_required(schema, "contract_family", "integration")
-    _drop_required(defs["Block"], "heading_level", "role", "integration")
-    _drop_required(defs["Correction"], "new_block_type", "new_reading_order")
+    _drop_required(schema, "contract_family")
+    _drop_required(defs["Block"], "heading_level", "role")
 
     defs["TableMeta"]["oneOf"] = [
         {"title": "structured table",
@@ -100,7 +93,6 @@ def _v1_2() -> dict[str, Any]:
     v1_0_flags = sorted(f.value for f in QualityFlag
                         if f not in QUALITY_FLAGS_ADDED_IN_1_1 and f not in QUALITY_FLAGS_ADDED_IN_1_2)
     v1_1_flags = sorted(f.value for f in QualityFlag if f not in QUALITY_FLAGS_ADDED_IN_1_2)
-    old_ops = sorted(o.value for o in CorrectionOperation if o not in CORRECTION_OPERATIONS_ADDED_IN_1_2)
 
     def pre_1_2(flags: list[str], *, page_status: bool) -> dict[str, Any]:
         page: dict[str, Any] = ({"required": ["status", "warnings"], "properties": {"status": {"$ref": "#/$defs/PageStatus"}}}
@@ -110,16 +102,13 @@ def _v1_2() -> dict[str, Any]:
             "quality_flags": {"items": {"enum": flags}},
             "role": {"anyOf": [{"type": "null"}, {"const": "body"}]},
             "heading_level": {"type": "null"},
-            "integration": {"type": "null"},
         }
         if not page_status:  # 1.0.0: every table has cells
             block_props["table"] = {"anyOf": [{"type": "null"}, {"properties": {"cell_ids": {"minItems": 1}}}]}
         return {"properties": {
             "contract_family": {"type": "null"},
-            "integration": {"type": "null"},
             "pages": {"items": page},
             "blocks": {"items": {"properties": block_props}},
-            "corrections": {"items": {"properties": {"operation": {"enum": old_ops}}}},
         }}
 
     schema["allOf"] = [

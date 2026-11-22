@@ -129,29 +129,8 @@ def _v12(base: Doc) -> Doc:
     return doc
 
 
-def _with_backend(doc: Doc) -> Doc:
-    import hashlib
-
-    from pathya_document_ai.sentences import SEGMENTER, segment_sentences
-
-    doc["integration"] = {"document_revision": 3, "backend_document_id": "p3-doc-opaque-42"}
-    a2 = _block(doc, "a2")
-    text = a2["current_text"]
-    digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
-    a2["integration"] = {
-        "backend_block_id": "p3-blk-a2",
-        "sentences": {"text_revision": a2["revision"], "text_sha256": digest, "segmenter": SEGMENTER,
-                      "ranges": [{"start": s, "end": e} for s, e in segment_sentences(text)]},
-        "voice_language": "en",
-        "audio": [{"key": "a2-r1-s0", "url": "audio://p3/opaque-a2-0", "bytes": 48213,
-                   "text_revision": a2["revision"], "text_sha256": digest}],
-    }
-    b2 = _block(doc, "b2")  # Hindi paragraph: original tag kept, Hindi voice chosen
-    b2["integration"] = {"backend_block_id": "p3-blk-b2", "sentences": None, "voice_language": "hi", "audio": []}
-    return doc
-
-
 def _after_corrections(doc: Doc) -> Doc:
+    """The three approved operations, as P3 records them in the Document history."""
     from pathya_document_ai.corrections import apply_correction
     from pathya_document_ai.models import Correction, Document
 
@@ -159,8 +138,8 @@ def _after_corrections(doc: Doc) -> Doc:
     steps = [
         ("a2", {"operation": "replace_text",
                 "new_text": _block(doc, "a2")["current_text"].replace("velocity", "speed")}),
-        ("b5", {"operation": "set_block_type", "new_block_type": "paragraph"}),
-        ("b4", {"operation": "set_reading_order", "new_reading_order": 0}),
+        ("b2", {"operation": "set_language", "new_language": "mul"}),
+        ("a1", {"operation": "set_review_status", "new_review_status": "approved"}),  # P3 mark_reviewed
     ]
     for n, (suffix, change) in enumerate(steps, start=1):
         block = next(b for b in document.blocks if str(b.id).endswith(suffix))
@@ -193,43 +172,17 @@ def _vectors_v12(base: Doc) -> list[tuple[str, str, Callable[[], Doc], dict[str,
     nowhere = {"schema_1_0_0": False, "schema_1_1_0": False, "schema_1_2_0": False, "python": False}
     python_only = {"schema_1_0_0": False, "schema_1_1_0": False, "schema_1_2_0": True, "python": False}
 
-    def stale_text(doc: Doc) -> None:
-        a2 = _block(doc, "a2")
-        a2["current_text"] = a2["current_text"] + " Edited."
-        a2["revision"] = 2  # text changed but derived fields still describe revision 1
-
-    def audio_only_stale(doc: Doc) -> None:
-        a2 = _block(doc, "a2")
-        a2["integration"]["sentences"] = None
-        a2["integration"]["audio"][0]["text_revision"] = 7
-
-    def ranges_with_gap(doc: Doc) -> None:
-        ranges = _block(doc, "a2")["integration"]["sentences"]["ranges"]
-        ranges[0]["end"] -= 1  # leaves one code point uncovered before the next range
-
-    def ranges_on_caption(doc: Doc) -> None:
-        import hashlib
-
-        from pathya_document_ai.sentences import SEGMENTER
-
-        cap = _block(doc, "a9")
-        text = cap["current_text"]
-        cap["integration"] = {"backend_block_id": None, "voice_language": None, "audio": [],
-                              "sentences": {"text_revision": cap["revision"], "segmenter": SEGMENTER,
-                                            "text_sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
-                                            "ranges": [{"start": 0, "end": len(text)}]}}
-
-    def legacy_audio_fields(doc: Doc) -> None:
-        clip = _block(doc, "a2")["integration"]["audio"][0]
-        clip["uri"] = clip.pop("url")  # pre-decision draft shape
+    def structural_correction(doc: Doc) -> None:
+        last = doc["corrections"][-1]
+        last.pop("new_review_status")
+        last.update(operation="set_block_type", new_block_type="paragraph")
 
     return [
         ("valid_v1_2_0_producer_fields", "1.2.0: contract_family, heading levels, footnote role, critical flag "
          "on an approved block.", make(), valid12),
-        ("valid_v1_2_0_backend_fields", "1.2.0: document revision, sentence ranges, voice_language and "
-         "revision-bound audio on blocks.", make(_with_backend), valid12),
-        ("valid_v1_2_0_after_corrections", "1.2.0: text, block-type and reading-order corrections applied by "
-         "apply_correction (ids kept, revisions bumped, history appended).", make(_after_corrections), valid12),
+        ("valid_v1_2_0_after_corrections", "1.2.0: the three approved corrections (replace_text, set_language, "
+         "set_review_status recorded for P3 mark_reviewed) applied by apply_correction.",
+         make(_after_corrections), valid12),
         ("invalid_v1_2_0_missing_contract_family", "1.2.0 requires contract_family.",
          make(lambda d: d.pop("contract_family")), nowhere),
         ("invalid_v1_2_0_wrong_contract_family", "Another payload family reusing the version string.",
@@ -240,18 +193,11 @@ def _vectors_v12(base: Doc) -> list[tuple[str, str, Callable[[], Doc], dict[str,
          make(lambda d: _block(d, "a2").update(heading_level=2)), nowhere),
         ("invalid_v1_2_0_critical_unreviewed", "A critical-symbol block cannot be unreviewed.",
          make(lambda d: _block(d, "b5").update(review_status="unreviewed")), nowhere),
-        ("invalid_v1_2_0_voice_language_mul", "voice_language is en or hi; language stays separate.",
-         make(_with_backend, lambda d: _block(d, "b2")["integration"].update(voice_language="mul")), nowhere),
-        ("invalid_python_only_v1_2_0_stale_sentences", "Sentence ranges/audio from an older revision "
-         "(JSON Schema cannot hash text).", make(_with_backend, stale_text), python_only),
-        ("invalid_python_only_v1_2_0_stale_audio", "Audio bound to another revision.",
-         make(_with_backend, audio_only_stale), python_only),
-        ("invalid_python_only_v1_2_0_sentence_gap", "Sentence ranges must cover current_text without gaps.",
-         make(_with_backend, ranges_with_gap), python_only),
-        ("invalid_python_only_v1_2_0_sentences_on_caption", "Only headings, paragraphs and list items carry "
-         "sentence ranges.", make(_with_backend, ranges_on_caption), python_only),
-        ("invalid_v1_2_0_audio_without_key_url_bytes", "Audio entries are {key, url, bytes} plus revision "
-         "binding.", make(_with_backend, legacy_audio_fields), nowhere),
+        ("invalid_v1_2_0_backend_integration_fields", "Backend fields (revision, sentence ranges, audio) are "
+         "served by P3's API, not carried in the producer Document.",
+         make(lambda d: d.update(integration={"document_revision": 3})), nowhere),
+        ("invalid_v1_2_0_structural_correction", "set_block_type/set_reading_order are not 1.2.0 operations.",
+         make(_after_corrections, structural_correction), nowhere),
         ("invalid_v1_1_0_with_1_2_role", "A 1.1.0 document cannot carry a non-body role.",
          old("1.1.0", lambda d: _block(d, "a2").update(role="page_header")), nowhere),
         ("invalid_v1_1_0_with_critical_flag", "critical_symbol_uncertain requires 1.2.0.",
@@ -279,6 +225,8 @@ def main() -> int:
     if args.check:
         stale = [str((out / n).relative_to(ROOT)) for out, files in sets for n, text in files.items()
                  if not (out / n).exists() or (out / n).read_text(encoding="utf-8") != text]
+        stale += [str(p.relative_to(ROOT)) + " (unexpected)" for out, files in sets
+                  for p in out.glob("*.json") if p.name not in files]
         if stale:
             print("STALE conformance vectors:", stale)
             return 1

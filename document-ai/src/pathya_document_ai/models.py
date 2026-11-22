@@ -9,7 +9,6 @@ from __future__ import annotations
 
 from collections import Counter
 from collections.abc import Iterable
-import hashlib
 from enum import StrEnum
 from typing import Annotated, Any, Literal
 from uuid import UUID, uuid4
@@ -168,17 +167,18 @@ class AnnotationOrigin(StrEnum):
 
 
 class CorrectionOperation(StrEnum):
+    """Correction history operations (unchanged since 1.0.0).
+
+    These are the three approved P1 correction operations. P3's API names the
+    review operation ``mark_reviewed``; P3 records it here as
+    ``set_review_status`` with ``new_review_status: approved``. Structural
+    corrections (block type, reading order) are deferred to a later contract
+    version: P3 rejects them for P1 chapters (``p1_correction_unsupported``).
+    """
+
     REPLACE_TEXT = "replace_text"
     SET_LANGUAGE = "set_language"
     SET_REVIEW_STATUS = "set_review_status"
-    # Added in 1.2.0 (proposed; see docs/p1_contract.md "Correction policy"):
-    SET_BLOCK_TYPE = "set_block_type"  # between text block types only
-    SET_READING_ORDER = "set_reading_order"  # within the same page and parent
-
-
-CORRECTION_OPERATIONS_ADDED_IN_1_2 = frozenset({CorrectionOperation.SET_BLOCK_TYPE,
-                                                CorrectionOperation.SET_READING_ORDER})
-RETYPEABLE_BLOCK_TYPES = frozenset({BlockType.HEADING, BlockType.PARAGRAPH, BlockType.LIST_ITEM, BlockType.CAPTION})
 
 
 def pipeline_review_status(flags: Iterable[QualityFlag]) -> ReviewStatus:
@@ -337,71 +337,9 @@ class FigureMeta(_Model):
 # --------------------------------------------------------------------- core models
 
 
-# ------------------------------------------------- 1.2.0 backend-owned fields
-
-
-VoiceLanguage = Literal["en", "hi"]
-
-
-SENTENCE_BLOCK_TYPES = frozenset({BlockType.HEADING, BlockType.PARAGRAPH, BlockType.LIST_ITEM})
-"""Block types that may carry sentence ranges (P2 decision, 19 Nov 2026)."""
-
-
-class SentenceRange(_Model):
-    """Half-open range [start, end) of Unicode code points in the block's current_text."""
-
-    start: int = Field(ge=0)
-    end: int = Field(gt=0)
-
-    @model_validator(mode="after")
-    def _ordered(self) -> "SentenceRange":
-        if self.end <= self.start:
-            raise ValueError("sentence range requires start < end")
-        return self
-
-
-class SentenceSegmentation(_Model):
-    """Sentence ranges bound to one block revision and the exact current_text they index."""
-
-    text_revision: int = Field(ge=1, description="Block revision whose current_text was segmented.")
-    text_sha256: Sha256Hex = Field(description="SHA-256 of current_text encoded as UTF-8.")
-    segmenter: NonEmptyStr = Field(description="Segmenter name and version, e.g. 'pathya-sentences/2'.")
-    ranges: list[SentenceRange] = Field(
-        description="Cover current_text completely and contiguously from 0 to its length; trailing "
-                    "whitespace belongs to the preceding range.")
-
-
-class AudioReference(_Model):
-    """Prepared audio entry ``{key, url, bytes}`` (P2 decision), bound to a block revision and text.
-
-    ``key`` is the reader's clip lookup key within a revision-scoped package; ``url``
-    is opaque and backend-owned; ``bytes`` is the clip size.
-    """
-
-    key: NonEmptyStr
-    url: NonEmptyStr
-    bytes: int = Field(ge=0)
-    text_revision: int = Field(ge=1, description="Block revision the clip was prepared for.")
-    text_sha256: Sha256Hex = Field(description="SHA-256 of the block's current_text (UTF-8) at that revision.")
-
-
-class BlockIntegration(_Model):
-    """Backend/reader-owned block fields (1.2.0). Producers must leave Block.integration null."""
-
-    backend_block_id: str | None = Field(
-        default=None, min_length=1, max_length=128,
-        description="Stable opaque block identifier assigned by P3 (not the producer UUID).")
-    sentences: SentenceSegmentation | None = None
-    voice_language: VoiceLanguage | None = Field(
-        default=None, description="Narration voice chosen by P2/P3; never replaces Block.language.")
-    audio: list[AudioReference] = Field(default_factory=list)
-
-
-class DocumentIntegration(_Model):
-    """Backend-owned document fields (1.2.0). P3 is authoritative; producers leave this null."""
-
-    document_revision: int = Field(ge=1)
-    backend_document_id: str | None = Field(default=None, description="Opaque P3 identifier.")
+# Sentence ranges, audio, backend IDs and the document revision are not Document
+# fields: P3 serves them from its API (docs/p3_verification_guide.md;
+# reference segmenter in sentences.py).
 
 
 class PageStatus(StrEnum):
@@ -473,11 +411,11 @@ class Block(_Model):
     equation: EquationMeta | None = None
     figure: FigureMeta | None = None
     # Added in 1.2.0 (producer-owned):
-    heading_level: int | None = Field(default=None, ge=1, le=6,
-                                      description="Headings only; 1 is the most prominent. Null if unknown.")
+    heading_level: int | None = Field(
+        default=None, ge=1, le=6,
+        description="Headings only; 1 is the most prominent. Set only when the level can be determined "
+                    "reliably; null means unspecified (readers treat null as level 2).")
     role: BlockRole | None = Field(default=None, description="1.2.0+: required semantic role.")
-    # Added in 1.2.0 (backend-owned; producers leave null):
-    integration: BlockIntegration | None = None
 
     @model_validator(mode="after")
     def _block_rules(self) -> "Block":
@@ -503,8 +441,6 @@ class Block(_Model):
                 and self.review_status is ReviewStatus.UNREVIEWED:
             raise ValueError("a block flagged critical_symbol_uncertain cannot be 'unreviewed'; "
                              "it needs review (or a human decision)")
-        if self.integration is not None:
-            _check_integration(self)
         return self
 
 
@@ -536,8 +472,6 @@ class Correction(_Model):
     new_text: str | None = None
     new_language: Language | None = None
     new_review_status: ReviewStatus | None = None
-    new_block_type: BlockType | None = None  # 1.2.0
-    new_reading_order: int | None = Field(default=None, ge=0)  # 1.2.0
     reason: str | None = None
     author_ref: str | None = Field(default=None, description="Opaque reviewer reference from P3.")
     created_at: AwareDatetime
@@ -548,8 +482,6 @@ class Correction(_Model):
             CorrectionOperation.REPLACE_TEXT: "new_text",
             CorrectionOperation.SET_LANGUAGE: "new_language",
             CorrectionOperation.SET_REVIEW_STATUS: "new_review_status",
-            CorrectionOperation.SET_BLOCK_TYPE: "new_block_type",
-            CorrectionOperation.SET_READING_ORDER: "new_reading_order",
         }
         required = payload[self.operation]
         for name in payload.values():
@@ -576,7 +508,6 @@ class Document(_Model):
     edges: list[Edge] = Field(default_factory=list)
     corrections: list[Correction] = Field(default_factory=list, description="Applied correction history.")
     created_at: AwareDatetime
-    integration: DocumentIntegration | None = Field(default=None, description="1.2.0+: backend-owned.")
 
     @model_validator(mode="before")
     @classmethod
@@ -691,44 +622,11 @@ def _check_v1_0_compatible(blocks: list[Block]) -> None:
             raise ValueError(f"block {block.id} is an uncertain table candidate, which requires 1.1.0")
 
 
-def _check_integration(block: "Block") -> None:
-    """Derived backend fields must describe this exact revision and text, or they are stale."""
-    integration = block.integration
-    assert integration is not None
-    digest = hashlib.sha256((block.current_text or "").encode("utf-8")).hexdigest()
-    seg = integration.sentences
-    if seg is not None:
-        if block.block_type not in SENTENCE_BLOCK_TYPES:
-            raise ValueError(f"sentence ranges are only allowed on headings, paragraphs and list items, "
-                             f"not '{block.block_type.value}'")
-        if block.current_text is None:
-            raise ValueError("sentence ranges require current_text")
-        if seg.text_revision != block.revision or seg.text_sha256 != digest:
-            raise ValueError("stale sentence ranges: computed for another revision or text; "
-                             "regenerate them for the current revision")
-        length, expected_start = len(block.current_text), 0
-        for r in seg.ranges:
-            if r.start != expected_start:
-                raise ValueError(f"sentence ranges must cover current_text without gaps or overlaps: "
-                                 f"range starts at {r.start}, expected {expected_start}")
-            expected_start = r.end
-        if expected_start != length:
-            raise ValueError(f"sentence ranges must end at the current_text length {length}, not {expected_start}")
-    keys = [a.key for a in integration.audio]
-    if len(set(keys)) != len(keys):
-        raise ValueError("audio keys must be unique within a block")
-    for audio in integration.audio:
-        if audio.text_revision != block.revision or audio.text_sha256 != digest:
-            raise ValueError("stale audio reference: bound to another revision or text; invalidate it")
-
-
 def _features_1_2(document: "Document") -> list[str]:
     """1.2.0-only content in a document (version checks and lossless export)."""
     found = []
     if document.contract_family is not None:
         found.append("contract_family")
-    if document.integration is not None:
-        found.append("document integration")
     for b in document.blocks:
         if QUALITY_FLAGS_ADDED_IN_1_2.intersection(b.quality_flags):
             found.append(f"block {b.id} critical_symbol_uncertain")
@@ -736,11 +634,6 @@ def _features_1_2(document: "Document") -> list[str]:
             found.append(f"block {b.id} heading_level")
         if b.role not in (None, BlockRole.BODY):
             found.append(f"block {b.id} role {b.role.value}")
-        if b.integration is not None:
-            found.append(f"block {b.id} integration")
-    for c in document.corrections:
-        if c.operation in CORRECTION_OPERATIONS_ADDED_IN_1_2:
-            found.append(f"correction {c.id} {c.operation.value}")
     return found
 
 
@@ -772,9 +665,7 @@ class IncompatibleVersionError(ValueError):
     """The document uses features the requested contract version cannot represent."""
 
 
-_KEYS_ADDED_IN_1_2 = {"document": ("contract_family", "integration"),
-                      "block": ("heading_level", "role", "integration"),
-                      "correction": ("new_block_type", "new_reading_order")}
+_KEYS_ADDED_IN_1_2 = {"document": ("contract_family",), "block": ("heading_level", "role")}
 
 
 def export_document_data(document: "Document", target_version: str = SCHEMA_VERSION, *,
@@ -784,12 +675,12 @@ def export_document_data(document: "Document", target_version: str = SCHEMA_VERS
     Nothing is dropped silently. Older targets succeed only when the content
     fits them; otherwise ``IncompatibleVersionError`` lists what would be lost.
     A caller may explicitly accept losing specific 1.2.0 producer fields when
-    exporting to 1.1.0/1.0.0 with ``drop={"heading_level", "role"}``; backend
-    ``integration`` fields and the critical-symbol flag can never be dropped.
+    exporting to 1.1.0/1.0.0 with ``drop={"heading_level", "role"}``; the
+    critical-symbol flag can never be dropped.
 
     * ``1.2.0``: the full document (contract_family and page status required).
-    * ``1.1.0``: no critical flag, no new correction operations, no integration
-      fields; heading levels and non-body roles only if listed in ``drop``.
+    * ``1.1.0``: no critical flag; heading levels and non-body roles only if
+      listed in ``drop``.
     * ``1.0.0``: as 1.1.0, plus no 1.1.0 flags or uncertain tables, every page
       ``ok`` and no warnings (page status is then omitted).
     """
@@ -835,9 +726,6 @@ def export_document_data(document: "Document", target_version: str = SCHEMA_VERS
     for block in data["blocks"]:
         for key in _KEYS_ADDED_IN_1_2["block"]:
             block.pop(key, None)
-    for correction in data["corrections"]:
-        for key in _KEYS_ADDED_IN_1_2["correction"]:
-            correction.pop(key, None)
     if target_version == "1.0.0":
         for page in data["pages"]:
             page.pop("status", None)
@@ -857,7 +745,7 @@ def upgrade_document_data(data: dict, target_version: str = SCHEMA_VERSION) -> d
     * 1.1.0 -> 1.2.0: adds ``contract_family``; each block gets a ``role``
       derived from the layout label recorded in its provenance (``page_header``,
       ``page_footer``, ``footnote``), otherwise ``body``. ``heading_level`` stays
-      null (unknown) and backend ``integration`` fields stay null.
+      null (unspecified).
 
     Nothing is removed or rewritten. Unknown versions and downgrades are rejected.
     """

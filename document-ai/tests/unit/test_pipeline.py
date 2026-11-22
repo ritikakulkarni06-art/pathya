@@ -8,6 +8,7 @@ from typing import Any
 
 import numpy as np
 from PIL import Image, ImageDraw
+from pydantic import ValidationError
 import pytest
 
 from _fake_ocr import FakeEngine, W
@@ -64,7 +65,7 @@ def test_returns_the_document_directly_and_json_root_is_the_document(tmp_path: P
     data = json.loads(result.to_json())
     assert data["schema_version"] == SCHEMA_VERSION and data["contract_family"] == CONTRACT_FAMILY
     assert set(data) == set(Document.model_fields)  # no envelope around the Document
-    assert data["source_asset"]["uri"] == "asset://p3/42" and data["integration"] is None
+    assert data["source_asset"]["uri"] == "asset://p3/42" and "integration" not in data  # producer-only
     assert validate_document_json(result.to_json()) == result.document
     assert producer_violations(result.document) == []
     assert result.engines == {"source": result.engines["source"], "ocr": "not run", "layout": "not run"}
@@ -95,6 +96,18 @@ def test_layout_path_sets_heading_levels_roles_and_review_status(tmp_path: Path)
     footer = next(b for b in doc.blocks if b.raw_text == "Page 7")
     assert footer.role is BlockRole.PAGE_FOOTER and footer.block_type.value == "paragraph"
     assert all(b.role is BlockRole.BODY for b in doc.blocks if b.raw_text != "Page 7")
+    assert producer_violations(doc) == []
+
+
+def test_heading_level_left_unspecified_without_a_size_hierarchy(tmp_path: Path) -> None:
+    """One heading size gives no evidence of hierarchy: levels stay null (readers show level 2)."""
+    pdf = write_pdf(tmp_path / "h1.pdf", [
+        PageSpec(texts=[Text(72, 740, "First Section", 16), Text(72, 700, "Body text on the page.", 11)]),
+        PageSpec(texts=[Text(72, 740, "Second Section", 16), Text(72, 700, "More body text here.", 11)]),
+    ])
+    doc = extract_document(pdf, ocr_engine=None, layout_engine=FakeLayout()).document
+    headings = {b.raw_text: b.heading_level for b in doc.blocks if b.block_type.value == "heading"}
+    assert headings == {"First Section": None, "Second Section": None}
     assert producer_violations(doc) == []
 
 
@@ -138,10 +151,11 @@ def test_required_engines_raise_when_unavailable(tmp_path: Path, monkeypatch: py
 def test_producer_rules_reject_backend_fields_and_wrong_review_status(tmp_path: Path) -> None:
     doc = extract_document(write_textbook(tmp_path / "tb.pdf"), **NO_ENGINES).document
     data = doc.model_dump()
-    data["integration"] = {"document_revision": 2, "backend_document_id": "x"}
     data["blocks"][0]["review_status"] = "approved"
     problems = producer_violations(Document.model_validate(data))
-    assert any("backend-owned" in p for p in problems) and any("pipeline rule" in p for p in problems)
+    assert any("pipeline rule" in p for p in problems)
+    with pytest.raises(ValidationError):  # backend fields are not part of the producer Document
+        Document.model_validate({**doc.model_dump(), "integration": {"document_revision": 2}})
     with pytest.raises(ProducerContractError, match="JSON Schema"):
         bad = json.loads(doc.model_dump_json())
         bad["blocks"][0]["role"] = "sidebar"

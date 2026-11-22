@@ -660,11 +660,20 @@ HEADING_SIZE_TOLERANCE = 0.08  # glyph heights within 8% are the same heading le
 
 
 def heading_levels(heights: dict[Any, float]) -> dict[Any, int]:
-    """Rank heading glyph heights document-wide: largest distinct size is level 1 (max 6)."""
+    """Rank heading glyph heights document-wide: largest distinct size is level 1 (max 6).
+
+    A level is only *reliably determinable* when the document shows a size
+    hierarchy: at least two distinct heading sizes. With one size (or none
+    measured) every level is left unspecified (null), which readers treat as
+    level 2 (P2 decision, 21 Nov 2026), rather than guessing that every heading
+    is a level-1 chapter title.
+    """
     distinct: list[float] = []
     for h in sorted(heights.values(), reverse=True):
         if not distinct or h < distinct[-1] * (1 - HEADING_SIZE_TOLERANCE):
             distinct.append(h)
+    if len(distinct) < 2:
+        return {}
     def level(h: float) -> int:
         for i, d in enumerate(distinct):
             if h >= d * (1 - HEADING_SIZE_TOLERANCE):
@@ -679,7 +688,8 @@ def _finalize_blocks(blocks: list[Any], page_heights: dict[Any, float], m: Any) 
     * ``role`` from the layout label (page header/footer, footnote, else body);
     * ``review_status`` by the pipeline rule (needs_review iff a review-trigger flag);
     * ``heading_level`` from the relative glyph size of headings across the
-      document (null when a heading has no words to measure).
+      document; null (unspecified) when a heading has no words to measure or
+      the document has fewer than two distinct heading sizes.
     """
     heights = {}
     for b in blocks:

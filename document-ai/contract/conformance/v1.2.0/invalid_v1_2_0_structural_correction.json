@@ -1,5 +1,6 @@
 {
   "schema_version": "1.2.0",
+  "contract_family": "pathya.p1.content",
   "id": "7d1e4c52-0000-4000-8000-000000000001",
   "title": "Science - Class 9 (bilingual sample excerpt)",
   "languages": [
@@ -80,8 +81,8 @@
       "raw_text": "4.2 Equations of Motion",
       "current_text": "4.2 Equations of Motion",
       "language": "en",
-      "revision": 1,
-      "review_status": "unreviewed",
+      "revision": 2,
+      "review_status": "approved",
       "confidence": {
         "score": null,
         "origin": "not_available",
@@ -101,8 +102,8 @@
       "table_cell": null,
       "equation": null,
       "figure": null,
-      "role": "body",
-      "heading_level": 1
+      "heading_level": 1,
+      "role": "body"
     },
     {
       "id": "7d1e4c52-0000-4000-8000-0000000000a2",
@@ -117,9 +118,9 @@
         0.2
       ],
       "raw_text": "When an object moves along a straight line with uniform acceleration, its velocity after time t is related to its initial velocity u by the first equation of motion.",
-      "current_text": "When an object moves along a straight line with uniform acceleration, its velocity after time t is related to its initial velocity u by the first equation of motion.",
+      "current_text": "When an object moves along a straight line with uniform acceleration, its speed after time t is related to its initial speed u by the first equation of motion.",
       "language": "en",
-      "revision": 1,
+      "revision": 2,
       "review_status": "unreviewed",
       "confidence": {
         "score": null,
@@ -140,31 +141,8 @@
       "table_cell": null,
       "equation": null,
       "figure": null,
-      "role": "body",
-      "integration": {
-        "backend_block_id": "p3-blk-a2",
-        "sentences": {
-          "text_revision": 1,
-          "text_sha256": "b4fff080751df794204041c501d78f73639e5b9f7a8ff201b2450417a1b717d4",
-          "segmenter": "pathya-sentences/2",
-          "ranges": [
-            {
-              "start": 0,
-              "end": 164
-            }
-          ]
-        },
-        "voice_language": "en",
-        "audio": [
-          {
-            "key": "a2-r1-s0",
-            "url": "audio://p3/opaque-a2-0",
-            "bytes": 48213,
-            "text_revision": 1,
-            "text_sha256": "b4fff080751df794204041c501d78f73639e5b9f7a8ff201b2450417a1b717d4"
-          }
-        ]
-      }
+      "heading_level": null,
+      "role": "body"
     },
     {
       "id": "7d1e4c52-0000-4000-8000-0000000000a3",
@@ -210,6 +188,7 @@
         "spoken_fallback_review_status": "approved"
       },
       "figure": null,
+      "heading_level": null,
       "role": "body"
     },
     {
@@ -259,6 +238,7 @@
       "table_cell": null,
       "equation": null,
       "figure": null,
+      "heading_level": null,
       "role": "body"
     },
     {
@@ -305,6 +285,7 @@
       },
       "equation": null,
       "figure": null,
+      "heading_level": null,
       "role": "body"
     },
     {
@@ -351,6 +332,7 @@
       },
       "equation": null,
       "figure": null,
+      "heading_level": null,
       "role": "body"
     },
     {
@@ -399,6 +381,7 @@
       },
       "equation": null,
       "figure": null,
+      "heading_level": null,
       "role": "body"
     },
     {
@@ -447,6 +430,7 @@
       },
       "equation": null,
       "figure": null,
+      "heading_level": null,
       "role": "body"
     },
     {
@@ -485,6 +469,7 @@
       "table_cell": null,
       "equation": null,
       "figure": null,
+      "heading_level": null,
       "role": "footnote"
     },
     {
@@ -527,8 +512,8 @@
       "table_cell": null,
       "equation": null,
       "figure": null,
-      "role": "body",
-      "heading_level": 1
+      "heading_level": 1,
+      "role": "body"
     },
     {
       "id": "7d1e4c52-0000-4000-8000-0000000000b2",
@@ -544,8 +529,8 @@
       ],
       "raw_text": "जब प्रकाश किसी चिकनी सतह पर पड़ता है, तो वह वापस लौट आता है। इसे प्रकाश का परावर्तन कहते हैं (चित्र 10.1 देखें)।",
       "current_text": "जब प्रकाश किसी चिकनी सतह पर पड़ता है, तो वह वापस लौट आता है। इसे प्रकाश का परावर्तन कहते हैं (चित्र 10.1 देखें)।",
-      "language": "hi",
-      "revision": 1,
+      "language": "mul",
+      "revision": 2,
       "review_status": "unreviewed",
       "confidence": {
         "score": 0.81,
@@ -570,13 +555,8 @@
       "table_cell": null,
       "equation": null,
       "figure": null,
-      "role": "body",
-      "integration": {
-        "backend_block_id": "p3-blk-b2",
-        "sentences": null,
-        "voice_language": "hi",
-        "audio": []
-      }
+      "heading_level": null,
+      "role": "body"
     },
     {
       "id": "7d1e4c52-0000-4000-8000-0000000000b3",
@@ -629,6 +609,7 @@
           "review_status": "approved"
         }
       },
+      "heading_level": null,
       "role": "body"
     },
     {
@@ -671,6 +652,7 @@
       "table_cell": null,
       "equation": null,
       "figure": null,
+      "heading_level": null,
       "role": "body"
     },
     {
@@ -717,6 +699,7 @@
       "table_cell": null,
       "equation": null,
       "figure": null,
+      "heading_level": null,
       "role": "body"
     }
   ],
@@ -842,12 +825,46 @@
       "reason": "OCR dropped the र्व conjunct in परावर्तन.",
       "author_ref": "reviewer:opaque-17",
       "created_at": "2026-11-17T10:02:00Z"
+    },
+    {
+      "id": "7d1e4c52-0000-4000-8000-000000001201",
+      "document_id": "7d1e4c52-0000-4000-8000-000000000001",
+      "block_id": "7d1e4c52-0000-4000-8000-0000000000a2",
+      "base_revision": 1,
+      "operation": "replace_text",
+      "new_text": "When an object moves along a straight line with uniform acceleration, its speed after time t is related to its initial speed u by the first equation of motion.",
+      "new_language": null,
+      "new_review_status": null,
+      "reason": "conformance vector",
+      "author_ref": "reviewer:opaque-17",
+      "created_at": "2026-11-19T10:00:00Z"
+    },
+    {
+      "id": "7d1e4c52-0000-4000-8000-000000001202",
+      "document_id": "7d1e4c52-0000-4000-8000-000000000001",
+      "block_id": "7d1e4c52-0000-4000-8000-0000000000b2",
+      "base_revision": 1,
+      "operation": "set_language",
+      "new_text": null,
+      "new_language": "mul",
+      "new_review_status": null,
+      "reason": "conformance vector",
+      "author_ref": "reviewer:opaque-17",
+      "created_at": "2026-11-19T10:00:00Z"
+    },
+    {
+      "id": "7d1e4c52-0000-4000-8000-000000001203",
+      "document_id": "7d1e4c52-0000-4000-8000-000000000001",
+      "block_id": "7d1e4c52-0000-4000-8000-0000000000a1",
+      "base_revision": 1,
+      "operation": "set_block_type",
+      "new_text": null,
+      "new_language": null,
+      "reason": "conformance vector",
+      "author_ref": "reviewer:opaque-17",
+      "created_at": "2026-11-19T10:00:00Z",
+      "new_block_type": "paragraph"
     }
   ],
-  "created_at": "2026-11-17T09:31:15Z",
-  "contract_family": "pathya.p1.content",
-  "integration": {
-    "document_revision": 3,
-    "backend_document_id": "p3-doc-opaque-42"
-  }
+  "created_at": "2026-11-17T09:31:15Z"
 }

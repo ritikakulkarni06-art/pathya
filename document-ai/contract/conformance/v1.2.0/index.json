@@ -13,18 +13,8 @@
       }
     },
     {
-      "file": "valid_v1_2_0_backend_fields.json",
-      "description": "1.2.0: document revision, sentence ranges, voice_language and revision-bound audio on blocks.",
-      "expected_valid": {
-        "schema_1_0_0": false,
-        "schema_1_1_0": false,
-        "schema_1_2_0": true,
-        "python": true
-      }
-    },
-    {
       "file": "valid_v1_2_0_after_corrections.json",
-      "description": "1.2.0: text, block-type and reading-order corrections applied by apply_correction (ids kept, revisions bumped, history appended).",
+      "description": "1.2.0: the three approved corrections (replace_text, set_language, set_review_status recorded for P3 mark_reviewed) applied by apply_correction.",
       "expected_valid": {
         "schema_1_0_0": false,
         "schema_1_1_0": false,
@@ -83,8 +73,8 @@
       }
     },
     {
-      "file": "invalid_v1_2_0_voice_language_mul.json",
-      "description": "voice_language is en or hi; language stays separate.",
+      "file": "invalid_v1_2_0_backend_integration_fields.json",
+      "description": "Backend fields (revision, sentence ranges, audio) are served by P3's API, not carried in the producer Document.",
       "expected_valid": {
         "schema_1_0_0": false,
         "schema_1_1_0": false,
@@ -93,48 +83,8 @@
       }
     },
     {
-      "file": "invalid_python_only_v1_2_0_stale_sentences.json",
-      "description": "Sentence ranges/audio from an older revision (JSON Schema cannot hash text).",
-      "expected_valid": {
-        "schema_1_0_0": false,
-        "schema_1_1_0": false,
-        "schema_1_2_0": true,
-        "python": false
-      }
-    },
-    {
-      "file": "invalid_python_only_v1_2_0_stale_audio.json",
-      "description": "Audio bound to another revision.",
-      "expected_valid": {
-        "schema_1_0_0": false,
-        "schema_1_1_0": false,
-        "schema_1_2_0": true,
-        "python": false
-      }
-    },
-    {
-      "file": "invalid_python_only_v1_2_0_sentence_gap.json",
-      "description": "Sentence ranges must cover current_text without gaps.",
-      "expected_valid": {
-        "schema_1_0_0": false,
-        "schema_1_1_0": false,
-        "schema_1_2_0": true,
-        "python": false
-      }
-    },
-    {
-      "file": "invalid_python_only_v1_2_0_sentences_on_caption.json",
-      "description": "Only headings, paragraphs and list items carry sentence ranges.",
-      "expected_valid": {
-        "schema_1_0_0": false,
-        "schema_1_1_0": false,
-        "schema_1_2_0": true,
-        "python": false
-      }
-    },
-    {
-      "file": "invalid_v1_2_0_audio_without_key_url_bytes.json",
-      "description": "Audio entries are {key, url, bytes} plus revision binding.",
+      "file": "invalid_v1_2_0_structural_correction.json",
+      "description": "set_block_type/set_reading_order are not 1.2.0 operations.",
       "expected_valid": {
         "schema_1_0_0": false,
         "schema_1_1_0": false,

@@ -1,5 +1,6 @@
-"""Contract 1.2.0: producer fields, backend integration fields, sentences, audio,
-critical-symbol uncertainty, correction policy and version boundaries."""
+"""Contract 1.2.0 (producer-only): producer fields, no backend fields, sentence
+offsets (reference segmenter), critical-symbol uncertainty, trust policy, the three
+approved correction operations and version boundaries."""
 
 from __future__ import annotations
 
@@ -17,11 +18,9 @@ from pathya_document_ai.corrections import CorrectionConflictError, CorrectionEr
 from pathya_document_ai.critical import critical_flag, critical_uncertain, is_critical_token, is_trusted_evidence
 from pathya_document_ai.models import (
     CONTRACT_FAMILY,
-    AudioReference,
-    BlockIntegration,
     SCHEMA_VERSION,
+    Block,
     BlockRole,
-    BlockType,
     Correction,
     Document,
     IncompatibleVersionError,
@@ -33,7 +32,7 @@ from pathya_document_ai.models import (
     upgrade_document_data,
 )
 from pathya_document_ai.schema import build_json_schema
-from pathya_document_ai.sentences import SEGMENTER, attach_sentences, segment_sentences, to_utf16_ranges
+from pathya_document_ai.sentences import SEGMENTER, block_sentence_ranges, segment_sentences, to_utf16_ranges
 
 ROOT = Path(__file__).resolve().parents[2]
 NOW = datetime(2026, 11, 19, 10, 0, tzinfo=timezone.utc)
@@ -98,7 +97,7 @@ def test_three_existing_payloads_valid_as_is_and_after_upgrade(name: str) -> Non
     upgraded = json.loads(json.dumps(upgrade_document_data(data), default=str))
     doc = Document.model_validate(upgraded)
     assert doc.schema_version == "1.2.0" and doc.contract_family == CONTRACT_FAMILY
-    assert all(b.role is BlockRole.BODY and b.heading_level is None and b.integration is None for b in doc.blocks)
+    assert all(b.role is BlockRole.BODY and b.heading_level is None for b in doc.blocks)
     _schema("1.2.0").validate(upgraded)
     assert not _schema("1.1.0").is_valid(upgraded)  # 1.1.0-only readers reject 1.2.0 (not forward-compatible)
 
@@ -229,6 +228,55 @@ def test_incomplete_pages_are_never_trusted_evidence() -> None:
     assert is_trusted_evidence(block, doc.pages[0])
 
 
+def _flagged_then_approved(flag: QualityFlag) -> tuple[Any, Any, Any]:
+    """(flagged block needing review, the same block after mark_reviewed, page)."""
+    doc = _v12()
+    flagged = _block(doc, "a2").model_copy(update={"quality_flags": [flag],
+                                                    "review_status": ReviewStatus.NEEDS_REVIEW})
+    doc = _replace(doc, flagged)
+    block = _block(doc, "a2")
+    approved = apply_correction(doc, _correction(doc, block, operation="set_review_status",
+                                                 new_review_status="approved"))
+    return block, _block(approved, "a2"), doc.pages[0]
+
+
+@pytest.mark.parametrize("status", [ReviewStatus.UNREVIEWED, ReviewStatus.NEEDS_REVIEW, ReviewStatus.REJECTED])
+def test_unsupported_content_requires_approval_for_trusted_evidence(status: ReviewStatus) -> None:
+    block, approved, page = _flagged_then_approved(QualityFlag.UNSUPPORTED_CONTENT)
+    block = block.model_copy(update={"review_status": status})
+    before = block.model_dump()
+    assert not is_trusted_evidence(block, page)
+    assert block.model_dump() == before  # checking eligibility never approves or alters the block
+    assert approved.review_status is ReviewStatus.APPROVED
+    assert QualityFlag.UNSUPPORTED_CONTENT in approved.quality_flags  # corrections never remove flags
+    assert is_trusted_evidence(approved, page)
+    assert approved.quality_flags == block.quality_flags
+    assert approved.current_text == block.current_text
+
+
+@pytest.mark.parametrize("status", ["needs_ocr", "partial", "failed"])
+def test_approved_unsupported_content_still_requires_a_complete_page(status: str) -> None:
+    _, approved, page = _flagged_then_approved(QualityFlag.UNSUPPORTED_CONTENT)
+    assert not is_trusted_evidence(approved, page.model_copy(update={"status": status}))
+
+
+@pytest.mark.parametrize("flag", [QualityFlag.BLOCK_TYPE_UNCERTAIN, QualityFlag.CRITICAL_SYMBOL_UNCERTAIN])
+def test_other_uncertainty_flags_still_require_approval(flag: QualityFlag) -> None:
+    block, approved, page = _flagged_then_approved(flag)
+    assert not is_trusted_evidence(block, page)
+    assert not is_trusted_evidence(block.model_copy(update={"review_status": ReviewStatus.UNREVIEWED}), page)
+    assert not is_trusted_evidence(block.model_copy(update={"review_status": ReviewStatus.REJECTED}), page)
+    assert is_trusted_evidence(approved, page)
+    assert flag in approved.quality_flags
+
+
+def test_excluded_blocks_remain_in_the_document_for_display() -> None:
+    block, _, page = _flagged_then_approved(QualityFlag.UNSUPPORTED_CONTENT)
+    doc = _replace(_v12(), block)
+    assert not is_trusted_evidence(block, page)
+    assert _block(doc, "a2").current_text == block.current_text  # nothing hidden or dropped
+
+
 # ------------------------------------------------------------- sentence offsets
 
 
@@ -255,177 +303,107 @@ def test_sentence_offsets_cover_current_text_with_trailing_whitespace_to_precedi
     ("iv. Roman numbered item.", ["iv. Roman numbered item."]),
     ("a. Lettered item.", ["a. Lettered item."]),
     ("He saw it. A dog ran.", ["He saw it. ", "A dog ran."]),
+    ("10. Tenth item. Second sentence.", ["10. Tenth item. ", "Second sentence."]),
+    ("1) Bracket item. More.", ["1) Bracket item. ", "More."]),
+    ("१. प्रकाश सीधी रेखा में चलता है। यह परावर्तित होता है।",  # Devanagari numeral marker
+     ["१. प्रकाश सीधी रेखा में चलता है। ", "यह परावर्तित होता है।"]),
+    ("Step 3. Mix well.", ["Step 3. ", "Mix well."]),  # not a marker: a real sentence end
 ])
 def test_list_markers_are_not_sentences(text: str, expected: list[str]) -> None:
     assert [text[s:e] for s, e in segment_sentences(text)] == expected
 
 
-def test_sentences_bound_to_revision_and_exact_text() -> None:
+def test_reference_segmenter_is_pathya_sentences_3() -> None:
+    assert SEGMENTER == "pathya-sentences/3"
+    text = "Compare cf. Table 2. He said «stop.» Then see pp. 12."
+    assert [text[s:e] for s, e in segment_sentences(text)] == [
+        "Compare cf. Table 2. ", "He said «stop.» ", "Then see pp. 12."]
+
+
+def test_bulk_entry_hashes_exact_current_text_and_covers_it() -> None:
     doc = _v12()
-    block = attach_sentences(_block(doc, "a2"))
-    seg = block.integration.sentences
-    assert seg.segmenter == SEGMENTER == "pathya-sentences/2" and seg.text_revision == block.revision
-    assert seg.text_sha256 == hashlib.sha256(block.current_text.encode("utf-8")).hexdigest()
-    assert _covers(block.current_text, [(r.start, r.end) for r in seg.ranges])
-    doc = _replace(doc, block)
-    stale = block.model_copy(update={"current_text": block.current_text + " Extra.", "revision": 2})
-    with pytest.raises(ValidationError, match="stale sentence ranges"):
-        _replace(doc, stale)
-
-
-@pytest.mark.parametrize(("ranges", "match"), [
-    ([{"start": 1, "end": 10}], "without gaps"),        # does not start at 0
-    ([{"start": 0, "end": 5}, {"start": 6, "end": 10}], "without gaps"),  # gap
-    ([{"start": 0, "end": 5}], "must end at"),          # stops short of the text
-    ([{"start": 0, "end": 10_000}], "must end at"),     # beyond the text
-])
-def test_sentence_ranges_must_cover_without_gaps(ranges: list[dict[str, int]], match: str) -> None:
-    doc = _replace(_v12(), attach_sentences(_block(_v12(), "a2")))
-    data = json.loads(doc.model_dump_json())
-    data["blocks"][1]["integration"]["sentences"]["ranges"] = ranges
-    with pytest.raises(ValidationError, match=match):
-        Document.model_validate(data)
-
-
-def test_sentence_ranges_only_on_headings_paragraphs_and_list_items() -> None:
-    from pathya_document_ai.sentences import build_segmentation
-
-    doc = _v12()
-    for suffix in ("a1", "a2", "b5"):  # heading, paragraph, list item
-        assert build_segmentation(_block(doc, suffix)) is not None
-    caption, cell = _block(doc, "a9"), _block(doc, "a5")
-    assert build_segmentation(caption) is None and build_segmentation(cell) is None
-    from pathya_document_ai.models import SentenceSegmentation
-
-    forced = SentenceSegmentation(
-        text_revision=caption.revision, segmenter=SEGMENTER,
-        text_sha256=hashlib.sha256(caption.current_text.encode("utf-8")).hexdigest(),
-        ranges=[{"start": 0, "end": len(caption.current_text)}])
-    with pytest.raises(ValidationError, match="only allowed on headings"):
-        _replace(doc, caption.model_copy(update={"integration": BlockIntegration(sentences=forced)}))
+    heading, caption, table = _block(doc, "a1"), _block(doc, "a9"), _block(doc, "a4")
+    entry = block_sentence_ranges(heading)
+    assert entry["block_id"] == str(heading.id) and entry["segmenter"] == SEGMENTER
+    assert entry["text_sha256"] == hashlib.sha256(heading.current_text.encode("utf-8")).hexdigest()
+    assert _covers(heading.current_text, [(r["start"], r["end"]) for r in entry["ranges"]])
+    assert block_sentence_ranges(caption)["ranges"] == []  # captions are not split into sentences
+    assert table.current_text is None
+    assert block_sentence_ranges(table)["text_sha256"] == hashlib.sha256(b"").hexdigest()
 
 
 def test_offsets_regenerated_after_text_correction() -> None:
     doc = _v12()
-    doc = _replace(doc, attach_sentences(_block(doc, "a1")))
     block = _block(doc, "a1")
+    before = block_sentence_ranges(block)
     corrected = apply_correction(doc, _correction(doc, block, operation="replace_text",
                                                   new_text="4.2 Equations of Motion. Revised."))
     after = _block(corrected, "a1")
-    assert after.revision == 2 and after.integration is None  # stale ranges removed by the correction
-    regenerated = attach_sentences(after)
-    assert regenerated.integration.sentences.text_revision == 2
-    assert [after.current_text[r.start:r.end] for r in regenerated.integration.sentences.ranges] == [
+    fresh = block_sentence_ranges(after)
+    assert after.revision == 2 and fresh["text_sha256"] != before["text_sha256"]
+    assert [after.current_text[r["start"]:r["end"]] for r in fresh["ranges"]] == [
         "4.2 Equations of Motion. ", "Revised."]
     assert after.raw_text == "4.2 Equations of Motion"  # offsets never index raw_text
 
 
-def _with_audio(doc: Document, suffix: str, voice: str | None = "en", sentences: bool = True,
-                backend_id: str | None = "p3-blk-1") -> Document:
-    block = _block(doc, suffix)
-    block = attach_sentences(block) if sentences else block.model_copy(update={"integration": BlockIntegration()})
-    clip = AudioReference(key=f"{suffix}-r{block.revision}-s0", url="audio://p3/opaque-1", bytes=48213,
-                          text_revision=block.revision,
-                          text_sha256=hashlib.sha256(block.current_text.encode("utf-8")).hexdigest())
-    integration = block.integration.model_copy(update={"audio": [clip], "voice_language": voice,
-                                                       "backend_block_id": backend_id})
-    return _replace(doc, block.model_copy(update={"integration": integration}))
+# ------------------------------------------- producer-only: no backend fields
 
 
-def test_audio_entries_are_key_url_bytes_and_unique() -> None:
-    doc = _with_audio(_v12(), "a2")
-    data = json.loads(doc.model_dump_json())
-    clip = data["blocks"][1]["integration"]["audio"][0]
-    assert set(clip) == {"key", "url", "bytes", "text_revision", "text_sha256"}
-    data["blocks"][1]["integration"]["audio"].append(dict(clip))
-    with pytest.raises(ValidationError, match="unique"):
+@pytest.mark.parametrize("field", ["integration", "sentences", "audio", "voice_language", "backend_block_id",
+                                   "document_revision"])
+def test_backend_owned_fields_are_not_document_fields(field: str) -> None:
+    assert field not in Document.model_fields and field not in Block.model_fields
+    data = json.loads(_v12().model_dump_json())
+    data["blocks"][1][field] = None
+    with pytest.raises(ValidationError):
         Document.model_validate(data)
-    legacy = json.loads(doc.model_dump_json())
-    legacy["blocks"][1]["integration"]["audio"][0]["uri"] = legacy["blocks"][1]["integration"]["audio"][0].pop("url")
+    assert not _schema("1.2.0").is_valid(data)
+    data = json.loads(_v12().model_dump_json())
+    data[field] = {"document_revision": 3}
     with pytest.raises(ValidationError):
-        Document.model_validate(legacy)
-    assert not _schema("1.2.0").is_valid(legacy)
-
-
-def test_audio_is_invalidated_when_the_revision_changes() -> None:
-    whole = _with_audio(_v12(), "a2", sentences=False)
-    block = _block(whole, "a2")
-    with pytest.raises(ValidationError, match="stale audio"):
-        _replace(whole, block.model_copy(update={"revision": 2, "current_text": block.current_text + "!"}))
-    with pytest.raises(ValidationError, match="stale audio"):  # same text, new revision: still stale
-        _replace(whole, block.model_copy(update={"revision": 2}))
-
-    doc = _with_audio(_v12(), "a2")
-    block = _block(doc, "a2")
-    corrected = apply_correction(doc, _correction(doc, block, operation="set_language", new_language="mul"))
-    after = _block(corrected, "a2")
-    assert after.integration.audio == [] and after.integration.sentences is None  # any revision change
-    assert after.integration.voice_language == "en"  # a reader choice, not derived from the text
-    assert after.integration.backend_block_id == "p3-blk-1"  # P3 identity survives corrections
-
-
-def test_backend_block_id_is_p3_owned_and_optional() -> None:
-    doc = _with_audio(_v12(), "a2", backend_id="p3-blk-a2")
-    assert _block(doc, "a2").integration.backend_block_id == "p3-blk-a2"
-    assert _block(doc, "a2").id != "p3-blk-a2"  # separate from the producer UUID
-    with pytest.raises(ValidationError):
-        data = json.loads(doc.model_dump_json())
-        data["blocks"][1]["integration"]["backend_block_id"] = ""
-        Document.model_validate(data)
-
-
-def test_voice_language_never_replaces_language() -> None:
-    doc = _with_audio(_v12(), "a2", voice="hi")
-    block = _block(doc, "a2")
-    assert block.language.value == "en" and block.integration.voice_language == "hi"
-    with pytest.raises(ValidationError):
-        data = json.loads(doc.model_dump_json())
-        data["blocks"][1]["integration"]["voice_language"] = "mul"  # voices are en/hi only
         Document.model_validate(data)
 
 
 # ----------------------------------------------------------- correction policy
 
 
-def test_block_type_correction_keeps_id_and_provenance() -> None:
+@pytest.mark.parametrize(("operation", "payload", "field", "value"), [
+    ("replace_text", {"new_text": "Corrected text."}, "current_text", "Corrected text."),
+    ("set_language", {"new_language": "mul"}, "language", "mul"),
+    ("set_review_status", {"new_review_status": "approved"}, "review_status", "approved"),  # P3 mark_reviewed
+])
+def test_three_approved_correction_operations(operation: str, payload: dict[str, Any], field: str,
+                                              value: str) -> None:
     doc = _v12()
     block = _block(doc, "a2")
-    out = apply_correction(doc, _correction(doc, block, operation="set_block_type", new_block_type="heading"))
+    out = apply_correction(doc, _correction(doc, block, operation=operation, **payload))
     after = _block(out, "a2")
-    assert after.id == block.id and after.block_type is BlockType.HEADING and after.heading_level is None
-    assert after.provenance == block.provenance and after.raw_text == block.raw_text
-    assert after.revision == 2 and after.review_status is block.review_status  # never changed implicitly
-    assert out.corrections[-1].operation.value == "set_block_type"
-    for bad_type in ("table", "figure"):
-        with pytest.raises((CorrectionError, ValidationError)):
-            apply_correction(doc, _correction(doc, block, operation="set_block_type", new_block_type=bad_type))
+    assert str(getattr(getattr(after, field), "value", getattr(after, field))) == value
+    assert after.id == block.id and after.raw_text == block.raw_text and after.provenance == block.provenance
+    assert after.revision == 2 and after.quality_flags == block.quality_flags
+    assert out.corrections[-1].operation.value == operation
+    if operation != "set_review_status":
+        assert after.review_status is block.review_status  # never changed implicitly
 
 
-def test_linked_caption_cannot_be_retyped_silently() -> None:
+@pytest.mark.parametrize("operation", ["set_block_type", "set_reading_order", "mark_reviewed", "split", "merge"])
+def test_structural_and_api_only_operations_are_not_contract_operations(operation: str) -> None:
     doc = _v12()
-    caption = _block(doc, "a9")  # caption_of -> table a4
-    with pytest.raises(CorrectionError, match="caption link"):
-        apply_correction(doc, _correction(doc, caption, operation="set_block_type", new_block_type="paragraph"))
-    figure_caption = _block(doc, "b4")  # referenced by figure b3's caption_block_id
-    with pytest.raises(CorrectionError, match="caption link"):
-        apply_correction(doc, _correction(doc, figure_caption, operation="set_block_type", new_block_type="heading"))
+    with pytest.raises(ValidationError):
+        _correction(doc, _block(doc, "a2"), operation=operation)
 
 
-def test_reading_order_correction_renumbers_siblings_and_rebuilds_precedes() -> None:
+def test_review_only_correction_keeps_the_audio_inputs_unchanged() -> None:
+    """Audio validity is decided by text, language, voice, pronunciation and segmenter (P3);
+    a review-only correction bumps the revision but changes none of the Document-side inputs."""
     doc = _v12()
-    page0 = doc.pages[0].id
-    top = sorted((b for b in doc.blocks if b.page_id == page0 and b.parent_id is None), key=lambda b: b.reading_order)
-    moved = top[2]
-    out = apply_correction(doc, _correction(doc, moved, operation="set_reading_order", new_reading_order=0))
-    after = sorted((b for b in out.blocks if b.page_id == page0 and b.parent_id is None), key=lambda b: b.reading_order)
-    assert [b.id for b in after] == [moved.id, top[0].id, top[1].id, *[b.id for b in top[3:]]]
-    assert [b.reading_order for b in after] == list(range(len(after)))
-    assert _block(out, str(moved.id)[-2:]).revision == 2
-    assert all(b.revision == 1 for b in after[1:3])  # siblings renumbered without a revision change
-    precedes = [(e.source_id, e.target_id) for e in out.edges if e.edge_type.value == "precedes"]
-    assert (moved.id, top[0].id) in precedes
-    with pytest.raises(CorrectionError):
-        apply_correction(doc, _correction(doc, moved, operation="set_reading_order", new_reading_order=99))
+    block = _block(doc, "a2")
+    out = apply_correction(doc, _correction(doc, block, operation="set_review_status",
+                                            new_review_status="approved"))
+    after = _block(out, "a2")
+    assert after.revision == block.revision + 1
+    assert (after.current_text, after.language) == (block.current_text, block.language)
+    assert block_sentence_ranges(after) == block_sentence_ranges(block)  # same hash, segmenter, ranges
 
 
 def test_correction_conflicts_and_text_rules() -> None:
@@ -446,7 +424,7 @@ def test_correction_conflicts_and_text_rules() -> None:
 # ----------------------------------------------------- versions and exports
 
 
-def test_backend_fields_block_export_to_1_1_and_heading_levels_need_explicit_drop() -> None:
+def test_heading_levels_need_explicit_drop_for_1_1_export() -> None:
     doc = _replace(_v12(), _block(_v12(), "a1").model_copy(update={"heading_level": 1}))
     assert required_version(doc) == "1.2.0"
     with pytest.raises(IncompatibleVersionError, match="heading_level"):
@@ -454,8 +432,6 @@ def test_backend_fields_block_export_to_1_1_and_heading_levels_need_explicit_dro
     v11 = export_document_data(doc, "1.1.0", drop={"heading_level"})
     assert "heading_level" not in v11["blocks"][0] and "contract_family" not in v11
     _schema("1.1.0").validate(v11)
-    with pytest.raises(IncompatibleVersionError, match="integration"):
-        export_document_data(_with_audio(_v12(), "a2"), "1.1.0", drop={"heading_level", "role"})
     with pytest.raises(ValueError, match="only heading_level and role"):
         export_document_data(doc, "1.1.0", drop={"integration"})
 
@@ -477,15 +453,12 @@ def test_upgrade_never_downgrades_and_round_trips() -> None:
 
 
 def test_producer_fields_survive_serialization() -> None:
-    doc = _with_audio(_replace(_v12(), _block(_v12(), "a1").model_copy(
-        update={"heading_level": 2, "role": BlockRole.PAGE_HEADER})), "a2")
+    doc = _replace(_v12(), _block(_v12(), "a1").model_copy(
+        update={"heading_level": 2, "role": BlockRole.PAGE_HEADER}))
     again = Document.model_validate_json(doc.model_dump_json())
     assert again == doc
     a1 = _block(again, "a1")
     assert (a1.heading_level, a1.role) == (2, BlockRole.PAGE_HEADER)
-    clip = _block(again, "a2").integration.audio[0]
-    assert (clip.key, clip.url, clip.bytes) == ("a2-r1-s0", "audio://p3/opaque-1", 48213)
-    assert _block(again, "a2").integration.backend_block_id == "p3-blk-1"
 
 
 # ------------------------------------------------------ 1.2.0 conformance set

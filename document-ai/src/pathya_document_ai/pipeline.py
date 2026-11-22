@@ -239,13 +239,9 @@ def producer_violations(document: Any) -> list[str]:
     problems = []
     if document.schema_version != m.SCHEMA_VERSION:
         problems.append(f"schema_version {document.schema_version} (producer emits {m.SCHEMA_VERSION})")
-    if document.integration is not None:
-        problems.append("document integration fields are backend-owned")
     if document.corrections:
         problems.append("a producer document has no correction history")
     for b in document.blocks:
-        if b.integration is not None:
-            problems.append(f"block {b.id}: integration fields are backend-owned")
         if b.revision != 1 or b.current_text != b.raw_text:
             problems.append(f"block {b.id}: producer output is revision 1 and unedited")
         if b.role is None:

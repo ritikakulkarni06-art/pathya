@@ -9,48 +9,6 @@
       "title": "AnnotationOrigin",
       "type": "string"
     },
-    "AudioReference": {
-      "additionalProperties": false,
-      "description": "Prepared audio entry ``{key, url, bytes}`` (P2 decision), bound to a block revision and text.\n\n``key`` is the reader's clip lookup key within a revision-scoped package; ``url``\nis opaque and backend-owned; ``bytes`` is the clip size.",
-      "properties": {
-        "bytes": {
-          "minimum": 0,
-          "title": "Bytes",
-          "type": "integer"
-        },
-        "key": {
-          "minLength": 1,
-          "title": "Key",
-          "type": "string"
-        },
-        "text_revision": {
-          "description": "Block revision the clip was prepared for.",
-          "minimum": 1,
-          "title": "Text Revision",
-          "type": "integer"
-        },
-        "text_sha256": {
-          "description": "SHA-256 of the block's current_text (UTF-8) at that revision.",
-          "pattern": "^[0-9a-f]{64}$",
-          "title": "Text Sha256",
-          "type": "string"
-        },
-        "url": {
-          "minLength": 1,
-          "title": "Url",
-          "type": "string"
-        }
-      },
-      "required": [
-        "key",
-        "url",
-        "bytes",
-        "text_revision",
-        "text_sha256"
-      ],
-      "title": "AudioReference",
-      "type": "object"
-    },
     "Block": {
       "additionalProperties": false,
       "allOf": [
@@ -180,24 +138,13 @@
             }
           ],
           "default": null,
-          "description": "Headings only; 1 is the most prominent. Null if unknown.",
+          "description": "Headings only; 1 is the most prominent. Set only when the level can be determined reliably; null means unspecified (readers treat null as level 2).",
           "title": "Heading Level"
         },
         "id": {
           "format": "uuid",
           "title": "Id",
           "type": "string"
-        },
-        "integration": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/BlockIntegration"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null
         },
         "language": {
           "$ref": "#/$defs/Language"
@@ -305,64 +252,6 @@
         "id"
       ],
       "title": "Block",
-      "type": "object"
-    },
-    "BlockIntegration": {
-      "additionalProperties": false,
-      "description": "Backend/reader-owned block fields (1.2.0). Producers must leave Block.integration null.",
-      "properties": {
-        "audio": {
-          "items": {
-            "$ref": "#/$defs/AudioReference"
-          },
-          "title": "Audio",
-          "type": "array"
-        },
-        "backend_block_id": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Stable opaque block identifier assigned by P3 (not the producer UUID).",
-          "title": "Backend Block Id"
-        },
-        "sentences": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/SentenceSegmentation"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null
-        },
-        "voice_language": {
-          "anyOf": [
-            {
-              "enum": [
-                "en",
-                "hi"
-              ],
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Narration voice chosen by P2/P3; never replaces Block.language.",
-          "title": "Voice Language"
-        }
-      },
-      "title": "BlockIntegration",
       "type": "object"
     },
     "BlockRole": {
@@ -549,17 +438,6 @@
           "title": "Id",
           "type": "string"
         },
-        "new_block_type": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/BlockType"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null
-        },
         "new_language": {
           "anyOf": [
             {
@@ -570,19 +448,6 @@
             }
           ],
           "default": null
-        },
-        "new_reading_order": {
-          "anyOf": [
-            {
-              "minimum": 0,
-              "type": "integer"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "New Reading Order"
         },
         "new_review_status": {
           "anyOf": [
@@ -635,44 +500,14 @@
       "type": "object"
     },
     "CorrectionOperation": {
+      "description": "Correction history operations (unchanged since 1.0.0).\n\nThese are the three approved P1 correction operations. P3's API names the\nreview operation ``mark_reviewed``; P3 records it here as\n``set_review_status`` with ``new_review_status: approved``. Structural\ncorrections (block type, reading order) are deferred to a later contract\nversion: P3 rejects them for P1 chapters (``p1_correction_unsupported``).",
       "enum": [
         "replace_text",
         "set_language",
-        "set_review_status",
-        "set_block_type",
-        "set_reading_order"
+        "set_review_status"
       ],
       "title": "CorrectionOperation",
       "type": "string"
-    },
-    "DocumentIntegration": {
-      "additionalProperties": false,
-      "description": "Backend-owned document fields (1.2.0). P3 is authoritative; producers leave this null.",
-      "properties": {
-        "backend_document_id": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Opaque P3 identifier.",
-          "title": "Backend Document Id"
-        },
-        "document_revision": {
-          "minimum": 1,
-          "title": "Document Revision",
-          "type": "integer"
-        }
-      },
-      "required": [
-        "document_revision"
-      ],
-      "title": "DocumentIntegration",
-      "type": "object"
     },
     "Edge": {
       "additionalProperties": false,
@@ -1170,68 +1005,6 @@
       "title": "Rotation",
       "type": "integer"
     },
-    "SentenceRange": {
-      "additionalProperties": false,
-      "description": "Half-open range [start, end) of Unicode code points in the block's current_text.",
-      "properties": {
-        "end": {
-          "exclusiveMinimum": 0,
-          "title": "End",
-          "type": "integer"
-        },
-        "start": {
-          "minimum": 0,
-          "title": "Start",
-          "type": "integer"
-        }
-      },
-      "required": [
-        "start",
-        "end"
-      ],
-      "title": "SentenceRange",
-      "type": "object"
-    },
-    "SentenceSegmentation": {
-      "additionalProperties": false,
-      "description": "Sentence ranges bound to one block revision and the exact current_text they index.",
-      "properties": {
-        "ranges": {
-          "description": "Cover current_text completely and contiguously from 0 to its length; trailing whitespace belongs to the preceding range.",
-          "items": {
-            "$ref": "#/$defs/SentenceRange"
-          },
-          "title": "Ranges",
-          "type": "array"
-        },
-        "segmenter": {
-          "description": "Segmenter name and version, e.g. 'pathya-sentences/2'.",
-          "minLength": 1,
-          "title": "Segmenter",
-          "type": "string"
-        },
-        "text_revision": {
-          "description": "Block revision whose current_text was segmented.",
-          "minimum": 1,
-          "title": "Text Revision",
-          "type": "integer"
-        },
-        "text_sha256": {
-          "description": "SHA-256 of current_text encoded as UTF-8.",
-          "pattern": "^[0-9a-f]{64}$",
-          "title": "Text Sha256",
-          "type": "string"
-        }
-      },
-      "required": [
-        "text_revision",
-        "text_sha256",
-        "segmenter",
-        "ranges"
-      ],
-      "title": "SentenceSegmentation",
-      "type": "object"
-    },
     "SourceAsset": {
       "additionalProperties": false,
       "description": "Original uploaded file, referenced by ID and hash rather than embedded.",
@@ -1451,9 +1224,6 @@
                 "heading_level": {
                   "type": "null"
                 },
-                "integration": {
-                  "type": "null"
-                },
                 "quality_flags": {
                   "items": {
                     "enum": [
@@ -1500,22 +1270,6 @@
           "contract_family": {
             "type": "null"
           },
-          "corrections": {
-            "items": {
-              "properties": {
-                "operation": {
-                  "enum": [
-                    "replace_text",
-                    "set_language",
-                    "set_review_status"
-                  ]
-                }
-              }
-            }
-          },
-          "integration": {
-            "type": "null"
-          },
           "pages": {
             "items": {
               "properties": {
@@ -1548,9 +1302,6 @@
             "items": {
               "properties": {
                 "heading_level": {
-                  "type": "null"
-                },
-                "integration": {
                   "type": "null"
                 },
                 "quality_flags": {
@@ -1588,22 +1339,6 @@
             }
           },
           "contract_family": {
-            "type": "null"
-          },
-          "corrections": {
-            "items": {
-              "properties": {
-                "operation": {
-                  "enum": [
-                    "replace_text",
-                    "set_language",
-                    "set_review_status"
-                  ]
-                }
-              }
-            }
-          },
-          "integration": {
             "type": "null"
           },
           "pages": {
@@ -1719,18 +1454,6 @@
       "title": "Id",
       "type": "string"
     },
-    "integration": {
-      "anyOf": [
-        {
-          "$ref": "#/$defs/DocumentIntegration"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "description": "1.2.0+: backend-owned."
-    },
     "languages": {
       "items": {
         "$ref": "#/$defs/Language"
@@ -1796,8 +1519,7 @@
     "Revision 1 blocks have current_text == raw_text; correction base_revision < block revision.",
     "A page with status 'blank' has no blocks.",
     "Confidence: origin 'not_available' iff score is null; null score and heuristic origin need a reason.",
-    "1.2.0: integration.sentences and every audio reference carry the block's current revision and the SHA-256 of its exact current_text (otherwise stale); sentence ranges appear only on headings, paragraphs and list items and cover current_text contiguously from 0 to its length in code points; audio keys are unique within a block.",
-    "1.0.0/1.1.0 documents use no 1.2.0 feature (role other than body, heading_level, integration, critical_symbol_uncertain, set_block_type/set_reading_order corrections)."
+    "1.0.0/1.1.0 documents use no 1.2.0 feature (role other than body, heading_level, critical_symbol_uncertain)."
   ],
   "x-pathya-schema-version": "1.2.0"
 }

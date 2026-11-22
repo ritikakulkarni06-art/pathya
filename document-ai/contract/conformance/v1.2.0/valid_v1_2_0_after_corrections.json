@@ -81,8 +81,8 @@
       "raw_text": "4.2 Equations of Motion",
       "current_text": "4.2 Equations of Motion",
       "language": "en",
-      "revision": 1,
-      "review_status": "unreviewed",
+      "revision": 2,
+      "review_status": "approved",
       "confidence": {
         "score": null,
         "origin": "not_available",
@@ -103,8 +103,7 @@
       "equation": null,
       "figure": null,
       "heading_level": 1,
-      "role": "body",
-      "integration": null
+      "role": "body"
     },
     {
       "id": "7d1e4c52-0000-4000-8000-0000000000a2",
@@ -143,8 +142,7 @@
       "equation": null,
       "figure": null,
       "heading_level": null,
-      "role": "body",
-      "integration": null
+      "role": "body"
     },
     {
       "id": "7d1e4c52-0000-4000-8000-0000000000a3",
@@ -191,8 +189,7 @@
       },
       "figure": null,
       "heading_level": null,
-      "role": "body",
-      "integration": null
+      "role": "body"
     },
     {
       "id": "7d1e4c52-0000-4000-8000-0000000000a4",
@@ -242,8 +239,7 @@
       "equation": null,
       "figure": null,
       "heading_level": null,
-      "role": "body",
-      "integration": null
+      "role": "body"
     },
     {
       "id": "7d1e4c52-0000-4000-8000-0000000000a5",
@@ -290,8 +286,7 @@
       "equation": null,
       "figure": null,
       "heading_level": null,
-      "role": "body",
-      "integration": null
+      "role": "body"
     },
     {
       "id": "7d1e4c52-0000-4000-8000-0000000000a6",
@@ -338,8 +333,7 @@
       "equation": null,
       "figure": null,
       "heading_level": null,
-      "role": "body",
-      "integration": null
+      "role": "body"
     },
     {
       "id": "7d1e4c52-0000-4000-8000-0000000000a7",
@@ -388,8 +382,7 @@
       "equation": null,
       "figure": null,
       "heading_level": null,
-      "role": "body",
-      "integration": null
+      "role": "body"
     },
     {
       "id": "7d1e4c52-0000-4000-8000-0000000000a8",
@@ -438,8 +431,7 @@
       "equation": null,
       "figure": null,
       "heading_level": null,
-      "role": "body",
-      "integration": null
+      "role": "body"
     },
     {
       "id": "7d1e4c52-0000-4000-8000-0000000000a9",
@@ -478,15 +470,14 @@
       "equation": null,
       "figure": null,
       "heading_level": null,
-      "role": "footnote",
-      "integration": null
+      "role": "footnote"
     },
     {
       "id": "7d1e4c52-0000-4000-8000-0000000000b1",
       "page_id": "7d1e4c52-0000-4000-8000-0000000000b0",
       "parent_id": null,
       "block_type": "heading",
-      "reading_order": 1,
+      "reading_order": 0,
       "bbox": [
         0.1,
         0.05,
@@ -522,15 +513,14 @@
       "equation": null,
       "figure": null,
       "heading_level": 1,
-      "role": "body",
-      "integration": null
+      "role": "body"
     },
     {
       "id": "7d1e4c52-0000-4000-8000-0000000000b2",
       "page_id": "7d1e4c52-0000-4000-8000-0000000000b0",
       "parent_id": null,
       "block_type": "paragraph",
-      "reading_order": 2,
+      "reading_order": 1,
       "bbox": [
         0.1,
         0.1,
@@ -539,8 +529,8 @@
       ],
       "raw_text": "जब प्रकाश किसी चिकनी सतह पर पड़ता है, तो वह वापस लौट आता है। इसे प्रकाश का परावर्तन कहते हैं (चित्र 10.1 देखें)।",
       "current_text": "जब प्रकाश किसी चिकनी सतह पर पड़ता है, तो वह वापस लौट आता है। इसे प्रकाश का परावर्तन कहते हैं (चित्र 10.1 देखें)।",
-      "language": "hi",
-      "revision": 1,
+      "language": "mul",
+      "revision": 2,
       "review_status": "unreviewed",
       "confidence": {
         "score": 0.81,
@@ -566,15 +556,14 @@
       "equation": null,
       "figure": null,
       "heading_level": null,
-      "role": "body",
-      "integration": null
+      "role": "body"
     },
     {
       "id": "7d1e4c52-0000-4000-8000-0000000000b3",
       "page_id": "7d1e4c52-0000-4000-8000-0000000000b0",
       "parent_id": null,
       "block_type": "figure",
-      "reading_order": 3,
+      "reading_order": 2,
       "bbox": [
         0.25,
         0.24,
@@ -621,15 +610,14 @@
         }
       },
       "heading_level": null,
-      "role": "body",
-      "integration": null
+      "role": "body"
     },
     {
       "id": "7d1e4c52-0000-4000-8000-0000000000b4",
       "page_id": "7d1e4c52-0000-4000-8000-0000000000b0",
       "parent_id": null,
       "block_type": "caption",
-      "reading_order": 0,
+      "reading_order": 3,
       "bbox": [
         0.25,
         0.51,
@@ -639,7 +627,7 @@
       "raw_text": "चित्र 10.1 समतल दर्पण द्वारा प्रकाश का परावर्तन",
       "current_text": "चित्र 10.1 समतल दर्पण द्वारा प्रकाश का परावर्तन",
       "language": "hi",
-      "revision": 2,
+      "revision": 1,
       "review_status": "unreviewed",
       "confidence": {
         "score": 0.9,
@@ -665,14 +653,13 @@
       "equation": null,
       "figure": null,
       "heading_level": null,
-      "role": "body",
-      "integration": null
+      "role": "body"
     },
     {
       "id": "7d1e4c52-0000-4000-8000-0000000000b5",
       "page_id": "7d1e4c52-0000-4000-8000-0000000000b0",
       "parent_id": null,
-      "block_type": "paragraph",
+      "block_type": "list_item",
       "reading_order": 4,
       "bbox": [
         0.12,
@@ -683,7 +670,7 @@
       "raw_text": "(i) आपतन कोण (angle of incidence) = परावतन कोण",
       "current_text": "(i) आपतन कोण (angle of incidence) = परावर्तन कोण",
       "language": "mul",
-      "revision": 3,
+      "revision": 2,
       "review_status": "approved",
       "confidence": {
         "score": 0.62,
@@ -713,8 +700,7 @@
       "equation": null,
       "figure": null,
       "heading_level": null,
-      "role": "body",
-      "integration": null
+      "role": "body"
     }
   ],
   "edges": [
@@ -836,8 +822,6 @@
       "new_text": "(i) आपतन कोण (angle of incidence) = परावर्तन कोण",
       "new_language": null,
       "new_review_status": null,
-      "new_block_type": null,
-      "new_reading_order": null,
       "reason": "OCR dropped the र्व conjunct in परावर्तन.",
       "author_ref": "reviewer:opaque-17",
       "created_at": "2026-11-17T10:02:00Z"
@@ -851,8 +835,6 @@
       "new_text": "When an object moves along a straight line with uniform acceleration, its speed after time t is related to its initial speed u by the first equation of motion.",
       "new_language": null,
       "new_review_status": null,
-      "new_block_type": null,
-      "new_reading_order": null,
       "reason": "conformance vector",
       "author_ref": "reviewer:opaque-17",
       "created_at": "2026-11-19T10:00:00Z"
@@ -860,14 +842,12 @@
     {
       "id": "7d1e4c52-0000-4000-8000-000000001202",
       "document_id": "7d1e4c52-0000-4000-8000-000000000001",
-      "block_id": "7d1e4c52-0000-4000-8000-0000000000b5",
-      "base_revision": 2,
-      "operation": "set_block_type",
+      "block_id": "7d1e4c52-0000-4000-8000-0000000000b2",
+      "base_revision": 1,
+      "operation": "set_language",
       "new_text": null,
-      "new_language": null,
+      "new_language": "mul",
       "new_review_status": null,
-      "new_block_type": "paragraph",
-      "new_reading_order": null,
       "reason": "conformance vector",
       "author_ref": "reviewer:opaque-17",
       "created_at": "2026-11-19T10:00:00Z"
@@ -875,19 +855,16 @@
     {
       "id": "7d1e4c52-0000-4000-8000-000000001203",
       "document_id": "7d1e4c52-0000-4000-8000-000000000001",
-      "block_id": "7d1e4c52-0000-4000-8000-0000000000b4",
+      "block_id": "7d1e4c52-0000-4000-8000-0000000000a1",
       "base_revision": 1,
-      "operation": "set_reading_order",
+      "operation": "set_review_status",
       "new_text": null,
       "new_language": null,
-      "new_review_status": null,
-      "new_block_type": null,
-      "new_reading_order": 0,
+      "new_review_status": "approved",
       "reason": "conformance vector",
       "author_ref": "reviewer:opaque-17",
       "created_at": "2026-11-19T10:00:00Z"
     }
   ],
-  "created_at": "2026-11-17T09:31:15Z",
-  "integration": null
+  "created_at": "2026-11-17T09:31:15Z"
 }
