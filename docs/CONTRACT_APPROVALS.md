@@ -137,18 +137,33 @@ so the reader can access the API's host-scoped CSRF cookie.
   identity as block ID, text SHA-256, sentence index and voice language.
   For `mul` and `und`, the reader retains the source tag and uses
   `integration.voice_language` when supplied, with a script-based fallback.
-- **P2's policy position.** Display `unsupported_content` with a review
-  marker and keep it out of trusted evidence until approved. The reader
-  matches bulk results by block ID and can accept any response order.
+- **P2's policy confirmation.** Atul confirmed that `unsupported_content`
+  stays visible with a review marker and stays out of trusted evidence until
+  reviewer approval. Bulk responses are matched by `block_id` with no order
+  guarantee.
 
-Shared approval and pinning remain pending. Open items include P3 verification
-against the 45 fixtures, end-to-end audio and reader compatibility, and joint
-confirmation of the evidence trust rule and the bulk ordering guarantee.
+Tharun confirmed both rules in his follow-up. Keep `unsupported_content`
+visible with a review marker and exclude it from trusted evidence until a
+reviewer approves it. Match bulk sentence ranges by `block_id`. Reading order
+is available for debugging and carries no contract guarantee.
 
-The published P1 candidate at `9f0d4ccf6ab3b740a98401ee44e6e09daa24eea5`
-contains `pathya-sentences/1`. P3 needs the later `/3` reference and fixture
-bundle from Tharun's update. At P2 commit
-`95b662e6263a702817f96402f86c39966bcd1f26`, prepared playback still computes
-a short SHA-1 key from language and sentence text. The live chapter loader
-reads content and sentence ranges. Verify P3 package ingestion and the
-four-field clip key before recording audio interoperability as complete.
+Tharun shared the reconciled candidate bundle from his `person-1` working tree
+at base commit `fd361526fe077b3c9cf3cc8a0436b0766bf50037`. P3's previous
+segmenter matched 31 of 45 fixtures. The `pathya-sentences/3` port matched all
+45 in the P3 reader range and built-in speech code, including expected
+code-point and UTF-16 offsets and text and sentence hashes. Prepared-audio
+interoperability, shared approval and pinning remain pending.
+
+Atul reported the prepared-audio implementation and passing local
+`npm run test:p1` checks at P2 commit
+`568d572caf7c0316be9ca1113e7fe7c2e7d52579`. The reader loads audio from a
+chapter manifest matching the content revision and keys clips by block ID,
+text SHA-256, sentence index and voice language. It skips synthetic clips.
+Manifest-based downloads are suitable for the live interoperability check.
+
+P3 sends the resolved `en` or `hi` in audio `language` and retains the
+original `mul` or `und` in content. Check equal script counts and text with
+no matching script characters. P3 defaults to English in both cases, while
+P2 picks Hindi on a nonzero tie and the chapter language when both counts
+are zero. Check reconnect both while the new chapter manifest is pending
+and after it is published. Live HTTPS verification remains pending.

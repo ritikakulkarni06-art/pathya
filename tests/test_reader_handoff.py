@@ -112,7 +112,7 @@ def test_bulk_sentences_check_document_access_and_refresh_after_correction(sessi
                 {
                     "block_id": "b",
                     "text_sha256": hashlib.sha256(text.encode()).hexdigest(),
-                    "segmenter": "pathya-reader-v1",
+                    "segmenter": "pathya-sentences/3",
                     "ranges": [{"start": 0, "end": 10}, {"start": 10, "end": 17}],
                 }
             ],
@@ -194,6 +194,7 @@ def test_p1_worker_import_current_content_revision_and_uncertain_pages(worker_cl
     assert set(by_id) == {item["id"] for item in newer.json()["blocks"]}
     for item in newer.json()["blocks"]:
         entry = by_id[item["id"]]
+        assert entry["segmenter"] == "pathya-sentences/3"
         assert (
             entry["text_sha256"]
             == hashlib.sha256((item["current_text"] or "").encode()).hexdigest()

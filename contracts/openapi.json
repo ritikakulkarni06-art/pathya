@@ -4495,7 +4495,7 @@
                               "start": 0
                             }
                           ],
-                          "segmenter": "pathya-reader-v1",
+                          "segmenter": "pathya-sentences/3",
                           "text_sha256": "fa58d0dc8b9989dcbb04abb660d9865c5d23983b76efd9ad07d8551aea436de9"
                         }
                       ],

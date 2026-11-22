@@ -1,27 +1,43 @@
 import re
 
-READER_SEGMENTER_VERSION = "pathya-reader-v1"
+READER_SEGMENTER_VERSION = "pathya-sentences/3"
 SENTENCE_BLOCK_TYPES = frozenset({"heading", "paragraph", "list_item"})
 
-_BOUNDARY = re.compile(r"""[.!?।॥]+["'”’»)}\]]*\s+""")
-_ABBREVIATION = re.compile(r"\b(?:e\.g|i\.e|etc|vs|fig|eq|no|dr|mr|mrs|ms|approx|cf)\.$", re.I)
-_LIST_NUMBER = re.compile(r"\s*[0-9]+\.")
-_DIGIT_STOP = re.compile(r"[0-9]\.$")
+_ABBREVIATIONS = frozenset(
+    "e.g. i.e. etc. vs. cf. fig. figs. eq. eqs. no. nos. dr. mr. mrs. ms. "
+    "approx. p. pp. vol. ch. sec.".split()
+)
+_BOUNDARY = re.compile(r"""[.!?।॥]+["'”’»«)}\]]*(?=\s|$)""")
+_LIST_MARKER = re.compile(r"\(?(?:\d{1,3}|[ivxlcdm]{1,6}|[a-z])[.)]", re.IGNORECASE)
+
+
+def _ends_with_abbreviation(text: str, terminator: int) -> bool:
+    if text[terminator] != ".":
+        return False
+    start = terminator
+    while start > 0 and not text[start - 1].isspace():
+        start -= 1
+    return text[start : terminator + 1].lower().lstrip("(\"'«»") in _ABBREVIATIONS
 
 
 def sentence_ranges(text: str) -> list[tuple[int, int]]:
     """Return contiguous code-point ranges into unchanged reader text."""
-    ranges = []
+    ranges: list[tuple[int, int]] = []
     start = 0
+    length = len(text)
     for match in _BOUNDARY.finditer(text):
         end = match.end()
-        head = text[start:end].rstrip()
-        if _ABBREVIATION.search(head) or _LIST_NUMBER.fullmatch(head):
+        after_punctuation = end
+        while end < length and text[end].isspace():
+            end += 1
+        if end == length or "a" <= text[end] <= "z":
             continue
-        if end < len(text) and text[end] in "0123456789" and _DIGIT_STOP.search(head):
+        if _ends_with_abbreviation(text, match.start()) or _LIST_MARKER.fullmatch(
+            text[start:after_punctuation].strip()
+        ):
             continue
         ranges.append((start, end))
         start = end
-    if start < len(text):
-        ranges.append((start, len(text)))
+    if start < length:
+        ranges.append((start, length))
     return ranges

@@ -232,12 +232,14 @@ Use the same current-block predicate for the review queue and the library
 badge. Return physical page count in library metadata. Published source
 pages carry printed labels where available.
 
-The bulk sentence route uses the existing `pathya-reader-v1` algorithm
-independently of speech configuration. Each response covers one authorized
-document revision and carries all current block IDs with hashes, including
-blocks for which the reader does not split text into sentences. Ready audio
-identifies its own segmenter so the reader can check compatibility. Adopt
-`pathya-sentences/3` once the reference rules and fixtures are available.
+The bulk sentence route uses `pathya-sentences/3` independently of speech
+configuration. Each response covers one authorized document revision and
+carries all current block IDs with hashes, including blocks with no sentence
+ranges. Set `SEGMENTER=pathya` for speech to share these offsets and the `/3`
+version in its audio cache keys. The port and tests use Tharun's handoff
+bundle from P1's working tree at base commit `fd361526fe077b3c9cf3cc8a0436b0766bf50037`.
+The test fixture is the supplied file, with SHA-256
+`4780bdef3079a9f5f3b05d53222d7291cbd35d1ee86b3b994d1644427e35a9e8`.
 
 ### v1.2.0 review-only corrections
 
@@ -248,5 +250,5 @@ lookup also checks the original synthesis inputs against the stored key.
 An existing package retains its original chapter revision, bytes and hash.
 Use the current content revision on reconnect to refresh review metadata.
 Corrections that include text, language or structure changes still invalidate
-affected media. The bulk endpoint currently emits page and reading order.
-Consumers can match by block ID while the team settles the ordering guarantee.
+affected media. The bulk endpoint currently emits page and reading order for
+debugging. Consumers match by `block_id`, with no contract guarantee on order.
