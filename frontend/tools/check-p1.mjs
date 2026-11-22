@@ -18,7 +18,7 @@ ok('sample converts: 3 pages, 8 passages', pkg.pages.length === 3 && pkg.blocks.
 ok('failed page keeps its status and warning', pkg.pages[2].status === 'failed' && pkg.pages[2].warnings.length === 1)
 ok('page without a printed number is marked, not given a fake label', pkg.pages[2].label_missing === true && pkg.pages[2].printed_label === '(3)')
 const notes = pageAnnouncements(pkg.pages, pkg.blocks)
-ok('a failed last page is announced after the last passage', [...notes.after.values()].flat().some((t) => t.includes('could not be read')))
+ok('a failed last page is announced after the last passage, in the language around it', [...notes.after.values()].flat().some((n) => n.text.includes('पढ़ा नहीं जा सका') && n.lang === 'hi'))
 ok('every passage has a voice language', pkg.blocks.every((b) => b.lang === 'en' || b.lang === 'hi'))
 
 // Uncertain table (1.1.0): no cells, counts null, text in raw_text.
@@ -53,6 +53,24 @@ const c = clone(base)
 c.blocks[1].quality_flags = ['low_confidence', 'critical_symbol_uncertain']
 const cp = fromP1(c, extra).blocks[1]
 ok('critical symbol flag sends the passage to review and is the reason shown first', cp.status === 'needs_review' && cp.confidence.flags[0] === 'critical_symbol_uncertain')
+
+// Two row-label columns: both are part of each row's label, and a label merged down two rows is repeated.
+{
+  const r = clone(base)
+  const rt = r.blocks.find((b) => b.block_type === 'table')
+  r.blocks = r.blocks.filter((b) => b.block_type !== 'table_cell')
+  const cell = (i, row, col, text, header, rowSpan = 1) => ({ ...clone(base.blocks.find((b) => b.block_type === 'table_cell')), id: `7d1e4c52-0000-4000-8000-0000000001${String(i).padStart(2, '0')}`, reading_order: 20 + i, raw_text: text, current_text: text,
+    table_cell: { row_index: row, column_index: col, row_span: rowSpan, column_span: 1, is_header: header, header_cell_ids: [] } })
+  const cs = [cell(1, 0, 0, 'Quantity', true), cell(2, 0, 1, 'Case', true), cell(3, 0, 2, 'Value', true),
+    cell(4, 1, 0, 'Speed', true, 2), cell(5, 1, 1, 'walking', true), cell(6, 1, 2, '1.4 m/s', false),
+    cell(7, 2, 1, 'cycling', true), cell(8, 2, 2, '4 m/s', false)]
+  cs.forEach((x) => { x.parent_id = rt.id })
+  r.blocks.push(...cs)
+  Object.assign(rt.table, { row_count: 3, column_count: 3, cell_ids: cs.map((x) => x.id) })
+  r.edges = r.edges.filter((e) => !['header_for', 'contains'].includes(e.edge_type))
+  const rp = tableOf(fromP1(r, extra))
+  ok('two row-label columns are read together, merged label repeated', !!rp && rp.table.columns.join('|') === 'Quantity – Case|Value' && rp.table.rows.map((x) => x.join('|')).join(' / ') === 'Speed – walking|1.4 m/s / Speed – cycling|4 m/s')
+}
 
 // Contract 1.2.0: heading_level, role, voice_language, and the original mul/und tag.
 const v = clone(base)

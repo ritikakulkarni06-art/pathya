@@ -11,8 +11,9 @@ async (page) => {
   await page.getByRole('heading', { name: 'Add a chapter', level: 1 }).waitFor()
 
   await page.getByRole('button', { name: 'Upload and prepare' }).click()
+  await page.getByRole('alert').filter({ hasText: 'Choose a PDF' }).waitFor({ timeout: 3000 }).catch(() => {})
   ok('empty form explains what is missing', await page.getByRole('alert').filter({ hasText: 'Choose a PDF' }).isVisible())
-  ok('error message receives focus', await page.evaluate(() => document.activeElement?.id === 'add-error'))
+  ok('error message receives focus', await page.waitForFunction(() => document.activeElement?.id === 'add-error', null, { timeout: 3000 }).then(() => true, () => false))
 
   await page.getByLabel('Chapter file').setInputFiles({ name: 'notes.pdf', mimeType: 'application/pdf', buffer: Buffer.from('this is not really a pdf') })
   await page.getByRole('button', { name: 'Upload and prepare' }).click()

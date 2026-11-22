@@ -84,12 +84,13 @@ For 1.0.0 and 1.1.0 the converter still guesses where the contract is silent. Ea
 - `mul` and `und` languages (voice picked by counting Hindi and English letters)
 - `review_status` is never set by the pipeline (a passage with any quality flag is treated as needing review)
 
-Supported from 1.1.0: page status and warnings (a page that was not read says so on screen and in narration),
-pages without a printed number, uncertain tables, and merged table headers (repeated over each column they cover).
+Supported from 1.1.0: page status and warnings (a page that was not read says so on screen and in narration, in
+Hindi or English to match the passages around it), pages without a printed number, uncertain tables, merged table
+headers (repeated over each column they cover), and tables with more than one row-label column (joined into one label).
 `npm run test:p1` checks the converter without a browser; pass extra Role 1 JSON files as arguments.
 
-Screens that exist because of the other roles' features. Each one calls the API below; the paths are this
-reader's proposal and still need Role 3's agreement.
+Screens that exist because of the other roles' features. Role 3 has built these routes (`person-3`,
+`docs/API_FOR_FRONTEND.md`); chapters now load from `GET /documents/:id/content` rather than the manifest.
 
 | Screen | For | API call the backend must provide |
 |---|---|---|
@@ -102,8 +103,19 @@ reader's proposal and still need Role 3's agreement.
 
 Sign-in (`src/routes/SignIn.tsx`, `src/api/auth.ts`, `src/state/auth.ts`) follows Role 3's session API: `POST /auth/register`,
 `POST /auth/login`, `POST /auth/logout`, `GET /auth/me`, with the `pathya_csrf` cookie echoed in `X-CSRF-Token` on writes.
-It has only been run against the built-in stand-in, where the app starts signed in as a sample student.
-Sharing a chapter with another person (`POST /documents/:id/grants`) has no screen yet.
+Role 3's API passed with these calls; the full browser flow still needs a shared HTTPS address.
+
+Downloaded chapters are kept per account. After sign-in and on reconnecting, each one is checked against the
+server: a newer revision is fetched, and a chapter the account can no longer open (403, 404, 410) is deleted from
+the device. Signing out deletes that account's downloads, bookmarks and saved places.
+
+Waiting on the other roles:
+- sharing a chapter: Role 3's `POST /documents/:id/grants` takes a user ID, and there is no way yet to find a
+  classmate's ID from their email
+- forgot password: no backend route
+- downloading backend audio for offline use (`/packages`): needs Role 3's real audio output to build against
+- the pinned 1.2.0 contract and sentence segmenter (Role 1)
+- a test in a real browser against the running backend
 
 ## Where things are
 

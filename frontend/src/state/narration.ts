@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { clipKey, speech, hasVoiceFor } from '../lib/speech'
-import { applyPronunciations, pageAnnouncements, unitsFor, type SpeechUnit } from '../lib/sentences'
+import { applyPronunciations, pageAnnouncements, unitsFor, type PageNote, type SpeechUnit } from '../lib/sentences'
 import { store } from '../lib/db'
 import { usePrefs } from './prefs'
 import type { ChapterPackage } from '../types'
@@ -87,7 +87,7 @@ export const useNarration = create<NarrationState>((set, get) => {
       const keep = get().docId === pkg.document.id ? get().units[get().index] : undefined
       // A page that could not be read is always announced, so a listener is never left with a silent gap.
       const notes = pageAnnouncements(pkg.pages, pkg.blocks)
-      const told = (b: { id: string }, list?: string[]): SpeechUnit[] => (list ?? []).map((text) => ({ block_id: b.id, sentence: -2, text, lang: 'en' }))
+      const told = (b: { id: string }, list?: PageNote[]): SpeechUnit[] => (list ?? []).map((n) => ({ block_id: b.id, sentence: -2, text: n.text, lang: n.lang }))
       const units = pkg.blocks.flatMap((b) => [...told(b, notes.before.get(b.id)), ...unitsFor(b, usePrefs.getState().announceFlags), ...told(b, notes.after.get(b.id))])
       // After a correction the text changed: stop so old audio is never played as current.
       if (get().status !== 'idle') {

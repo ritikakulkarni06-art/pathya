@@ -38,8 +38,8 @@ async (page) => {
   ok('"mul" list item with mostly Hindi text is read by the Hindi voice', langs[langs.length - 1] === 'hi')
 
   const note = page.locator('[data-page-status=failed]')
-  ok('a page that could not be read says so, and is not shown as blank', (await note.count()) === 1 && (await note.innerText()).includes('could not be read'))
-  ok('a page with no printed number is named by its place in the file', (await note.innerText()).includes('Page 3 of the file'))
+  ok('a page that could not be read says so in the language around it, and is not shown as blank', (await note.count()) === 1 && (await note.innerText()).includes('पढ़ा नहीं जा सका') && (await note.getAttribute('lang')) === 'hi')
+  ok('a page with no printed number is named by its place in the file', (await note.innerText()).includes('फ़ाइल का पृष्ठ 3'))
   ok('scanner notes for a page can be opened', (await page.getByText(/Notes from the scanner for this page/).count()) === 2)
 
   const fig = page.locator('.passage figure')

@@ -30,8 +30,19 @@ export interface SpeechUnit {
   lang: Lang
 }
 
-/** What the student is told about a page that Role 1 could not read completely. Null when the page is fine. */
-export function pageNotice(page: Page): string | null {
+/** What the student is told about a page that Role 1 could not read completely, in the page's language.
+ *  Null when the page is fine. */
+export function pageNotice(page: Page, lang: Lang = 'en'): string | null {
+  if (lang === 'hi') {
+    const name = page.label_missing ? `फ़ाइल का पृष्ठ ${page.pdf_index_0 + 1}` : `पृष्ठ ${page.printed_label}`
+    switch (page.status) {
+      case 'failed': return `${name} पढ़ा नहीं जा सका। इसकी सामग्री इस अध्याय में नहीं है। इस पृष्ठ के लिए छपी हुई किताब देखें।`
+      case 'needs_ocr': return `${name} एक स्कैन की हुई तस्वीर है जिसे अभी पढ़ा नहीं गया है। इसका कुछ या पूरा पाठ यहाँ नहीं है।`
+      case 'partial': return `${name} आंशिक रूप से ही पढ़ा गया। पाठ यहाँ है, पर शीर्षक, तालिकाएँ और पढ़ने का क्रम गलत हो सकते हैं।`
+      case 'blank': return `${name} किताब में खाली है।`
+      default: return null
+    }
+  }
   const name = page.label_missing ? `Page ${page.pdf_index_0 + 1} of the file` : `Page ${page.printed_label}`
   switch (page.status) {
     case 'failed': return `${name} could not be read. Its content is missing from this chapter. Use the printed book for this page.`
@@ -42,14 +53,34 @@ export function pageNotice(page: Page): string | null {
   }
 }
 
-/** Page notices as narration: spoken before the first passage that follows, or after the last passage of the chapter. */
-export function pageAnnouncements(pages: Page[], blocks: Block[]): { before: Map<string, string[]>; after: Map<string, string[]> } {
-  const before = new Map<string, string[]>()
-  const after = new Map<string, string[]>()
-  let waiting: string[] = []
+/** The language of each page: most of its passages, else the passage that follows it, else the one before. */
+export function pageLanguages(pages: Page[], blocks: Block[]): Map<string, Lang> {
+  const out = new Map<string, Lang>()
+  const order = new Map(pages.map((p, i) => [p.id, i]))
   for (const page of pages) {
-    const note = pageNotice(page)
-    if (note) waiting.push(note)
+    const own = blocks.filter((b) => b.page_id === page.id)
+    const hi = own.filter((b) => b.lang === 'hi').length
+    if (own.length) { out.set(page.id, hi * 2 > own.length ? 'hi' : 'en'); continue }
+    const i = order.get(page.id)!
+    const next = blocks.find((b) => (order.get(b.page_id) ?? -1) > i)
+    const prev = [...blocks].reverse().find((b) => (order.get(b.page_id) ?? Infinity) < i)
+    out.set(page.id, next?.lang ?? prev?.lang ?? 'en')
+  }
+  return out
+}
+
+export interface PageNote { text: string; lang: Lang }
+
+/** Page notices as narration: spoken before the first passage that follows, or after the last passage of the chapter. */
+export function pageAnnouncements(pages: Page[], blocks: Block[]): { before: Map<string, PageNote[]>; after: Map<string, PageNote[]> } {
+  const langs = pageLanguages(pages, blocks)
+  const before = new Map<string, PageNote[]>()
+  const after = new Map<string, PageNote[]>()
+  let waiting: PageNote[] = []
+  for (const page of pages) {
+    const lang = langs.get(page.id) ?? 'en'
+    const text = pageNotice(page, lang)
+    if (text) waiting.push({ text, lang })
     const first = blocks.find((b) => b.page_id === page.id)
     if (first && waiting.length) { before.set(first.id, waiting); waiting = [] }
   }

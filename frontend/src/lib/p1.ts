@@ -116,12 +116,13 @@ export function fromP1(input: unknown, extra: { subject: string; rights_note: st
       } else {
         const grid = Array.from({ length: b.table!.row_count! }, () => Array<string>(b.table!.column_count!).fill(''))
         const head = grid.map(() => true)
+        const isHeader = grid.map((row) => row.map(() => false))
         for (const c of cells) {
           const m = c.table_cell!
           // A merged cell is repeated in every position it covers, so each value still has its full header.
           for (let r = m.row_index; r < m.row_index + m.row_span; r++) {
             if (!m.is_header) head[r] = false
-            for (let k = m.column_index; k < m.column_index + m.column_span; k++) grid[r][k] = c.current_text ?? ''
+            for (let k = m.column_index; k < m.column_index + m.column_span; k++) { grid[r][k] = c.current_text ?? ''; isHeader[r][k] = m.is_header }
           }
         }
         // Header rows are the leading rows made only of header cells. Stacked headers are joined top to bottom.
@@ -130,7 +131,15 @@ export function fromP1(input: unknown, extra: { subject: string; rights_note: st
         // GAP: the reader needs at least one header row. A table without one is sent to review.
         if (n === 0) { n = 1; flags.push('table_structure_uncertain') }
         const columns = grid[0].map((_, k) => [...new Set(grid.slice(0, n).map((row) => row[k]).filter(Boolean))].join(' – '))
-        table = { caption: captionFor.get(b.id), columns, rows: grid.slice(n) }
+        // Row labels: the leading columns whose body cells are all header cells (for example "Quantity" then
+        // "Unit"). They are joined into one label, so every value is read with its full row label.
+        const body = grid.slice(n)
+        let w = 0
+        while (w < columns.length - 2 && body.every((_, r) => isHeader[n + r][w + 1]) && body.every((_, r) => isHeader[n + r][w])) w++
+        const join = (parts: string[]) => [...new Set(parts.filter(Boolean))].join(' – ')
+        table = w === 0
+          ? { caption: captionFor.get(b.id), columns, rows: body }
+          : { caption: captionFor.get(b.id), columns: [join(columns.slice(0, w + 1)), ...columns.slice(w + 1)], rows: body.map((row) => [join(row.slice(0, w + 1)), ...row.slice(w + 1)]) }
         say = cells.map((c) => c.current_text ?? '').join(' ')
       }
     } else if (b.equation) {

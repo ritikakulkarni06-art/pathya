@@ -5,7 +5,7 @@ import { ArrowLeft, Check, Info, CornerDownLeft, Download, FileSearch, Flag, Lis
 import { api, LimitError, OfflineError } from '../api/client'
 import { store, uid } from '../lib/db'
 import { blockText } from '../lib/search'
-import { pageNotice } from '../lib/sentences'
+import { pageLanguages, pageNotice } from '../lib/sentences'
 import { say, submitCorrection, syncPending, useChapter, useOnline, type SubmitOutcome } from '../state/app'
 import { useNarration } from '../state/narration'
 import { readingVars, usePrefs } from '../state/prefs'
@@ -318,6 +318,7 @@ export default function Reader() {
   }
 
   const doc = pkg.document
+  const pageLangs = pageLanguages(pkg.pages, pkg.blocks)
   const activeBlock = pkg.blocks.find((b) => b.id === activeId)
   const activeHeading = activeBlock ? [...pkg.blocks.filter((b) => b.order_key <= activeBlock.order_key)].reverse().find((b) => b.type === 'heading')?.id ?? null : null
   const reviewCount = pkg.blocks.filter((b) => b.status === 'needs_review').length + pending.length
@@ -396,12 +397,12 @@ export default function Reader() {
         {wide && <aside aria-label="Contents and search" className="sticky top-14 h-[calc(100dvh-7.5rem)] overflow-y-auto p-4 pl-6">{navPanel}</aside>}
         <main id="main" tabIndex={-1} className="min-w-0 px-0 pb-52 pt-0 outline-none sm:px-6 sm:pt-6 xl:px-3 xl:pb-32">
           <article aria-label={doc.title} className="reading mx-auto border-border bg-surface px-5 py-6 sm:rounded-card sm:border sm:px-12 sm:py-10" style={readingVars(prefs)} data-focus={prefs.focusMode} data-reading={nar.status === 'playing'}>
-            {pkg.pages.map((page) => (
+            {pkg.pages.map((page) => { const noteLang = pageLangs.get(page.id) ?? 'en'; const note = pageNotice(page, noteLang); return (
               <section key={page.id} aria-label={`Printed page ${page.printed_label}`}>
                 <p className="page-mark first:mt-0" id={`page-${page.printed_label}`} lang="en">Page {page.printed_label}{page.label_missing && <span className="font-normal">no printed number, counted from the start of the file</span>}</p>
-                {pageNotice(page) && (
-                  <div role="note" lang="en" data-page-status={page.status} className={`mb-4 rounded-control border px-3 py-2.5 font-sans text-sm tracking-normal [word-spacing:0] ${page.status === 'blank' ? 'border-border text-muted' : 'border-warn-border bg-warn-bg text-warn-ink'}`}>
-                    <p className="m-0 font-medium">{pageNotice(page)}</p>
+                {note && (
+                  <div role="note" lang={noteLang} data-page-status={page.status} className={`mb-4 rounded-control border px-3 py-2.5 font-sans text-sm tracking-normal [word-spacing:0] ${page.status === 'blank' ? 'border-border text-muted' : 'border-warn-border bg-warn-bg text-warn-ink'}`}>
+                    <p className="m-0 font-medium">{note}</p>
                   </div>
                 )}
                 {!!page.warnings?.length && (
@@ -415,7 +416,7 @@ export default function Reader() {
                     current={unit?.block_id === b.id ? unit.sentence : null} bookmarked={bookmarkIds.has(b.id)} pending={pendingIds.has(b.id)} />
                 ))}
               </section>
-            ))}
+            )})}
             <p className="page-mark" lang="en">End of chapter</p>
           </article>
         </main>
