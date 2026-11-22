@@ -1,0 +1,1595 @@
+{
+  "segmenter": "pathya-sentences/3",
+  "offset_unit": "unicode_code_point",
+  "range_convention": "half-open [start, end); ranges cover the text contiguously from 0 to its length",
+  "text_sha256": "lowercase hex SHA-256 of the exact UTF-8 bytes of the text",
+  "utf16_ranges": "the same ranges as JavaScript (UTF-16 code unit) indices, for readers",
+  "abbreviations": [
+    "approx.",
+    "cf.",
+    "ch.",
+    "dr.",
+    "e.g.",
+    "eq.",
+    "eqs.",
+    "etc.",
+    "fig.",
+    "figs.",
+    "i.e.",
+    "mr.",
+    "mrs.",
+    "ms.",
+    "no.",
+    "nos.",
+    "p.",
+    "pp.",
+    "sec.",
+    "vol.",
+    "vs."
+  ],
+  "rules": [
+    "A sentence may end after one or more of . ! ? । ॥, optionally followed by closing quotes or brackets \" ' ) ] } ’ ” » «, when the next character is whitespace or the end of the text.",
+    "Not after a listed abbreviation (case-insensitive, ignoring a leading ( \" ' « »).",
+    "Not when the text since the previous cut is only a list marker: 1-3 digits in any script, a Roman numeral of up to six letters, or one Latin letter, optionally opened by ( and closed by . or ).",
+    "Not when the next word starts with a lowercase ASCII letter.",
+    "Whitespace after the cut joins the sentence that ended; leading whitespace joins the first sentence."
+  ],
+  "fixtures": [
+    {
+      "id": "regression_mixed_script_decimal",
+      "category": "regression",
+      "text": "Speed is 4.5 m/s.  वेग दिशा बताता है। See Fig. 4.2 next.",
+      "text_sha256": "2ec4935bbfae4ab5d370eef30a66f5133f090be01752fa6cc7933004f52e0674",
+      "length_code_points": 56,
+      "length_utf16": 56,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 19
+        },
+        {
+          "start": 19,
+          "end": 38
+        },
+        {
+          "start": 38,
+          "end": 56
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 19
+        },
+        {
+          "start": 19,
+          "end": 38
+        },
+        {
+          "start": 38,
+          "end": 56
+        }
+      ],
+      "sentences": [
+        "Speed is 4.5 m/s.  ",
+        "वेग दिशा बताता है। ",
+        "See Fig. 4.2 next."
+      ],
+      "sentence_sha256": [
+        "cfbccf7fdc1279bcf4c5a325aa16297c257d8e71817b31c5c6267e0e87007e30",
+        "32cb35f43a61f76791afad00d2b6c7858f634b82dbafe5fcc315bf41cb699b8b",
+        "d4048ff99092b49d90ff58a1ca57a449a3b536902a2ee7d3164ce817dba031af"
+      ]
+    },
+    {
+      "id": "regression_leading_trailing_space",
+      "category": "regression",
+      "text": "  Lead. Tail  ",
+      "text_sha256": "fb28cee56b1a1ac3a5045a0e8c8d9bdd2599a4d6fbc18c376d798c82c67aabc9",
+      "length_code_points": 14,
+      "length_utf16": 14,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 8
+        },
+        {
+          "start": 8,
+          "end": 14
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 8
+        },
+        {
+          "start": 8,
+          "end": 14
+        }
+      ],
+      "sentences": [
+        "  Lead. ",
+        "Tail  "
+      ],
+      "sentence_sha256": [
+        "c5862920902acdb724b1c8e497eb94932170545c66321b12314345f2f3a78c0d",
+        "f33c88ebe2547e19085854adbde35af85c157609c06660e865bef94990c54ad2"
+      ]
+    },
+    {
+      "id": "regression_empty",
+      "category": "regression",
+      "text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "length_code_points": 0,
+      "length_utf16": 0,
+      "ranges": [],
+      "utf16_ranges": [],
+      "sentences": [],
+      "sentence_sha256": []
+    },
+    {
+      "id": "regression_no_terminator",
+      "category": "regression",
+      "text": "No terminator",
+      "text_sha256": "524ba504a24cc7bcc093e18cf04838d0115e838b0c89e959eb1431cb23fecf3f",
+      "length_code_points": 13,
+      "length_utf16": 13,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 13
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 13
+        }
+      ],
+      "sentences": [
+        "No terminator"
+      ],
+      "sentence_sha256": [
+        "524ba504a24cc7bcc093e18cf04838d0115e838b0c89e959eb1431cb23fecf3f"
+      ]
+    },
+    {
+      "id": "regression_astral_code_points",
+      "category": "regression",
+      "text": "𝑥 = 2. Next.",
+      "text_sha256": "29672718ebf28b8c9c76526d8f5b3bb85df47627cda6d86a4dbc229e8e3458e7",
+      "length_code_points": 12,
+      "length_utf16": 13,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 7
+        },
+        {
+          "start": 7,
+          "end": 12
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 8
+        },
+        {
+          "start": 8,
+          "end": 13
+        }
+      ],
+      "sentences": [
+        "𝑥 = 2. ",
+        "Next."
+      ],
+      "sentence_sha256": [
+        "0f9dc9b0eb9f609638982d03b72af79234b24112980141e32b4bdb14068f6cee",
+        "3afc86e0d447bbf9162f547b03ca0fc0c8f746dc161fc3ab269070be2f310e75"
+      ]
+    },
+    {
+      "id": "regression_corrected_heading",
+      "category": "regression",
+      "text": "4.2 Equations of Motion. Revised.",
+      "text_sha256": "c0389624a790a08bb5d6dce5066b8c13da17a79f75599994fae32f9b96c7e178",
+      "length_code_points": 33,
+      "length_utf16": 33,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 25
+        },
+        {
+          "start": 25,
+          "end": 33
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 25
+        },
+        {
+          "start": 25,
+          "end": 33
+        }
+      ],
+      "sentences": [
+        "4.2 Equations of Motion. ",
+        "Revised."
+      ],
+      "sentence_sha256": [
+        "96f2c5a7d27f098ffdf92113e1374053e4e3edbda0819d334322f4b7ec0e979e",
+        "3b9b97d61e614ff5c4555b8165f017179b497ec616bb48bac1ad80f1115ec73b"
+      ]
+    },
+    {
+      "id": "regression_simple_two",
+      "category": "regression",
+      "text": "He saw it. A dog ran.",
+      "text_sha256": "e7a1e37c28b88415dcb20819342acffeac7e12d1b2b4b6c3399031d64513d7c0",
+      "length_code_points": 21,
+      "length_utf16": 21,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 11
+        },
+        {
+          "start": 11,
+          "end": 21
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 11
+        },
+        {
+          "start": 11,
+          "end": 21
+        }
+      ],
+      "sentences": [
+        "He saw it. ",
+        "A dog ran."
+      ],
+      "sentence_sha256": [
+        "ec386c2366c683b316915e115d271e38eb6ec4008330352e319d7f1ebba532a3",
+        "21941c11e2c37956067275760a404bd87ee1a703964de71b09d6716f5b9e3c04"
+      ]
+    },
+    {
+      "id": "regression_ends_with_space",
+      "category": "regression",
+      "text": "Ends with space. ",
+      "text_sha256": "68315c53303a3723613ed2c790f0e51c3ff250aeb0dddeb5d958b5b52a04499c",
+      "length_code_points": 17,
+      "length_utf16": 17,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 17
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 17
+        }
+      ],
+      "sentences": [
+        "Ends with space. "
+      ],
+      "sentence_sha256": [
+        "68315c53303a3723613ed2c790f0e51c3ff250aeb0dddeb5d958b5b52a04499c"
+      ]
+    },
+    {
+      "id": "regression_quote_closer",
+      "category": "regression",
+      "text": "He said \"stop.\" Then left.",
+      "text_sha256": "957b1690659565253c101f26211fedc3d4b5f8bf1dbc84e8a8966ffb99296323",
+      "length_code_points": 26,
+      "length_utf16": 26,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 16
+        },
+        {
+          "start": 16,
+          "end": 26
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 16
+        },
+        {
+          "start": 16,
+          "end": 26
+        }
+      ],
+      "sentences": [
+        "He said \"stop.\" ",
+        "Then left."
+      ],
+      "sentence_sha256": [
+        "4382bdf9eb0c4e86a5e2012906520a7e1a931abb1a96a32b10570ca2d52c56ed",
+        "17b3256a4ecf62842a212f5719f5e0ba68ca9e941c043e9b9b5a50d0be39aaa6"
+      ]
+    },
+    {
+      "id": "regression_decimal_unit",
+      "category": "regression",
+      "text": "Total is 4.5 m. Next.",
+      "text_sha256": "d9acc9e86c08b83c0027859f5e43f8cbf29979e8cb41240fd9f98c951f5af9d4",
+      "length_code_points": 21,
+      "length_utf16": 21,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 16
+        },
+        {
+          "start": 16,
+          "end": 21
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 16
+        },
+        {
+          "start": 16,
+          "end": 21
+        }
+      ],
+      "sentences": [
+        "Total is 4.5 m. ",
+        "Next."
+      ],
+      "sentence_sha256": [
+        "da2e6baf9e844e8cc3f4b3e0cc27490b828cc1460ed4c7ecdcb68bafa8871f3e",
+        "3afc86e0d447bbf9162f547b03ca0fc0c8f746dc161fc3ab269070be2f310e75"
+      ]
+    },
+    {
+      "id": "regression_p3_reader_emoji",
+      "category": "regression",
+      "text": "📚 First.  Second.",
+      "text_sha256": "1d224346de74fc9a0723bda20728a08571cb7df02a1e08cbc7c5793b6b652ae0",
+      "length_code_points": 17,
+      "length_utf16": 18,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 10
+        },
+        {
+          "start": 10,
+          "end": 17
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 11
+        },
+        {
+          "start": 11,
+          "end": 18
+        }
+      ],
+      "sentences": [
+        "📚 First.  ",
+        "Second."
+      ],
+      "sentence_sha256": [
+        "0cf18d57cb8c5c4caf55da215c800a8f744d13d30d3c76e24b691783e6238eb6",
+        "1e8bbbab2a0b0e51cce5a6867182b081c60b35e2512744847021b624729a8218"
+      ]
+    },
+    {
+      "id": "list_arabic_single",
+      "category": "list_marker",
+      "text": "1. Distance is the length of the path travelled.",
+      "text_sha256": "ccffb802a93ca13a4fc796a1da6a60d056d017b654dd0459f548058ebc033e18",
+      "length_code_points": 48,
+      "length_utf16": 48,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 48
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 48
+        }
+      ],
+      "sentences": [
+        "1. Distance is the length of the path travelled."
+      ],
+      "sentence_sha256": [
+        "ccffb802a93ca13a4fc796a1da6a60d056d017b654dd0459f548058ebc033e18"
+      ]
+    },
+    {
+      "id": "list_arabic_two_sentences",
+      "category": "list_marker",
+      "text": "2. Displacement is shortest. It has direction.",
+      "text_sha256": "b0f2291669cd962924e0a0d01ea9f0f85a9c263a1ff5a1eb745f4013f175851a",
+      "length_code_points": 46,
+      "length_utf16": 46,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 29
+        },
+        {
+          "start": 29,
+          "end": 46
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 29
+        },
+        {
+          "start": 29,
+          "end": 46
+        }
+      ],
+      "sentences": [
+        "2. Displacement is shortest. ",
+        "It has direction."
+      ],
+      "sentence_sha256": [
+        "38d329f9ba722447c1159e1cb56466942cc3aeefbcdb35d1bbb91fd7011fdae4",
+        "9040c445c9f97a6d4f3a1f2d95e4225cae6ab95025d63f86a8b45e12f9f5585c"
+      ]
+    },
+    {
+      "id": "list_arabic_two_digits",
+      "category": "list_marker",
+      "text": "10. Tenth item. Second sentence.",
+      "text_sha256": "3f64d99094a04cfc9208c67eb287a8b48b6d459e9c2399f36084e61e0635a892",
+      "length_code_points": 32,
+      "length_utf16": 32,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 16
+        },
+        {
+          "start": 16,
+          "end": 32
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 16
+        },
+        {
+          "start": 16,
+          "end": 32
+        }
+      ],
+      "sentences": [
+        "10. Tenth item. ",
+        "Second sentence."
+      ],
+      "sentence_sha256": [
+        "980f3cdc030e502fd199a469ac2303f89963420026e84fa730be51c42cb2458c",
+        "b7713d24920f25bb563d3ff1e719fc89706450870050ee117d4b10d03c4628ea"
+      ]
+    },
+    {
+      "id": "list_arabic_bracket",
+      "category": "list_marker",
+      "text": "1) Bracket item. More.",
+      "text_sha256": "1b54c4c05eb96c428f634d89b4073ee203e4e5f459e80675b2af5edef25f2ae9",
+      "length_code_points": 22,
+      "length_utf16": 22,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 17
+        },
+        {
+          "start": 17,
+          "end": 22
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 17
+        },
+        {
+          "start": 17,
+          "end": 22
+        }
+      ],
+      "sentences": [
+        "1) Bracket item. ",
+        "More."
+      ],
+      "sentence_sha256": [
+        "b5c1addcc7481b632a2f62ffe33b10583f08e9df43164e24f7859e3330644e50",
+        "2e823667482aae3d8353944b920f4eabeeb9c2b7347ba19f05d4d16a32bd460d"
+      ]
+    },
+    {
+      "id": "list_arabic_parenthesised",
+      "category": "list_marker",
+      "text": "(2) Paren item. More.",
+      "text_sha256": "c49091f4786fa49ff77bf234301c4d995b0f835d56433ccd0e45a7de069d2702",
+      "length_code_points": 21,
+      "length_utf16": 21,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 16
+        },
+        {
+          "start": 16,
+          "end": 21
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 16
+        },
+        {
+          "start": 16,
+          "end": 21
+        }
+      ],
+      "sentences": [
+        "(2) Paren item. ",
+        "More."
+      ],
+      "sentence_sha256": [
+        "fe1ed10e5d6e9cd214b20ca49d23851592e281ef026ad8d8c6a77b80baa6c596",
+        "2e823667482aae3d8353944b920f4eabeeb9c2b7347ba19f05d4d16a32bd460d"
+      ]
+    },
+    {
+      "id": "list_step_is_a_sentence",
+      "category": "list_marker",
+      "text": "Step 3. Mix well.",
+      "text_sha256": "ebcb5ede5c14317d2f7b4d2485fa0eb2a5aebe48563b718596a5068ffeefe695",
+      "length_code_points": 17,
+      "length_utf16": 17,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 8
+        },
+        {
+          "start": 8,
+          "end": 17
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 8
+        },
+        {
+          "start": 8,
+          "end": 17
+        }
+      ],
+      "sentences": [
+        "Step 3. ",
+        "Mix well."
+      ],
+      "sentence_sha256": [
+        "a8219f5af754f499b6e07373a34e53e59859f8cc7d2fd1089cb29f5510ac8f20",
+        "fb4d91e108d0529272b15a6a3ad914834b63d0aac04858d2a1d76ea8c89a9409"
+      ]
+    },
+    {
+      "id": "list_step_then_number",
+      "category": "list_marker",
+      "text": "Step 3. 4 apples fell. Next.",
+      "text_sha256": "e8bd1edba0b2851a34590e1950ac813c5bb50edf67dd8b1ced3f848d98f6820e",
+      "length_code_points": 28,
+      "length_utf16": 28,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 8
+        },
+        {
+          "start": 8,
+          "end": 23
+        },
+        {
+          "start": 23,
+          "end": 28
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 8
+        },
+        {
+          "start": 8,
+          "end": 23
+        },
+        {
+          "start": 23,
+          "end": 28
+        }
+      ],
+      "sentences": [
+        "Step 3. ",
+        "4 apples fell. ",
+        "Next."
+      ],
+      "sentence_sha256": [
+        "a8219f5af754f499b6e07373a34e53e59859f8cc7d2fd1089cb29f5510ac8f20",
+        "c81c92e8c7c1df245fc7ea20b94e6889d361dd4db726f7494cc441b61af5a7ee",
+        "3afc86e0d447bbf9162f547b03ca0fc0c8f746dc161fc3ab269070be2f310e75"
+      ]
+    },
+    {
+      "id": "roman_lower",
+      "category": "roman_numeral",
+      "text": "iv. Roman numbered item.",
+      "text_sha256": "6fa01934abe4c9482eec5a7f9e807fc5a6a9223b0b4b0fe8ee54f118b8c5d6d3",
+      "length_code_points": 24,
+      "length_utf16": 24,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 24
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 24
+        }
+      ],
+      "sentences": [
+        "iv. Roman numbered item."
+      ],
+      "sentence_sha256": [
+        "6fa01934abe4c9482eec5a7f9e807fc5a6a9223b0b4b0fe8ee54f118b8c5d6d3"
+      ]
+    },
+    {
+      "id": "roman_upper_two_sentences",
+      "category": "roman_numeral",
+      "text": "IV. Upper Roman item. Second.",
+      "text_sha256": "52ccfc4f80048d71fdaf6cc8201b35a978c1bc3a0e7cbe9d87b52b8ee71594f7",
+      "length_code_points": 29,
+      "length_utf16": 29,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 22
+        },
+        {
+          "start": 22,
+          "end": 29
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 22
+        },
+        {
+          "start": 22,
+          "end": 29
+        }
+      ],
+      "sentences": [
+        "IV. Upper Roman item. ",
+        "Second."
+      ],
+      "sentence_sha256": [
+        "78d4fcba305e8449a92cb923a3186d241deb4de2426f3d47be089ea7ca08a259",
+        "1e8bbbab2a0b0e51cce5a6867182b081c60b35e2512744847021b624729a8218"
+      ]
+    },
+    {
+      "id": "roman_parenthesised",
+      "category": "roman_numeral",
+      "text": "(iv) Item text. More.",
+      "text_sha256": "d35a3a61a111e5a040025dc9cbde84d42765cd4d5fe6a831278f03ce643f7adb",
+      "length_code_points": 21,
+      "length_utf16": 21,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 16
+        },
+        {
+          "start": 16,
+          "end": 21
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 16
+        },
+        {
+          "start": 16,
+          "end": 21
+        }
+      ],
+      "sentences": [
+        "(iv) Item text. ",
+        "More."
+      ],
+      "sentence_sha256": [
+        "fe1554e6d75e7dada944b11ecdacd0bc374072a22eff6026a32d5ef6e6338e1f",
+        "2e823667482aae3d8353944b920f4eabeeb9c2b7347ba19f05d4d16a32bd460d"
+      ]
+    },
+    {
+      "id": "roman_long",
+      "category": "roman_numeral",
+      "text": "viii. Eighth point. Next.",
+      "text_sha256": "6373345ff6679769953aaf1dbe4f65c1f7c46a605468da0fae44d3166a94019a",
+      "length_code_points": 25,
+      "length_utf16": 25,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 20
+        },
+        {
+          "start": 20,
+          "end": 25
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 20
+        },
+        {
+          "start": 20,
+          "end": 25
+        }
+      ],
+      "sentences": [
+        "viii. Eighth point. ",
+        "Next."
+      ],
+      "sentence_sha256": [
+        "75581349e68b7751a64040ec1a3275e7e0275b5689a03eecb13f3f062a6d467c",
+        "3afc86e0d447bbf9162f547b03ca0fc0c8f746dc161fc3ab269070be2f310e75"
+      ]
+    },
+    {
+      "id": "letter_lower",
+      "category": "lettered_item",
+      "text": "a. Lettered item.",
+      "text_sha256": "7280b1c3e1f66e7f35f7aebac9ab513c5edec1ca483ad7d3c9d40fcbdb3666dc",
+      "length_code_points": 17,
+      "length_utf16": 17,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 17
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 17
+        }
+      ],
+      "sentences": [
+        "a. Lettered item."
+      ],
+      "sentence_sha256": [
+        "7280b1c3e1f66e7f35f7aebac9ab513c5edec1ca483ad7d3c9d40fcbdb3666dc"
+      ]
+    },
+    {
+      "id": "letter_upper",
+      "category": "lettered_item",
+      "text": "B. Capital letter item.",
+      "text_sha256": "ac785f990fc96f9924fdd263ec50b46dd381efeebe3aaea365589fad810ab657",
+      "length_code_points": 23,
+      "length_utf16": 23,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 23
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 23
+        }
+      ],
+      "sentences": [
+        "B. Capital letter item."
+      ],
+      "sentence_sha256": [
+        "ac785f990fc96f9924fdd263ec50b46dd381efeebe3aaea365589fad810ab657"
+      ]
+    },
+    {
+      "id": "letter_parenthesised",
+      "category": "lettered_item",
+      "text": "(a) Lettered in brackets. Next.",
+      "text_sha256": "2e201180019ac9160d2e6f213e46077681610a085a2693d04b3f49a51628738b",
+      "length_code_points": 31,
+      "length_utf16": 31,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 26
+        },
+        {
+          "start": 26,
+          "end": 31
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 26
+        },
+        {
+          "start": 26,
+          "end": 31
+        }
+      ],
+      "sentences": [
+        "(a) Lettered in brackets. ",
+        "Next."
+      ],
+      "sentence_sha256": [
+        "4cae83aa50f61e3475768eb5503caba0a930008ed5d01b02d72453be7fa43de3",
+        "3afc86e0d447bbf9162f547b03ca0fc0c8f746dc161fc3ab269070be2f310e75"
+      ]
+    },
+    {
+      "id": "letter_not_marker_mid_text",
+      "category": "lettered_item",
+      "text": "She got an A. Then left.",
+      "text_sha256": "df66a91465890956f1f425e74ab4fc5ed793904bb3776ee527936dde3c53698a",
+      "length_code_points": 24,
+      "length_utf16": 24,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 14
+        },
+        {
+          "start": 14,
+          "end": 24
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 14
+        },
+        {
+          "start": 14,
+          "end": 24
+        }
+      ],
+      "sentences": [
+        "She got an A. ",
+        "Then left."
+      ],
+      "sentence_sha256": [
+        "705e6c6304c240450cc68093a4b7aba594f2b325f5826a4cc620468e0c5256c2",
+        "17b3256a4ecf62842a212f5719f5e0ba68ca9e941c043e9b9b5a50d0be39aaa6"
+      ]
+    },
+    {
+      "id": "devanagari_numeral",
+      "category": "devanagari",
+      "text": "१. प्रकाश सीधी रेखा में चलता है। यह परावर्तित होता है।",
+      "text_sha256": "50baf5602d3d57157fcd09c53957c1c9332646ac7df382aad39d62194ea5ed25",
+      "length_code_points": 54,
+      "length_utf16": 54,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 33
+        },
+        {
+          "start": 33,
+          "end": 54
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 33
+        },
+        {
+          "start": 33,
+          "end": 54
+        }
+      ],
+      "sentences": [
+        "१. प्रकाश सीधी रेखा में चलता है। ",
+        "यह परावर्तित होता है।"
+      ],
+      "sentence_sha256": [
+        "b4bed4f6447a6b02077bf15795da70a0aa41afae1b100a5c29faa7a4780f89b1",
+        "2ed96ec25e14dbded7c5bbf814f6d7a336785ebce93a189cdbd5c0a05a233aed"
+      ]
+    },
+    {
+      "id": "devanagari_two_digit_numeral",
+      "category": "devanagari",
+      "text": "१०. दसवाँ बिंदु। अगला।",
+      "text_sha256": "af801dbd3122df0cbc137f4f7540c7daef8e2ee386b76da4b1bfd884b793cb29",
+      "length_code_points": 22,
+      "length_utf16": 22,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 17
+        },
+        {
+          "start": 17,
+          "end": 22
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 17
+        },
+        {
+          "start": 17,
+          "end": 22
+        }
+      ],
+      "sentences": [
+        "१०. दसवाँ बिंदु। ",
+        "अगला।"
+      ],
+      "sentence_sha256": [
+        "c87194ebd2fc01dcad7e55de4c472202f4b27c2c19a55fba0427972d3179e252",
+        "2fe287dfeca15a8325e77d13f48cfa879efa77dfe56838b2830a9fba93f15e9c"
+      ]
+    },
+    {
+      "id": "devanagari_question",
+      "category": "devanagari",
+      "text": "क्या यह सही है? हाँ।",
+      "text_sha256": "64d03fe9f95857f0dbe03a38135c7a56c5a2947eef0032d01b0f0a2d4c71c340",
+      "length_code_points": 20,
+      "length_utf16": 20,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 16
+        },
+        {
+          "start": 16,
+          "end": 20
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 16
+        },
+        {
+          "start": 16,
+          "end": 20
+        }
+      ],
+      "sentences": [
+        "क्या यह सही है? ",
+        "हाँ।"
+      ],
+      "sentence_sha256": [
+        "ecf119257091c0f8d8321147e50f8bb221f1c74c40bf223e9b619055dafccb76",
+        "6027274da455351f685e099ec2119689daf3d5c99c6fe67d631ff5a3fc9950ff"
+      ]
+    },
+    {
+      "id": "devanagari_double_danda",
+      "category": "devanagari",
+      "text": "वह आया॥ फिर गया।",
+      "text_sha256": "2e7048cf4fd91cd4f043359d7ec2f56cefcc084caf31beac7f422b0a77bb24c3",
+      "length_code_points": 16,
+      "length_utf16": 16,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 8
+        },
+        {
+          "start": 8,
+          "end": 16
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 8
+        },
+        {
+          "start": 8,
+          "end": 16
+        }
+      ],
+      "sentences": [
+        "वह आया॥ ",
+        "फिर गया।"
+      ],
+      "sentence_sha256": [
+        "f2d3606d02d658dcc4d9bc80032b38b9af092487ced4e69245c47d64b9381275",
+        "0a5cdd9355c367cf18079c591eaff270770bb5931d825c2a23961acb41a5f54c"
+      ]
+    },
+    {
+      "id": "abbrev_pp",
+      "category": "abbreviation",
+      "text": "See pp. 12 for more. Next.",
+      "text_sha256": "3ff7c68062787d40bf2450cd64cc5e6293387573213a7a27e592af254c3f5852",
+      "length_code_points": 26,
+      "length_utf16": 26,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 21
+        },
+        {
+          "start": 21,
+          "end": 26
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 21
+        },
+        {
+          "start": 21,
+          "end": 26
+        }
+      ],
+      "sentences": [
+        "See pp. 12 for more. ",
+        "Next."
+      ],
+      "sentence_sha256": [
+        "a0bac6fba7a8ac9a76ba032a263ae46a929e5e32a72836dd5a7b7d70aadcaf6b",
+        "3afc86e0d447bbf9162f547b03ca0fc0c8f746dc161fc3ab269070be2f310e75"
+      ]
+    },
+    {
+      "id": "abbrev_ch",
+      "category": "abbreviation",
+      "text": "Read Ch. 4 now. Next.",
+      "text_sha256": "e6ea0cb99fdc1ba663017f249669246b54e9671888ace309044913f41b62c8d4",
+      "length_code_points": 21,
+      "length_utf16": 21,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 16
+        },
+        {
+          "start": 16,
+          "end": 21
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 16
+        },
+        {
+          "start": 16,
+          "end": 21
+        }
+      ],
+      "sentences": [
+        "Read Ch. 4 now. ",
+        "Next."
+      ],
+      "sentence_sha256": [
+        "97b79b6bdb245119d19040b3f51ce0c5640a4bbb2af651a7b341fe6980374012",
+        "3afc86e0d447bbf9162f547b03ca0fc0c8f746dc161fc3ab269070be2f310e75"
+      ]
+    },
+    {
+      "id": "abbrev_vol",
+      "category": "abbreviation",
+      "text": "Vol. 2 is long. Next.",
+      "text_sha256": "9d2d18ba0eb51a310fc95f2efb106593f6ad9651b30af53ffcba4f4c18159be7",
+      "length_code_points": 21,
+      "length_utf16": 21,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 16
+        },
+        {
+          "start": 16,
+          "end": 21
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 16
+        },
+        {
+          "start": 16,
+          "end": 21
+        }
+      ],
+      "sentences": [
+        "Vol. 2 is long. ",
+        "Next."
+      ],
+      "sentence_sha256": [
+        "ea5e08d7ea566eaac6b99180a211bec92bbf5354797c29eb24084d6e8f1d57a7",
+        "3afc86e0d447bbf9162f547b03ca0fc0c8f746dc161fc3ab269070be2f310e75"
+      ]
+    },
+    {
+      "id": "abbrev_figs",
+      "category": "abbreviation",
+      "text": "Use figs. 2 and 3. Next.",
+      "text_sha256": "d5bc5241bca6c3f1f06d996f96755d89450401cb6471ef68ce6943c8aeb500dc",
+      "length_code_points": 24,
+      "length_utf16": 24,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 19
+        },
+        {
+          "start": 19,
+          "end": 24
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 19
+        },
+        {
+          "start": 19,
+          "end": 24
+        }
+      ],
+      "sentences": [
+        "Use figs. 2 and 3. ",
+        "Next."
+      ],
+      "sentence_sha256": [
+        "63c2c77ccac6725e5d06e153771d40d92b78c2ea0ad39519208ff62cbd392a1d",
+        "3afc86e0d447bbf9162f547b03ca0fc0c8f746dc161fc3ab269070be2f310e75"
+      ]
+    },
+    {
+      "id": "abbrev_cf",
+      "category": "abbreviation",
+      "text": "Compare cf. Table 2. Next.",
+      "text_sha256": "71bbf961be0a1c7fcf25bb41813c4779cedd3e834fc31d99df272064c2de9d51",
+      "length_code_points": 26,
+      "length_utf16": 26,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 21
+        },
+        {
+          "start": 21,
+          "end": 26
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 21
+        },
+        {
+          "start": 21,
+          "end": 26
+        }
+      ],
+      "sentences": [
+        "Compare cf. Table 2. ",
+        "Next."
+      ],
+      "sentence_sha256": [
+        "41bd5fef1f13cde810e21b4ee512ae143bbf24a48702eef5d805f9e517ce7bd3",
+        "3afc86e0d447bbf9162f547b03ca0fc0c8f746dc161fc3ab269070be2f310e75"
+      ]
+    },
+    {
+      "id": "abbrev_fig_decimal",
+      "category": "abbreviation",
+      "text": "See Fig. 4.2 for details. Next one.",
+      "text_sha256": "2d18e837e7d1e069cb9992b01c728dc700797fe981db85e627a9066675c93d95",
+      "length_code_points": 35,
+      "length_utf16": 35,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 26
+        },
+        {
+          "start": 26,
+          "end": 35
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 26
+        },
+        {
+          "start": 26,
+          "end": 35
+        }
+      ],
+      "sentences": [
+        "See Fig. 4.2 for details. ",
+        "Next one."
+      ],
+      "sentence_sha256": [
+        "1024270777fb4736e03cdae4e76033d0fea79700fa0bb2212be08b22663a5072",
+        "72c29e7169d6239d1f263e00015eee52217020d98b723756e42e33b8cc739aab"
+      ]
+    },
+    {
+      "id": "abbrev_eg",
+      "category": "abbreviation",
+      "text": "Use e.g. a ruler. Then measure.",
+      "text_sha256": "83c77c6d2dbb35c6eb00e3ebfcc68fb55d2d1078387ad0943b55bb6ee430a8e3",
+      "length_code_points": 31,
+      "length_utf16": 31,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 18
+        },
+        {
+          "start": 18,
+          "end": 31
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 18
+        },
+        {
+          "start": 18,
+          "end": 31
+        }
+      ],
+      "sentences": [
+        "Use e.g. a ruler. ",
+        "Then measure."
+      ],
+      "sentence_sha256": [
+        "9a11235bb1462ba53352caf4d4104ec2f8cd0ed308a8e0a0d385a633e49ba37c",
+        "9b731ba38ada80760946afc45ca8711410b6bd4b2f5f556e55a963bba594644f"
+      ]
+    },
+    {
+      "id": "abbrev_titles",
+      "category": "abbreviation",
+      "text": "Mr. Rao and Dr. Sen met. Then left.",
+      "text_sha256": "bbaaa72b48014eafbd4223de04d1621d9d4e7f715ae00076d1a53570801c87e8",
+      "length_code_points": 35,
+      "length_utf16": 35,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 25
+        },
+        {
+          "start": 25,
+          "end": 35
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 25
+        },
+        {
+          "start": 25,
+          "end": 35
+        }
+      ],
+      "sentences": [
+        "Mr. Rao and Dr. Sen met. ",
+        "Then left."
+      ],
+      "sentence_sha256": [
+        "cb3b56b0e76fbf16d7a3526802aad20c4cf7b3b1989843e2702329a25bbe238f",
+        "17b3256a4ecf62842a212f5719f5e0ba68ca9e941c043e9b9b5a50d0be39aaa6"
+      ]
+    },
+    {
+      "id": "abbrev_in_brackets",
+      "category": "abbreviation",
+      "text": "Speed (cf. Table 2) varies. Next.",
+      "text_sha256": "3723ffa76076168b680fb1123cea0277cdd64ccc96dae12a912c2629ab5d1fed",
+      "length_code_points": 33,
+      "length_utf16": 33,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 28
+        },
+        {
+          "start": 28,
+          "end": 33
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 28
+        },
+        {
+          "start": 28,
+          "end": 33
+        }
+      ],
+      "sentences": [
+        "Speed (cf. Table 2) varies. ",
+        "Next."
+      ],
+      "sentence_sha256": [
+        "00f879ae056b523aae26ca5d3eee54afb7138da6fbf2e33e53183224529fff24",
+        "3afc86e0d447bbf9162f547b03ca0fc0c8f746dc161fc3ab269070be2f310e75"
+      ]
+    },
+    {
+      "id": "guillemet_closing",
+      "category": "guillemet",
+      "text": "He said «stop.» Then left.",
+      "text_sha256": "707d557340d6fe0128c801480cf9ae883ce2c34af5cebfbfe24b0f340915efdc",
+      "length_code_points": 26,
+      "length_utf16": 26,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 16
+        },
+        {
+          "start": 16,
+          "end": 26
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 16
+        },
+        {
+          "start": 16,
+          "end": 26
+        }
+      ],
+      "sentences": [
+        "He said «stop.» ",
+        "Then left."
+      ],
+      "sentence_sha256": [
+        "06a5a76ff93e240315264c47b7fa958df4b642c6f41deb71953864bf3971545d",
+        "17b3256a4ecf62842a212f5719f5e0ba68ca9e941c043e9b9b5a50d0be39aaa6"
+      ]
+    },
+    {
+      "id": "guillemet_reversed",
+      "category": "guillemet",
+      "text": "Er sagte »Halt.« Dann ging er.",
+      "text_sha256": "64f16b8add825dbf469de565c1259d492721ef17bd065f41e1b8fe2f321ecbfe",
+      "length_code_points": 30,
+      "length_utf16": 30,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 17
+        },
+        {
+          "start": 17,
+          "end": 30
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 17
+        },
+        {
+          "start": 17,
+          "end": 30
+        }
+      ],
+      "sentences": [
+        "Er sagte »Halt.« ",
+        "Dann ging er."
+      ],
+      "sentence_sha256": [
+        "cddf25e94ac34966850a46a5cf5522d436c801469374c934dcd18dc635c811e7",
+        "5f23324be7aa510a948cb5c80e78f20046f23324e527df426f47dce90f88ba1f"
+      ]
+    },
+    {
+      "id": "guillemet_abbreviation",
+      "category": "guillemet",
+      "text": "See «cf. Table 2» here. Next.",
+      "text_sha256": "4b698e78272916fd7debce0e43185638b9699b7112703565b12b601d9994c81d",
+      "length_code_points": 29,
+      "length_utf16": 29,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 24
+        },
+        {
+          "start": 24,
+          "end": 29
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 24
+        },
+        {
+          "start": 24,
+          "end": 29
+        }
+      ],
+      "sentences": [
+        "See «cf. Table 2» here. ",
+        "Next."
+      ],
+      "sentence_sha256": [
+        "2e8de43b0875e9055a524c11144cd547780a8bcd7223d866d5c3669299870666",
+        "3afc86e0d447bbf9162f547b03ca0fc0c8f746dc161fc3ab269070be2f310e75"
+      ]
+    },
+    {
+      "id": "lowercase_continuation",
+      "category": "other",
+      "text": "It rained. then it stopped.",
+      "text_sha256": "2c505e9fad855009116a8232ec89bbf178f42ec2d21fe007910e6647544faa06",
+      "length_code_points": 27,
+      "length_utf16": 27,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 27
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 27
+        }
+      ],
+      "sentences": [
+        "It rained. then it stopped."
+      ],
+      "sentence_sha256": [
+        "2c505e9fad855009116a8232ec89bbf178f42ec2d21fe007910e6647544faa06"
+      ]
+    },
+    {
+      "id": "multiple_terminators",
+      "category": "other",
+      "text": "Wow! Really?! Yes.",
+      "text_sha256": "cb98b360773426f3c476ff8cd57d7be7da3bd3c8614175605b1db87f104bf40f",
+      "length_code_points": 18,
+      "length_utf16": 18,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 5
+        },
+        {
+          "start": 5,
+          "end": 14
+        },
+        {
+          "start": 14,
+          "end": 18
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 5
+        },
+        {
+          "start": 5,
+          "end": 14
+        },
+        {
+          "start": 14,
+          "end": 18
+        }
+      ],
+      "sentences": [
+        "Wow! ",
+        "Really?! ",
+        "Yes."
+      ],
+      "sentence_sha256": [
+        "b56512e294c8ea9ac2577242fc357d9fe7916a57f90d73773f6a3bad96177a0e",
+        "32e516a5bb9d0a4404353adb0ec79ea4b454177b5ed6c92f0da12a81d40215ac",
+        "5f9a2b795615ba6a3d5455fd5624d773fbca5bcd16249c421fd37411dc9837da"
+      ]
+    },
+    {
+      "id": "newline_whitespace",
+      "category": "other",
+      "text": "Line one.\nLine two.",
+      "text_sha256": "2f9ce0b72be8c99f2560d28081f32ace70d5ff46c732191ea75ca22158af8e3e",
+      "length_code_points": 19,
+      "length_utf16": 19,
+      "ranges": [
+        {
+          "start": 0,
+          "end": 10
+        },
+        {
+          "start": 10,
+          "end": 19
+        }
+      ],
+      "utf16_ranges": [
+        {
+          "start": 0,
+          "end": 10
+        },
+        {
+          "start": 10,
+          "end": 19
+        }
+      ],
+      "sentences": [
+        "Line one.\n",
+        "Line two."
+      ],
+      "sentence_sha256": [
+        "7c085df69713d5198ca47dd7ad4bfc57cb9353995ca4ff6a5882d1dafe809e6e",
+        "79bc5f11ed4620681be04700058bad0f4173cbbb66b902c839eb5c70d8408ade"
+      ]
+    }
+  ]
+}

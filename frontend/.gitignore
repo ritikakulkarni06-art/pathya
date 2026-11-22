@@ -1,0 +1,9 @@
+node_modules
+dist
+dev-dist
+.taste-skill
+.playwright-cli
+*.tsbuildinfo
+.venv
+tools/voices
+e2e/shots
