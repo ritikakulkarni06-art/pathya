@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect } from 'react'
-import { Route, Routes } from 'react-router'
+import { Route, Routes, useLocation } from 'react-router'
 import { applyRootPrefs, usePrefs } from './state/prefs'
 import { Notices } from './components/Notices'
 import Library from './routes/Library'
@@ -23,13 +23,14 @@ export default function App() {
   const check = useAuth((s) => s.check)
   useEffect(() => void check(), [check])
   const online = useOnline()
+  const resetting = useLocation().pathname === '/reset-password'
   useEffect(() => { if (auth === 'in' && online) void revalidateDownloads() }, [auth, online])
 
   return (
     <>
       <a href="#main" className="skip-link">Skip to content</a>
       <Suspense fallback={<p className="p-6 text-muted" role="status">Loading…</p>}>
-        {auth === 'checking' ? <p className="p-6 text-muted" role="status">Loading…</p> : auth === 'out' ? <SignIn /> : (
+        {auth === 'checking' ? <p className="p-6 text-muted" role="status">Loading…</p> : auth === 'out' || resetting ? <SignIn /> : (
         <Routes>
           <Route path="/" element={<Library />} />
           <Route path="/read/:docId" element={<Reader />} />
