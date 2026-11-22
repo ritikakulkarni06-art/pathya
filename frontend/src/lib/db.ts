@@ -2,6 +2,7 @@
 // immutable audio and page images live in Cache Storage (report p.18).
 import { deleteDB, openDB, type IDBPDatabase } from 'idb'
 import type { AnswerRecord, Bookmark, ChapterPackage, PendingCorrection, Pronunciation } from '../types'
+import { sha256 } from './hash'
 
 export interface StoredPackage extends ChapterPackage {
   downloaded_at: string
@@ -61,23 +62,37 @@ export const store = {
   /** Download a chapter. The old package stays until every part of the new one is stored. */
   async savePackage(pkg: ChapterPackage, onProgress?: (done: number, total: number) => void): Promise<StoredPackage> {
     const urls = assetUrls(pkg)
+    const hashes = new Map(pkg.audio.filter((a) => a.sha256).map((a) => [a.url, a.sha256!]))
     const missing: string[] = []
-    if (urls.length && 'caches' in window) {
-      const cache = await caches.open(assetCache())
+    const cache = 'caches' in window ? await caches.open(assetCache()) : null
+    if (urls.length && cache) {
       let done = 0
       for (const url of urls) {
         try {
-          const res = await fetch(url)
-          if (!res.ok) throw new Error(String(res.status))
-          await cache.put(url, res)
+          // Files are immutable (a changed clip gets a new address), so one already saved is reused.
+          if (!(await cache.match(url))) {
+            const res = await fetch(url)
+            if (!res.ok) throw new Error(String(res.status))
+            const body = await res.arrayBuffer()
+            // Role 3 lists a SHA-256 for every clip; a file that does not match is not kept.
+            if (hashes.has(url) && (await sha256(body)) !== hashes.get(url)) throw new Error('hash')
+            await cache.put(url, new Response(body, { headers: res.headers }))
+          }
         } catch {
           missing.push(url)
         }
         onProgress?.(++done, urls.length)
       }
     }
+    const d = await db()
+    const old: StoredPackage | undefined = await d.get('packages', pkg.document.id)
     const stored: StoredPackage = { ...pkg, downloaded_at: new Date().toISOString(), missing_assets: missing }
-    await (await db()).put('packages', stored)
+    await d.put('packages', stored)
+    // Files the new revision no longer uses are removed only after it is stored.
+    if (old && cache) {
+      const keep = new Set(urls)
+      await Promise.all(assetUrls(old).filter((u) => !keep.has(u)).map((u) => cache.delete(u)))
+    }
     return stored
   },
   /** Remove everything this account keeps on the device: downloads, places, bookmarks, answers, queued corrections. */

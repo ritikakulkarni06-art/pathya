@@ -50,9 +50,10 @@ npm run audio
 npm run build
 ```
 
-Clips land in `public/audio/<chapter>/` with a list in `public/audio/<chapter>.json`. Each clip is named by a
-hash of its sentence, so changed text can never play old audio. To try another voice, download it the same way
-and run `npm run audio -- <voice name>`. In the real system this job belongs to the backend.
+Clips land in `public/audio/<chapter>/` with a list in `public/audio/<chapter>.json`. Each clip is listed under
+the same key Role 3 uses (passage id, SHA-256 of the passage text, sentence number, voice language), so changed
+text can never play old audio. To try another voice, download it the same way
+and run `npm run audio -- <voice name>`. With `VITE_API_URL` set, clips come from Role 3 instead (below).
 
 ## How it connects to the other roles
 
@@ -105,6 +106,13 @@ Sign-in (`src/routes/SignIn.tsx`, `src/api/auth.ts`, `src/state/auth.ts`) follow
 `POST /auth/login`, `POST /auth/logout`, `GET /auth/me`, with the `pathya_csrf` cookie echoed in `X-CSRF-Token` on writes.
 Role 3's API passed with these calls; the full browser flow still needs a shared HTTPS address.
 
+Prepared narration from Role 3: the reader reads `GET /documents/:id/manifest` (same revision only), fetches each
+passage's audio file from `GET /assets/:asset_id`, and plays a clip only when the passage id, text SHA-256,
+sentence boundaries and voice language all match (`src/lib/audio.ts`). A `mul` or `und` passage matches by its
+source tag and is keyed by its voice language. Silent test clips (`synthetic`) are never played. Downloading a
+chapter saves the clips, checks each one against its SHA-256, and reuses clips already saved, so a review-only
+change re-downloads nothing.
+
 Downloaded chapters are kept per account. After sign-in and on reconnecting, each one is checked against the
 server: a newer revision is fetched, and a chapter the account can no longer open (403, 404, 410) is deleted from
 the device. Signing out deletes that account's downloads, bookmarks and saved places.
@@ -113,7 +121,7 @@ Waiting on the other roles:
 - sharing a chapter: Role 3's `POST /documents/:id/grants` takes a user ID, and there is no way yet to find a
   classmate's ID from their email
 - forgot password: no backend route
-- downloading backend audio for offline use (`/packages`): needs Role 3's real audio output to build against
+- a joint check of prepared audio against Role 3's running server
 - the pinned 1.2.0 contract and sentence segmenter (Role 1)
 - a test in a real browser against the running backend
 

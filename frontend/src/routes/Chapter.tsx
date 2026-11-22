@@ -5,7 +5,7 @@ import { ArrowLeft, BookOpen, Check, CircleAlert, Trash2 } from 'lucide-react'
 import { Shell } from '../components/Shell'
 import { api } from '../api/client'
 import { store } from '../lib/db'
-import { clipKey } from '../lib/speech'
+import { unitClipKey } from '../lib/hash'
 import { unitsFor } from '../lib/sentences'
 import { refreshReviewCount, say, useChapter, useOnline } from '../state/app'
 import { FLAG_REASONS, type AnswerRecord, type BlockStatus, type ChapterPackage, type RevisionEntry } from '../types'
@@ -44,8 +44,9 @@ function Step({ ok, name, children }: { ok: boolean; name: string; children: Rea
 /** How many narration sentences have a prepared clip made from the current text. */
 async function audioCover(pkg: ChapterPackage) {
   const have = new Set(pkg.audio.map((a) => a.key))
+  const texts = new Map(pkg.blocks.map((b) => [b.id, b.text_current]))
   const units = pkg.blocks.flatMap((b) => unitsFor(b, false))
-  const keys = await Promise.all(units.map((u) => clipKey(u.lang, u.text)))
+  const keys = await Promise.all(units.map((u) => unitClipKey(u, texts.get(u.block_id))))
   return { total: units.length, ready: keys.filter((k) => have.has(k)).length }
 }
 

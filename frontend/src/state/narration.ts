@@ -1,5 +1,6 @@
 import { create } from 'zustand'
-import { clipKey, speech, hasVoiceFor } from '../lib/speech'
+import { speech, hasVoiceFor } from '../lib/speech'
+import { unitClipKey } from '../lib/hash'
 import { applyPronunciations, pageAnnouncements, unitsFor, type PageNote, type SpeechUnit } from '../lib/sentences'
 import { store } from '../lib/db'
 import { usePrefs } from './prefs'
@@ -27,6 +28,7 @@ let run = 0
 /** Identity of the loaded content, so re-fetching the same revision never interrupts playback. */
 let loadedKey = ''
 let clips = new Map<string, string>()
+let blockTexts = new Map<string, string>()
 
 export const useNarration = create<NarrationState>((set, get) => {
   async function speakFrom(i: number) {
@@ -40,7 +42,7 @@ export const useNarration = create<NarrationState>((set, get) => {
       const prefs = usePrefs.getState()
       const text = applyPronunciations(unit.text, unit.lang, docId ?? '', pronunciations)
       // A prepared clip is used only for the exact, unmodified sentence it was made from.
-      const clipUrl = text === unit.text ? clips.get(await clipKey(unit.lang, unit.text)) : undefined
+      const clipUrl = text === unit.text ? clips.get(await unitClipKey(unit, blockTexts.get(unit.block_id))) : undefined
       if (clipUrl) {
         try {
           await speech.speak({ text, lang: unit.lang, rate: prefs.rate, clipUrl })
@@ -84,12 +86,20 @@ export const useNarration = create<NarrationState>((set, get) => {
       if (key === loadedKey) return
       loadedKey = key
       clips = new Map(pkg.audio.map((a) => [a.key, a.url]))
+      blockTexts = new Map(pkg.blocks.map((b) => [b.id, b.text_current]))
+      const before = get().units
       const keep = get().docId === pkg.document.id ? get().units[get().index] : undefined
       // A page that could not be read is always announced, so a listener is never left with a silent gap.
       const notes = pageAnnouncements(pkg.pages, pkg.blocks)
       const told = (b: { id: string }, list?: PageNote[]): SpeechUnit[] => (list ?? []).map((n) => ({ block_id: b.id, sentence: -2, text: n.text, lang: n.lang }))
       const units = pkg.blocks.flatMap((b) => [...told(b, notes.before.get(b.id)), ...unitsFor(b, usePrefs.getState().announceFlags), ...told(b, notes.after.get(b.id))])
       // After a correction the text changed: stop so old audio is never played as current.
+      // A change that leaves every spoken word the same (for example a review approval) keeps playing.
+      const same = get().docId === pkg.document.id && before.length === units.length && units.every((u, i) => u.block_id === before[i].block_id && u.text === before[i].text)
+      if (same) {
+        set({ units })
+        return
+      }
       if (get().status !== 'idle') {
         run++
         speech.cancel()

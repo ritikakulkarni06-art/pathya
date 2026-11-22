@@ -93,7 +93,7 @@ export interface ChapterPackage {
   pages: Page[]
   blocks: Block[]
   /** Prepared sentence audio from the backend. Empty means the reader uses the device voice. */
-  audio: { key: string; url: string; bytes: number }[]
+  audio: { key: string; url: string; bytes: number; sha256?: string }[]
   /** Name of the voice that made the clips, shown to the student. */
   audio_voice?: string
   bytes: number

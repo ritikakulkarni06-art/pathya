@@ -28,12 +28,6 @@ export interface SpeechAdapter {
   cancel(): void
 }
 
-/** Clips are named by a hash of language and sentence, so changed text never matches old audio. */
-export async function clipKey(lang: Lang, text: string): Promise<string> {
-  const buf = await crypto.subtle.digest('SHA-1', new TextEncoder().encode(`${lang}|${text}`))
-  return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('').slice(0, 16)
-}
-
 /** Use the downloaded copy of a clip when there is one, so narration keeps working offline. */
 async function clipSource(url: string): Promise<string> {
   try {

@@ -1,8 +1,10 @@
 // Runs Role 1 documents through the reader's converter without a browser.
-// Usage: node --experimental-strip-types tools/check-p1.mjs [more-documents.json ...]
+// Usage: npm run test:p1 -- [more-documents.json ...]
 import { readFileSync } from 'node:fs'
 import { fromP1 } from '../src/lib/p1.ts'
-import { pageAnnouncements, sentencesOf, toSentenceStarts } from '../src/lib/sentences.ts'
+import { pageAnnouncements, sentencesOf, toSentenceStarts, unitsFor } from '../src/lib/sentences.ts'
+import { clipsFor } from '../src/lib/audio.ts'
+import { unitClipKey } from '../src/lib/hash.ts'
 
 const extra = { subject: 'check', rights_note: 'check' }
 const load = (f) => JSON.parse(readFileSync(f, 'utf8'))
@@ -98,6 +100,31 @@ const starts = toSentenceStarts(hiText, [cut(0, i1), cut(i1 + 1, i2), cut(i2 + 1
 const pieces = starts && sentencesOf({ text_current: hiText, lang: 'hi', sentence_starts: starts })
 ok('code-point ranges with a character outside the basic plane map to the right sentences', !!pieces && pieces.length === 3 && pieces.join('') === hiText && pieces[2] === 'अंत')
 ok('ranges that do not fit the text are ignored', toSentenceStarts('short', [cut(0, 50)]) === null)
+
+// Role 3 prepared audio: the four-field clip key (passage, text SHA-256, sentence number, voice language).
+{
+  const enc = new TextEncoder()
+  const sha = async (t) => [...new Uint8Array(await crypto.subtle.digest('SHA-256', enc.encode(t)))].map((b) => b.toString(16).padStart(2, '0')).join('')
+  const text = 'Speed is distance per time. वेग में दिशा भी होती है।'
+  const cps = [...text], cut = cps.indexOf('.') + 1
+  const units = [[0, cut], [cut + 1, cps.length]].map(([s, e], i) => ({ text_offset_start: s, text_offset_end: e, clip_asset_id: `clip${i}`, hash: 'h' + i, bytes: 100 }))
+  const block = () => ({ id: 'b1', type: 'paragraph', lang: 'hi', source_lang: 'mul', text_current: text, status: 'trusted' })
+  const file = async (over = {}) => ({ status: 'ready', block_id: 'b1', text_sha256: await sha(text), language: 'mul', units, ...over })
+  const url = (id) => `/api/assets/${id}`
+
+  const b = block()
+  const clips = await clipsFor(b, await file(), url)
+  ok('backend clips are keyed by passage, text hash, sentence number and voice language', clips.length === 2 && clips[1].key === `b1|${await sha(text)}|1|hi` && clips[1].url === '/api/assets/clip1')
+  ok('a mul passage keeps its tag and gets the clip for its voice language', b.source_lang === 'mul' && clips.every((c) => c.key.endsWith('|hi')))
+  const keys = await Promise.all(unitsFor(b, false).map((u) => unitClipKey(u, b.text_current)))
+  ok('the narrator asks for exactly those keys', keys.join() === clips.map((c) => c.key).join())
+  const reviewed = { ...block(), status: 'reviewed', revision: 7 }
+  ok('a review-only change keeps the same clips', (await clipsFor(reviewed, await file(), url)).map((c) => c.key).join() === clips.map((c) => c.key).join())
+  ok('edited text gets no old clips', (await clipsFor({ ...block(), text_current: text + ' नया' }, await file(), url)).length === 0)
+  ok('silent test clips are never used', (await clipsFor(block(), await file({ synthetic: true }), url)).length === 0)
+  ok('clips cut at other sentence boundaries are not used', (await clipsFor({ ...block(), sentence_starts: [0, 5] }, await file(), url)).length === 0)
+  ok('clips in another voice language are not used', (await clipsFor({ ...block(), source_lang: undefined }, await file({ language: 'en' }), url)).length === 0)
+}
 
 for (const f of process.argv.slice(2)) {
   try { const p = fromP1(load(f), extra); ok(`${f}: ${p.pages.length} pages, ${p.blocks.length} passages`, p.blocks.every((b) => b.lang === 'en' || b.lang === 'hi')) }

@@ -7,6 +7,8 @@ import { fromP1 } from '../lib/p1'
 import type { Answer, Block, ChapterPackage, CorrectionRequest, CorrectionResult, DocumentSummary, Lang, RevisionEntry, Usage } from '../types'
 import { splitSentences, toSentenceStarts } from '../lib/sentences'
 import { tokens } from '../lib/search'
+import { sha256 } from '../lib/hash'
+import { clipsFor, type AudioUnits } from '../lib/audio'
 
 export class OfflineError extends Error {
   constructor() {
@@ -320,9 +322,11 @@ interface BackendDocument {
 }
 // Role 3 has no subject or printed page range in the list, so those stay empty here.
 
-/** SHA-256 of the exact UTF-8 text, as Role 3 sends it with each block's sentence ranges. */
-const sha256 = async (text: string) =>
-  [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)))].map((b) => b.toString(16).padStart(2, '0')).join('')
+/** Role 3's chapter manifest: one audio entry per passage that has prepared narration. */
+interface Manifest {
+  revision: number
+  artifacts: { block_id: string; asset_id?: string; status: string; synthetic?: boolean }[]
+}
 
 interface SentenceRanges {
   document_revision: number
@@ -347,6 +351,21 @@ function http(base: string): PathyaApi {
     if (res.status === 204) return undefined as T
     if (!res.ok) throw new Error(`The server answered ${res.status}.`)
     return res.json()
+  }
+  /** Prepared narration from Role 3. A clip is kept only when its passage text, sentence and voice language
+   *  match what the reader will say; everything else uses the device voice. Silent test clips are skipped. */
+  async function backendAudio(pkg: ChapterPackage, revision: number) {
+    const manifest = await call<Manifest>(`/documents/${pkg.document.id}/manifest`)
+    if (manifest.revision !== revision) return
+    const blocks = new Map(pkg.blocks.map((b) => [b.id, b]))
+    for (const entry of manifest.artifacts) {
+      const b = blocks.get(entry.block_id)
+      if (!b || entry.status !== 'ready' || !entry.asset_id || entry.synthetic) continue
+      const a = await call<AudioUnits>(`/assets/${entry.asset_id}`).catch((e) => { if (e instanceof OfflineError) throw e; return null })
+      const clips = a ? await clipsFor(b, a, (id) => `${base}/assets/${id}`) : []
+      pkg.audio.push(...clips)
+      pkg.bytes += clips.reduce((n, c) => n + c.bytes, 0)
+    }
   }
   return {
     async createDocument(input) {
@@ -395,6 +414,9 @@ function http(base: string): PathyaApi {
       } catch (e) {
         if (e instanceof OfflineError) throw e
       }
+      await backendAudio(pkg, revision).catch((e) => {
+        if (e instanceof OfflineError) throw e
+      })
       return pkg
     },
     patchBlock: (_doc, req) =>
