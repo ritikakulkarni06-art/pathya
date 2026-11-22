@@ -1,0 +1,12 @@
+{"id":"s1","category":"supported","question":"What provides sunlight energy?","gold_block_ids":["column-left"],"expected_abstain":false,"sample":true}
+{"id":"s2","category":"supported","question":"What green pigment do leaves contain?","gold_block_ids":["column-right"],"expected_abstain":false,"sample":true}
+{"id":"s3","category":"supported","question":"What is the Bean Count?","gold_block_ids":["cell-count","header-count","cell-kind"],"expected_abstain":false,"sample":true}
+{"id":"s4","category":"supported","question":"What is two plus two?","gold_block_ids":["equation-1"],"expected_abstain":false,"sample":true}
+{"id":"s5","category":"supported","question":"Which square and circle shapes are shown?","gold_block_ids":["figure-1","caption-1"],"expected_abstain":false,"sample":true}
+{"id":"s6","category":"supported","question":"पौधे प्रकाश ऊर्जा से क्या बनाते हैं?","gold_block_ids":["paragraph-7"],"expected_abstain":false,"sample":true}
+{"id":"a1","category":"absent","question":"Describe a unicorn habitat.","gold_block_ids":[],"expected_abstain":true,"sample":true}
+{"id":"a2","category":"absent","question":"Explain quantum rocket propulsion.","gold_block_ids":[],"expected_abstain":true,"sample":true}
+{"id":"m1","category":"misleading_premise","question":"Why does sunlight stop plants making food?","gold_block_ids":["column-left"],"expected_abstain":true,"sample":true}
+{"id":"m2","category":"misleading_premise","question":"Which unicorn makes leaves green?","gold_block_ids":["column-right"],"expected_abstain":true,"sample":true}
+{"id":"d1","category":"damaged","question":"What value?","gold_block_ids":[],"expected_abstain":true,"sample":true}
+{"id":"d2","category":"damaged","question":"Is the value reliable?","gold_block_ids":[],"expected_abstain":true,"sample":true}

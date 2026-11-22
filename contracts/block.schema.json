@@ -1,0 +1,314 @@
+{
+  "$defs": {
+    "BlockMetadata": {
+      "additionalProperties": false,
+      "properties": {
+        "alt_text_extended": {
+          "anyOf": [
+            {
+              "maxLength": 10000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Alt Text Extended"
+        },
+        "alt_text_short": {
+          "anyOf": [
+            {
+              "maxLength": 1000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Alt Text Short"
+        },
+        "caption_block_ids": {
+          "items": {
+            "pattern": "^[A-Za-z0-9_-]{1,128}$",
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Caption Block Ids",
+          "type": "array"
+        },
+        "header_cell_ids": {
+          "items": {
+            "pattern": "^[A-Za-z0-9_-]{1,128}$",
+            "type": "string"
+          },
+          "maxItems": 200,
+          "title": "Header Cell Ids",
+          "type": "array"
+        },
+        "mathml": {
+          "anyOf": [
+            {
+              "maxLength": 20000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mathml"
+        },
+        "spoken_fallback": {
+          "anyOf": [
+            {
+              "maxLength": 5000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Spoken Fallback"
+        }
+      },
+      "title": "BlockMetadata",
+      "type": "object"
+    },
+    "Confidence": {
+      "additionalProperties": false,
+      "properties": {
+        "engine": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Engine",
+          "type": "string"
+        },
+        "flags": {
+          "items": {
+            "maxLength": 128,
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Flags",
+          "type": "array"
+        },
+        "score": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Score"
+        }
+      },
+      "required": [
+        "engine",
+        "score",
+        "flags"
+      ],
+      "title": "Confidence",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "changed_at": {
+          "format": "date-time",
+          "title": "Changed At",
+          "type": "string"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Model"
+        },
+        "parser": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Parser",
+          "type": "string"
+        },
+        "reviewer": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9_-]{1,128}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reviewer"
+        },
+        "version": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "parser",
+        "model",
+        "version",
+        "reviewer",
+        "changed_at"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "bbox": {
+      "maxItems": 4,
+      "minItems": 4,
+      "prefixItems": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "number"
+        }
+      ],
+      "title": "Bbox",
+      "type": "array"
+    },
+    "confidence": {
+      "$ref": "#/$defs/Confidence"
+    },
+    "critical_flag": {
+      "default": false,
+      "title": "Critical Flag",
+      "type": "boolean"
+    },
+    "id": {
+      "pattern": "^[A-Za-z0-9_-]{1,128}$",
+      "title": "Id",
+      "type": "string"
+    },
+    "lang": {
+      "enum": [
+        "en",
+        "hi"
+      ],
+      "title": "Lang",
+      "type": "string"
+    },
+    "metadata": {
+      "$ref": "#/$defs/BlockMetadata"
+    },
+    "order_key": {
+      "title": "Order Key",
+      "type": "number"
+    },
+    "page_id": {
+      "pattern": "^[A-Za-z0-9_-]{1,128}$",
+      "title": "Page Id",
+      "type": "string"
+    },
+    "parent_id": {
+      "anyOf": [
+        {
+          "pattern": "^[A-Za-z0-9_-]{1,128}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Parent Id"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    },
+    "revision": {
+      "default": 1,
+      "minimum": 1,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "status": {
+      "enum": [
+        "ok",
+        "needs_review",
+        "corrected",
+        "reviewed",
+        "unsupported",
+        "not_scored"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "successor_ids": {
+      "items": {
+        "pattern": "^[A-Za-z0-9_-]{1,128}$",
+        "type": "string"
+      },
+      "maxItems": 100,
+      "title": "Successor Ids",
+      "type": "array"
+    },
+    "text_current": {
+      "maxLength": 100000,
+      "title": "Text Current",
+      "type": "string"
+    },
+    "text_raw": {
+      "maxLength": 100000,
+      "title": "Text Raw",
+      "type": "string"
+    },
+    "type": {
+      "enum": [
+        "heading",
+        "paragraph",
+        "list_item",
+        "table",
+        "table_cell",
+        "equation",
+        "figure",
+        "caption"
+      ],
+      "title": "Type",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "page_id",
+    "type",
+    "parent_id",
+    "order_key",
+    "bbox",
+    "text_raw",
+    "text_current",
+    "lang",
+    "status",
+    "confidence",
+    "provenance"
+  ],
+  "title": "Block",
+  "type": "object"
+}

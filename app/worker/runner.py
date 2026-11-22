@@ -1,0 +1,199 @@
+import json
+import os
+import signal
+import sqlite3
+import subprocess
+import sys
+import threading
+import time
+from typing import Any
+
+from app.clock import now_utc
+from app.config import Settings
+from app.db.connection import Database
+from app.db.migrate import migrate
+from app.db.repos import jobs
+from app.errors import Problem
+from app.services.deletions import schedule_daily_sweep
+from app.services.jobs import LeaseLost, claim_next, fail, finish, heartbeat
+from app.services.operations import record_job_metric
+from app.worker.handlers.audio import handle as audio
+from app.worker.handlers.delete import handle as delete
+from app.worker.handlers.extract import handle as extract
+from app.worker.handlers.index import handle as index
+from app.worker.handlers.rebuild import handle as rebuild
+
+
+def execute_claimed(database: Database, settings: Settings, job: dict[str, Any]) -> None:
+    started = time.monotonic()
+    try:
+        if job["kind"] == "extract":
+            extract(database, settings, job)
+        elif job["kind"] == "rebuild":
+            rebuild(database, settings, job)
+        elif job["kind"] == "build_audio":
+            audio(database, settings, job)
+        elif job["kind"] == "build_index":
+            index(database, settings, job)
+        elif job["kind"] in {"delete", "retention_sweep"}:
+            delete(database, settings, job)
+        else:
+            raise Problem(
+                422, "handler_unavailable", "This processing stage is not implemented yet."
+            )
+    except LeaseLost:
+        return
+    except Problem as error:
+        if error.code == "stale_revision":
+            try:
+                finish(
+                    database,
+                    job["id"],
+                    job["lease_owner"],
+                    "ready",
+                    "A newer content revision superseded this processing request.",
+                )
+            except LeaseLost:
+                return
+        else:
+            fail(database, job["id"], job["lease_owner"], error.code, error.detail)
+    except Exception:
+        fail(
+            database,
+            job["id"],
+            job["lease_owner"],
+            "processing_failed",
+            "Processing could not finish. Check the adapter and retry limit.",
+        )
+    finally:
+        record_job_metric(database, job, round((time.monotonic() - started) * 1000))
+
+
+def renew_lease(database: Database, job: dict[str, Any], settings: Settings) -> bool | None:
+    """A busy writer is not proof of lease loss; publication still validates ownership."""
+    try:
+        return heartbeat(database, job["id"], job["lease_owner"], settings.job_lease_seconds)
+    except sqlite3.OperationalError as error:
+        if getattr(error, "sqlite_errorcode", None) in {sqlite3.SQLITE_BUSY, sqlite3.SQLITE_LOCKED}:
+            return None
+        raise
+
+
+def run_once(database: Database, settings: Settings) -> bool:
+    """In-process integration helper. The CLI uses a child process for hard timeout control."""
+    job = claim_next(database, settings)
+    if job is None:
+        return False
+    stopped = threading.Event()
+
+    def keep_lease() -> None:
+        while not stopped.wait(settings.job_lease_seconds / 3):
+            if renew_lease(database, job, settings) is False:
+                break
+
+    keeper = threading.Thread(target=keep_lease, daemon=True)
+    keeper.start()
+    try:
+        execute_claimed(database, settings, job)
+    finally:
+        stopped.set()
+        keeper.join(timeout=5)
+    return True
+
+
+def child_environment(settings: Settings) -> dict[str, str]:
+    environment = os.environ.copy()
+    for key, value in settings.model_dump(mode="json").items():
+        if value is None:
+            environment.pop(key.upper(), None)
+        else:
+            environment[key.upper()] = (
+                json.dumps(value) if isinstance(value, (list, dict)) else str(value)
+            )
+    environment["SESSION_SECRET"] = settings.session_secret.get_secret_value()
+    environment["GEMINI_API_KEY"] = settings.gemini_api_key.get_secret_value()
+    return environment
+
+
+def stop_process(process: subprocess.Popen[bytes]) -> None:
+    if process.poll() is not None:
+        return
+    if sys.platform == "win32":
+        subprocess.run(
+            ["taskkill", "/PID", str(process.pid), "/T", "/F"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=False,
+        )
+        process.kill()
+    else:
+        os.killpg(process.pid, signal.SIGKILL)
+    process.wait()
+
+
+def run_worker(settings: Settings, *, once: bool = False) -> None:
+    assert settings.pathya_db_path is not None
+    database = Database(settings.pathya_db_path)
+    migrate(database)
+    stopping = threading.Event()
+
+    def shutdown(signum: int, frame: Any) -> None:
+        stopping.set()
+
+    signal.signal(signal.SIGTERM, shutdown)
+    signal.signal(signal.SIGINT, shutdown)
+    last_sweep_day = ""
+    while not stopping.is_set():
+        day = now_utc()[:10]
+        if day != last_sweep_day:
+            schedule_daily_sweep(database, settings)
+            last_sweep_day = day
+        job = claim_next(database, settings)
+        if job is None:
+            if once:
+                return
+            stopping.wait(0.5)
+            continue
+        flags = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
+        process = subprocess.Popen(
+            [sys.executable, "-m", "app.worker.execute", job["id"], job["lease_owner"]],
+            env=child_environment(settings),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            start_new_session=sys.platform != "win32",
+            creationflags=flags,
+        )
+        started = time.monotonic()
+        last_heartbeat = started
+        while process.poll() is None:
+            instant = time.monotonic()
+            if stopping.is_set() or instant - started >= settings.job_timeout_seconds:
+                stop_process(process)
+                fail(
+                    database,
+                    job["id"],
+                    job["lease_owner"],
+                    "worker_stopped" if stopping.is_set() else "job_timeout",
+                    "Processing stopped. The visible retry policy will be applied.",
+                )
+                break
+            if instant - last_heartbeat >= settings.job_lease_seconds / 3:
+                renewed = renew_lease(database, job, settings)
+                if renewed is False:
+                    stop_process(process)
+                    break
+                if renewed is True:
+                    last_heartbeat = instant
+            stopping.wait(0.05)
+        with database.read_conn() as connection:
+            remaining = jobs.get_job(connection, job["id"])
+        if remaining and remaining["lease_owner"] == job["lease_owner"]:
+            fail(
+                database,
+                job["id"],
+                job["lease_owner"],
+                "worker_exit",
+                "The worker exited before completing this attempt.",
+            )
+        if once:
+            return

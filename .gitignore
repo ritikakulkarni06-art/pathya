@@ -34,6 +34,11 @@ coverage/
 *.sqlite3
 *.log
 data/
+backups/
+eval/out/
+!eval/data/
+eval/data/*
+!eval/data/sample.jsonl
 uploads/
 storage/
 audio/
@@ -47,3 +52,7 @@ Thumbs.db
 .codex-tmp/
 .agents/
 .codex/
+
+# Test runner scratch files
+pytest-cache-files-*/
+eval/out/

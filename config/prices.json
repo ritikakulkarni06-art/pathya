@@ -1,0 +1,14 @@
+{
+  "TODO": "Fill verified current INR tariffs, model ID, UTC updated_at and source_note manually before enabling paid calls. Placeholder zeros do NOT mean free usage.",
+  "prices": [
+    {
+      "provider": "gemini",
+      "model": "MANUAL_MODEL_ID_REQUIRED",
+      "input_inr_per_million_tokens": "0",
+      "output_inr_per_million_tokens": "0",
+      "updated_at": "2026-11-17T00:00:00+00:00",
+      "source_note": "TODO: Verify current tariff, currency conversion, taxes, terms and retention.",
+      "verified": false
+    }
+  ]
+}

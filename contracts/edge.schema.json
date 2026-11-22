@@ -1,0 +1,34 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "from_id": {
+      "pattern": "^[A-Za-z0-9_-]{1,128}$",
+      "title": "From Id",
+      "type": "string"
+    },
+    "relation": {
+      "enum": [
+        "contains",
+        "precedes",
+        "caption_of",
+        "refers_to",
+        "header_for",
+        "supersedes"
+      ],
+      "title": "Relation",
+      "type": "string"
+    },
+    "to_id": {
+      "pattern": "^[A-Za-z0-9_-]{1,128}$",
+      "title": "To Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "from_id",
+    "relation",
+    "to_id"
+  ],
+  "title": "Edge",
+  "type": "object"
+}

@@ -1,0 +1,133 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "asset_id": {
+      "anyOf": [
+        {
+          "pattern": "^[A-Za-z0-9_-]{1,128}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Asset Id"
+    },
+    "block_id": {
+      "anyOf": [
+        {
+          "pattern": "^[A-Za-z0-9_-]{1,128}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Block Id"
+    },
+    "content_hash": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Content Hash"
+    },
+    "dependency_revisions": {
+      "patternProperties": {
+        "^[A-Za-z0-9_-]{1,128}$": {
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "title": "Dependency Revisions",
+      "type": "object"
+    },
+    "document_id": {
+      "pattern": "^[A-Za-z0-9_-]{1,128}$",
+      "title": "Document Id",
+      "type": "string"
+    },
+    "engine_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Engine Version"
+    },
+    "id": {
+      "pattern": "^[A-Za-z0-9_-]{1,128}$",
+      "title": "Id",
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "audio_block",
+        "chunk_index",
+        "embedding",
+        "package"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "language": {
+      "anyOf": [
+        {
+          "enum": [
+            "en",
+            "hi"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Language"
+    },
+    "status": {
+      "enum": [
+        "pending",
+        "building",
+        "ready",
+        "stale",
+        "failed"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "voice": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Voice"
+    }
+  },
+  "required": [
+    "id",
+    "document_id",
+    "kind",
+    "block_id",
+    "dependency_revisions",
+    "content_hash",
+    "language",
+    "voice",
+    "engine_version",
+    "status",
+    "asset_id"
+  ],
+  "title": "Artifact",
+  "type": "object"
+}

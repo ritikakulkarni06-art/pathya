@@ -1,0 +1,101 @@
+{
+  "$defs": {
+    "Citation": {
+      "additionalProperties": false,
+      "properties": {
+        "block_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Block Id",
+          "type": "string"
+        },
+        "rev": {
+          "minimum": 1,
+          "title": "Rev",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "block_id",
+        "rev"
+      ],
+      "title": "Citation",
+      "type": "object"
+    },
+    "Claim": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/Citation"
+          },
+          "maxItems": 30,
+          "minItems": 1,
+          "title": "Evidence",
+          "type": "array"
+        },
+        "text": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text",
+        "evidence"
+      ],
+      "title": "Claim",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "abstain": {
+      "title": "Abstain",
+      "type": "boolean"
+    },
+    "claims": {
+      "items": {
+        "$ref": "#/$defs/Claim"
+      },
+      "maxItems": 8,
+      "title": "Claims",
+      "type": "array"
+    },
+    "document_revision": {
+      "minimum": 1,
+      "title": "Document Revision",
+      "type": "integer"
+    },
+    "model_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Model Id",
+      "type": "string"
+    },
+    "origin": {
+      "const": "ai_explanation",
+      "title": "Origin",
+      "type": "string"
+    },
+    "uncertainty_notes": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 12,
+      "title": "Uncertainty Notes",
+      "type": "array"
+    }
+  },
+  "required": [
+    "origin",
+    "document_revision",
+    "claims",
+    "abstain",
+    "uncertainty_notes",
+    "model_id"
+  ],
+  "title": "GeneratedAnswer",
+  "type": "object"
+}

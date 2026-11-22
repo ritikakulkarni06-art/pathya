@@ -1,0 +1,79 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "accepted_revision": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Accepted Revision"
+    },
+    "author_id": {
+      "pattern": "^[A-Za-z0-9_-]{1,128}$",
+      "title": "Author Id",
+      "type": "string"
+    },
+    "base_revision": {
+      "minimum": 1,
+      "title": "Base Revision",
+      "type": "integer"
+    },
+    "block_id": {
+      "pattern": "^[A-Za-z0-9_-]{1,128}$",
+      "title": "Block Id",
+      "type": "string"
+    },
+    "document_id": {
+      "pattern": "^[A-Za-z0-9_-]{1,128}$",
+      "title": "Document Id",
+      "type": "string"
+    },
+    "id": {
+      "pattern": "^[A-Za-z0-9_-]{1,128}$",
+      "title": "Id",
+      "type": "string"
+    },
+    "operations": {
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "title": "Operations",
+      "type": "array"
+    },
+    "reason": {
+      "maxLength": 2000,
+      "minLength": 1,
+      "title": "Reason",
+      "type": "string"
+    },
+    "state": {
+      "enum": [
+        "accepted",
+        "conflict",
+        "rejected"
+      ],
+      "title": "State",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "document_id",
+    "block_id",
+    "base_revision",
+    "operations",
+    "reason",
+    "author_id",
+    "state"
+  ],
+  "title": "Correction",
+  "type": "object"
+}
