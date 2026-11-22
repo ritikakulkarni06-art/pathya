@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router'
 import * as Dialog from '@radix-ui/react-dialog'
 import { ArrowLeft, BookOpen, Check, CircleAlert, Trash2 } from 'lucide-react'
 import { Shell } from '../components/Shell'
+import { Sharing } from '../components/Sharing'
 import { api } from '../api/client'
 import { store } from '../lib/db'
 import { unitClipKey } from '../lib/hash'
@@ -190,6 +191,8 @@ export default function Chapter() {
             </dl>
             <p className="m-0 mt-4 text-xs text-muted">Permission note: {doc.rights_note}</p>
           </Card>
+
+          <Sharing docId={docId} title={doc.title} online={online} />
 
           <Card id="ch-remove" title="Remove this chapter">
             <p className="m-0 mt-2 text-muted">Deletes the uploaded file, the prepared text and audio, and the copy on this device. This cannot be undone.</p>

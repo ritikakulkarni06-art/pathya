@@ -28,6 +28,10 @@ export interface AuthApi {
   /** Creates the account and signs in. */
   register(email: string, password: string): Promise<User>
   logout(): Promise<void>
+  /** Sends a reset link if an account uses this address. Never says whether one does. */
+  requestReset(email: string): Promise<void>
+  /** Sets a new password with the token from the link. Signs the account out everywhere. */
+  confirmReset(token: string, password: string): Promise<void>
 }
 
 /** Header every write to the real server must carry. */
@@ -44,6 +48,7 @@ const MESSAGES: Record<string, string> = {
   invalid_credentials: 'The email or password is incorrect.',
   account_unavailable: 'This account cannot be registered. Try signing in.',
   https_required: 'Use a secure HTTPS connection to sign in.',
+  reset_link_invalid: 'This reset link has expired or was already used. Ask for a new one.',
 }
 
 function http(base: string): AuthApi {
@@ -74,6 +79,8 @@ function http(base: string): AuthApi {
       return api.login(email, password) // registering does not start a session
     },
     logout: async () => void (await send('/auth/logout')),
+    requestReset: async (email) => void (await send('/auth/password-reset', { email })),
+    confirmReset: async (token, password) => void (await send('/auth/password-reset/confirm', { token, password })),
   }
   return api
 }
@@ -81,6 +88,8 @@ function http(base: string): AuthApi {
 // ---------- stand-in ----------
 const USERS = 'pathya.mock.users.v1'
 const SESSION = 'pathya.mock.session.v1'
+const RESETS = 'pathya.mock.resets.v1'
+const OUTBOX = 'pathya.mock.outbox.v1'
 const SAMPLE: User = { id: 'sample-student', email: 'student@pathya.example', role: 'user' }
 const read = <T,>(key: string, fallback: T): T => {
   try { return JSON.parse(localStorage.getItem(key) ?? '') as T } catch { return fallback }
@@ -116,6 +125,33 @@ const mock: AuthApi = {
     return mock.login(email, password)
   },
   async logout() {
+    localStorage.setItem(SESSION, JSON.stringify('out'))
+  },
+  // The stand-in has no email: the link is kept in this browser's "outbox" (pathya.mock.outbox.v1).
+  async requestReset(email) {
+    online()
+    await pause()
+    const users = read<Record<string, { id: string; hash: string }>>(USERS, {})
+    if (!users[email.toLowerCase()]) return
+    const token = crypto.randomUUID() + crypto.randomUUID()
+    const resets = read<Record<string, { email: string; until: number }>>(RESETS, {})
+    for (const k of Object.keys(resets)) if (resets[k].email === email.toLowerCase()) delete resets[k]
+    resets[await digest(token)] = { email: email.toLowerCase(), until: Date.now() + 30 * 60_000 }
+    localStorage.setItem(RESETS, JSON.stringify(resets))
+    localStorage.setItem(OUTBOX, JSON.stringify({ to: email, link: `${location.origin}/reset-password?token=${token}` }))
+  },
+  async confirmReset(token, password) {
+    online()
+    await pause()
+    const resets = read<Record<string, { email: string; until: number }>>(RESETS, {})
+    const key = await digest(token)
+    const r = resets[key]
+    if (!r || r.until < Date.now()) throw new AuthError('reset_link_invalid', MESSAGES.reset_link_invalid)
+    delete resets[key]
+    localStorage.setItem(RESETS, JSON.stringify(resets))
+    const users = read<Record<string, { id: string; hash: string }>>(USERS, {})
+    users[r.email] = { ...users[r.email], hash: await digest(password) }
+    localStorage.setItem(USERS, JSON.stringify(users))
     localStorage.setItem(SESSION, JSON.stringify('out'))
   },
 }

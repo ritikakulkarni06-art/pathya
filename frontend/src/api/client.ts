@@ -69,9 +69,28 @@ export interface PathyaApi {
   listJobs(): Promise<Job[]>
   cancelJob(jobId: string): Promise<Job>
   retryJob(jobId: string): Promise<Job>
+  /** Who else can open a chapter. Null when this account does not own it (only owners share). */
+  listGrants(docId: string): Promise<Grant[] | null>
+  /** Give a classmate access by the email address of their Pathya account. */
+  share(docId: string, email: string, role: Grant['role']): Promise<void>
+  unshare(docId: string, userId: string): Promise<void>
 }
 
+export interface Grant {
+  user_id: string
+  email: string
+  role: 'reader' | 'reviewer'
+  created_at: string
+}
+
+/** A refusal with a message ready to show, e.g. "No Pathya account uses that address." */
+export class ShareError extends Error {}
+
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms))
+const GRANTS = 'pathya.mock.grants.v1'
+const loadGrants = (): Record<string, Grant[]> => {
+  try { return JSON.parse(localStorage.getItem(GRANTS) ?? '{}') } catch { return {} }
+}
 const online = () => {
   if (!navigator.onLine) throw new OfflineError()
 }
@@ -271,6 +290,31 @@ const mock: PathyaApi = {
     saveJobs(loadJobs().map((j) => (j.id === jobId ? { ...j, cancelled: false, started: Date.now() } : j)))
     return mockJob(jobId)
   },
+  // The stand-in treats every chapter as yours, and knows the accounts created in this browser.
+  async listGrants(docId) {
+    online()
+    await wait(200)
+    return loadGrants()[docId] ?? []
+  },
+  async share(docId, email, role) {
+    online()
+    await wait(300)
+    let accounts: Record<string, { id: string }> = {}
+    try { accounts = JSON.parse(localStorage.getItem('pathya.mock.users.v1') ?? '{}') } catch { /* none */ }
+    const mail = email.trim().toLowerCase()
+    const found = accounts[mail]
+    if (!found) throw new ShareError('No Pathya account uses that address. Ask your classmate to create one first.')
+    const all = loadGrants()
+    all[docId] = [...(all[docId] ?? []).filter((g) => g.user_id !== found.id), { user_id: found.id, email: mail, role, created_at: new Date().toISOString() }]
+    localStorage.setItem(GRANTS, JSON.stringify(all))
+  },
+  async unshare(docId, userId) {
+    online()
+    await wait(200)
+    const all = loadGrants()
+    all[docId] = (all[docId] ?? []).filter((g) => g.user_id !== userId)
+    localStorage.setItem(GRANTS, JSON.stringify(all))
+  },
 }
 
 // Base mode from the report: extractive evidence passages, no generated prose.
@@ -443,6 +487,26 @@ function http(base: string): PathyaApi {
       return call(`/jobs/${id}`)
     },
     retryJob: (id) => call(`/jobs/${id}/retry`, { method: 'POST' }),
+    async listGrants(id) {
+      online()
+      const res = await fetch(`${base}/documents/${id}/grants`, { credentials: 'include' })
+      if (res.status === 403 || res.status === 404) return null
+      if (!res.ok) throw new Error(`The server answered ${res.status}.`)
+      return (await res.json()).grants
+    },
+    async share(id, email, role) {
+      online()
+      const res = await fetch(`${base}/documents/${id}/grants`, {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json', ...csrfHeader() },
+        body: JSON.stringify({ email, role }),
+      })
+      if (res.ok) return
+      const problem = await res.json().catch(() => ({}))
+      if (res.status === 422) throw new ShareError('Enter the email address of a Pathya account, for example name@school.in.')
+      throw new ShareError(typeof problem.detail === 'string' ? problem.detail : `Sharing did not work. The server answered ${res.status}.`)
+    },
+    unshare: (id, userId) => call(`/documents/${id}/grants/${encodeURIComponent(userId)}`, { method: 'DELETE' }),
   }
 }
 

@@ -28,6 +28,7 @@ npm run test:e2e
 `e2e/roles.js` checks the screens built for the other roles' features (24 checks, see below).
 `e2e/p1.js` checks that Role 1's contract sample opens and reads correctly (15 checks).
 `e2e/auth.js` checks sign in, create account and sign out (17 checks).
+`e2e/account.js` checks forgot password, the reset link and sharing a chapter (19 checks, with axe on the new screens).
 `e2e/tour.js` only takes a screenshot of every screen.
 
 ## English narration (Piper)
@@ -105,7 +106,16 @@ Screens that exist because of the other roles' features. Role 3 has built these 
 
 Sign-in (`src/routes/SignIn.tsx`, `src/api/auth.ts`, `src/state/auth.ts`) follows Role 3's session API: `POST /auth/register`,
 `POST /auth/login`, `POST /auth/logout`, `GET /auth/me`, with the `pathya_csrf` cookie echoed in `X-CSRF-Token` on writes.
-Role 3's API passed with these calls; the full browser flow still needs a shared HTTPS address.
+Sign-up, sign-in, the library, prepared audio, download and reconnect were checked in a browser against Role 3's
+running server on 22 November 2026.
+
+Forgot password: "Forgot your password?" on the sign-in screen calls `POST /auth/password-reset` (always the same
+answer, so no account is revealed). The emailed link opens `/reset-password?token=...`, which calls
+`POST /auth/password-reset/confirm`; the account is then signed out everywhere and the token leaves the address bar.
+
+Sharing (owners, on chapter details): add a classmate by the email address of their Pathya account as a reader or
+reviewer, see who has access, and remove it (`GET`/`POST /documents/:id/grants`, `DELETE /documents/:id/grants/:user_id`).
+A classmate who loses access has their downloaded copy deleted when their device next connects.
 
 Prepared narration from Role 3: the reader reads `GET /documents/:id/manifest` (same revision only), fetches each
 passage's audio file from `GET /assets/:asset_id`, and plays a clip only when the passage id, text SHA-256,
@@ -123,12 +133,8 @@ Downloaded chapters are kept per account. After sign-in and on reconnecting, eac
 server: a newer revision is fetched, and a chapter the account can no longer open (403, 404, 410) is deleted from
 the device. Signing out deletes that account's downloads, bookmarks and saved places.
 
-Waiting on the other roles:
-- sharing a chapter: Role 3's `POST /documents/:id/grants` takes a user ID, and there is no way yet to find a
-  classmate's ID from their email
-- forgot password: no backend route
-- a joint check of prepared audio against Role 3's running server
-- a test in a real browser against the running backend
+Still to check by hand: a full run with a real PDF (upload, Role 1 processing, reading and listening), and a
+screen-reader pass with NVDA or TalkBack.
 
 ## Where things are
 
