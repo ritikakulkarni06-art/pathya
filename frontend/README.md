@@ -113,6 +113,11 @@ source tag and is keyed by its voice language. Silent test clips (`synthetic`) a
 chapter saves the clips, checks each one against its SHA-256, and reuses clips already saved, so a review-only
 change re-downloads nothing.
 
+For Role 3: `tools/p3/piper_speech.py` is a free Piper speech adapter for the backend (`SPEECH_PROVIDER=python:app.adapters.piper_speech:PiperSpeech`,
+English and Hindi voices, setup in the file). `tools/p3/mul-und-chapter.json` is the Role 1 sample with a `mul` list
+item (voiced in Hindi) and an `und` paragraph (voiced in English), for checking prepared clips. Build the reader for
+Role 3's server with `VITE_API_URL=/api npm run build` (in PowerShell: `$env:VITE_API_URL='/api'; npm run build`).
+
 Downloaded chapters are kept per account. After sign-in and on reconnecting, each one is checked against the
 server: a newer revision is fetched, and a chapter the account can no longer open (403, 404, 410) is deleted from
 the device. Signing out deletes that account's downloads, bookmarks and saved places.

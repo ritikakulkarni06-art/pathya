@@ -11,7 +11,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      workbox: { globPatterns: ['**/*.{js,css,html,woff2,svg}'], navigateFallback: '/index.html' },
+      workbox: { globPatterns: ['**/*.{js,css,html,woff2,svg}'], navigateFallback: '/index.html', navigateFallbackDenylist: [/^\/api\//] },
       manifest: {
         name: 'Pathya textbook reader',
         short_name: 'Pathya',
