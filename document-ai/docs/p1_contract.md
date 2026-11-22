@@ -1,11 +1,11 @@
-# P1 content contract — versions 1.1.0 (integration baseline) and 1.2.0 (proposed)
+# P1 content contract — versions 1.1.0 and 1.2.0 (pinned)
 
-> **1.2.0 is PROPOSED on branch `person-1` (in `document-ai/`). It is not
-> finally approved; final joint P1/P2/P3 approval is pending.** Atul reports
-> conditional P2 approval, subject to `pathya-sentences/3` being the single
-> pinned segmenter. Ritika reports **45/45 P3 conformance fixtures** and
-> **327 backend tests passed**; P1 has not independently rerun these P3
-> checks. **1.1.0** at `39331e4` remains the frozen integration baseline. See [1.2.0 changes](#120-changes-proposed) and
+> **1.2.0 is APPROVED by P1, P2 and P3 and pinned on 23 November 2026, with
+> `pathya-sentences/3` as the single pinned segmenter.** Approval followed P3's
+> 45/45 segmentation fixtures and passing backend tests (person-3 `ed6a71f`), the
+> reader matching the same 45 fixtures (person-2 `23d8c40`), and the live
+> prepared-audio checks recorded in `docs/CONTRACT_APPROVALS.md`. **1.1.0** at
+> `39331e4` stays the frozen earlier baseline. See [1.2.0 changes](#120-changes-proposed) and
 > `docs/contract_change_request_v1.2.0.md`.
 
 > **Historical 1.1.0 proposal status:** P2/P3 approval was pending in that

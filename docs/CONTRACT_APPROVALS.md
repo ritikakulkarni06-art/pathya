@@ -202,4 +202,18 @@ was pending. After publication, the saved chapter stayed at revision 3,
 cleared `audio_pending` and kept both files. The reader requested the chapter
 manifest and per-passage audio metadata, with no WAV requests in the
 published-manifest check. Atul confirmed P2 is ready for final v1.2.0 approval
-and pinning. The final shared approval and pin are still pending.
+and pinning.
+
+## 23 November 2026 final approval: v1.2.0 pinned
+
+P1 (Tharun), P2 (Atul) and P3 (Ritika) approve content contract v1.2.0 with
+`pathya-sentences/3` as the single pinned segmenter. The basis:
+
+- P1: the v1.2.0 schema, conformance documents and 45 segmentation fixtures on `person-1` (`b326e67`).
+- P2: the reader at `person-2` `23d8c40` reads the v1.2.0 conformance documents, matches all 45
+  fixtures with its own splitter, and passed the live prepared-audio checks above.
+- P3: all 45 fixtures and the backend tests pass at `person-3` `ed6a71f`.
+
+Both rules stand as recorded. `unsupported_content` stays visible with a review marker and out
+of trusted evidence until a reviewer approves it. Bulk sentence-range responses carry no ordering
+guarantee; clients match by `block_id`.
