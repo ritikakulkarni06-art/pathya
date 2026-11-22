@@ -109,6 +109,69 @@ def test_glossary_scope_and_only_affected_cache_changes(chapter):
     )
 
 
+def test_review_only_revisions_preserve_audio_and_offline_package(chapter):
+    client, ids, mapping = chapter
+    settings = client.app.state.settings
+    settings.speech_provider = "stub"
+    database = client.app.state.database
+    document_id = ids["document_id"]
+    block_id = mapping["column-left"]
+    speaker = CountingSpeech()
+    audio = build_block(database, settings, block_id, "default", speaker=speaker)
+    publish_manifest(database, settings.pathya_data_dir, document_id, 1)
+    owner = client.get("/auth/me").json()["id"]
+    package = build_package(database, settings, document_id, owner)
+    package_url = f"/documents/{document_id}/packages/{package['id']}"
+    package_asset_url = f"/assets/{package['asset_id']}"
+    clip_url = f"/assets/{audio['units'][0]['clip_asset_id']}"
+    original_package = client.get(package_url)
+    assert original_package.status_code == 200
+    assert client.get(clip_url).status_code == 200
+
+    for revision in (1, 2):
+        review = client.patch(
+            f"/blocks/{block_id}",
+            json={
+                "base_revision": revision,
+                "operations": [{"op": "mark_reviewed"}],
+                "reason": "Confirmed the source passage",
+            },
+        )
+        assert review.status_code == 200, review.text
+        assert review.json()["document_revision"] == revision + 1
+        assert review.json()["block_revision"] == revision + 1
+        assert review.json()["stale"]["audio"] == 0
+
+    assert build_block(database, settings, block_id, "default", speaker=speaker) == audio
+    assert speaker.calls == 1
+    ready_audio = client.get(f"/blocks/{block_id}/audio")
+    assert ready_audio.status_code == 200, ready_audio.text
+    assert ready_audio.json() == audio
+    assert client.get(clip_url).status_code == 200
+    saved_package = client.get(package_url)
+    assert saved_package.status_code == 200, saved_package.text
+    assert saved_package.headers["etag"] == original_package.headers["etag"]
+    assert saved_package.content == original_package.content
+    assert client.get(package_asset_url).status_code == 200
+
+    correction = client.patch(
+        f"/blocks/{block_id}",
+        json={
+            "base_revision": 3,
+            "operations": [
+                {"op": "replace_text", "text": "A changed passage."},
+                {"op": "mark_reviewed"},
+            ],
+            "reason": "Corrected the passage and confirmed the edit",
+        },
+    )
+    assert correction.status_code == 200, correction.text
+    assert client.get(f"/blocks/{block_id}/audio").status_code == 409
+    assert client.get(clip_url).status_code == 409
+    assert client.get(package_url).status_code == 409
+    assert client.get(package_asset_url).status_code == 409
+
+
 def test_voice_unavailable_and_paid_budget_fallback(chapter):
     client, ids, mapping = chapter
     settings = client.app.state.settings

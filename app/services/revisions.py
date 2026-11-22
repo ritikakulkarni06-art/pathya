@@ -463,12 +463,19 @@ def _cited_ids(value: Any) -> set[str]:
 
 
 def _invalidate(
-    connection: sqlite3.Connection, document_id: str, affected: set[str], structural: bool
+    connection: sqlite3.Connection,
+    document_id: str,
+    affected: set[str],
+    structural: bool,
+    *,
+    review_only: bool,
 ) -> dict[str, int]:
     counts = {"audio": 0, "chunks": 0, "embeddings": 0, "answers": 0}
     for artifact in connection.execute(
         "SELECT * FROM artifacts WHERE document_id=? AND status<>'stale'", (document_id,)
     ).fetchall():
+        if review_only and artifact["kind"] in {"audio_block", "package"}:
+            continue
         dependencies = json.loads(artifact["dependency_revisions_json"])
         if set(dependencies) & affected or (
             structural and artifact["kind"] in {"package", "chunk_index", "embedding"}
@@ -650,7 +657,13 @@ def correct_block(
                         document_revision,
                     ),
                 )
-                stale = _invalidate(connection, document["id"], set(changed), structural)
+                stale = _invalidate(
+                    connection,
+                    document["id"],
+                    set(changed),
+                    structural,
+                    review_only=all(item.op == "mark_reviewed" for item in request.operations),
+                )
                 pending = connection.execute(
                     "SELECT 1 FROM blocks WHERE document_id=? AND json_array_length(successor_ids_json)=0 AND (critical_flag=1 OR status='needs_review') LIMIT 1",
                     (document["id"],),

@@ -238,3 +238,15 @@ document revision and carries all current block IDs with hashes, including
 blocks for which the reader does not split text into sentences. Ready audio
 identifies its own segmenter so the reader can check compatibility. Adopt
 `pathya-sentences/3` once the reference rules and fixtures are available.
+
+### v1.2.0 review-only corrections
+
+A correction consisting entirely of `mark_reviewed` still advances block and
+chapter revisions and updates evidence eligibility. Audio and offline package
+dependencies accept an intervening chain of review-only block revisions. Audio
+lookup also checks the original synthesis inputs against the stored key.
+An existing package retains its original chapter revision, bytes and hash.
+Use the current content revision on reconnect to refresh review metadata.
+Corrections that include text, language or structure changes still invalidate
+affected media. The bulk endpoint currently emits page and reading order.
+Consumers can match by block ID while the team settles the ordering guarantee.

@@ -122,3 +122,33 @@ authenticated session lookup, rejection of logout without CSRF, logout
 with CSRF, and session revocation. The reader's browser flow still needs
 verification. Serve the frontend and API through the same HTTPS origin
 so the reader can access the API's host-scoped CSRF cookie.
+
+## 21 November v1.2.0 handoff, recorded 22 November 2026
+
+- **P1, Tharun.** Reported 514 strict tests passing, all 45 segmentation
+  fixtures matching the P1 reference, and the frozen v1.0.0/v1.1.0 artifacts
+  byte-identical. The v1.2.0 candidate, reference implementation, fixtures
+  and P3 verification guide were reported as local.
+- **P2, Atul.** Approves v1.2.0 provided `pathya-sentences/3` is the single
+  pinned segmenter. Reader commit `a9fbda324498247c79449f00ea7e9b7049352bb2`
+  implements heading ranks (null reads as level 2), skips page headers and
+  footers, retains footnotes, and consumes bulk ranges by block ID after
+  checking the chapter revision and per-block text hash. Atul reported clip
+  identity as block ID, text SHA-256, sentence index and voice language.
+  For `mul` and `und`, the reader retains the source tag and uses
+  `integration.voice_language` when supplied, with a script-based fallback.
+- **P2's policy position.** Display `unsupported_content` with a review
+  marker and keep it out of trusted evidence until approved. The reader
+  matches bulk results by block ID and can accept any response order.
+
+Shared approval and pinning remain pending. Open items include P3 verification
+against the 45 fixtures, end-to-end audio and reader compatibility, and joint
+confirmation of the evidence trust rule and the bulk ordering guarantee.
+
+The published P1 candidate at `9f0d4ccf6ab3b740a98401ee44e6e09daa24eea5`
+contains `pathya-sentences/1`. P3 needs the later `/3` reference and fixture
+bundle from Tharun's update. At P2 commit
+`95b662e6263a702817f96402f86c39966bcd1f26`, prepared playback still computes
+a short SHA-1 key from language and sentence text. The live chapter loader
+reads content and sentence ranges. Verify P3 package ingestion and the
+four-field clip key before recording audio interoperability as complete.

@@ -36,7 +36,32 @@ def artifact_current(connection: sqlite3.Connection, artifact: dict[str, Any]) -
             "SELECT revision,successor_ids_json FROM blocks WHERE id=? AND document_id=?",
             (block_id, artifact["document_id"]),
         ).fetchone()
-        if row is None or row["revision"] != revision or json.loads(row["successor_ids_json"]):
+        if row is None or json.loads(row["successor_ids_json"]):
+            return False
+        if row["revision"] != revision and (
+            artifact["kind"] not in {"audio_block", "package"}
+            or not only_review_changes(connection, block_id, revision, row["revision"])
+        ):
+            return False
+    return True
+
+
+def only_review_changes(
+    connection: sqlite3.Connection, block_id: str, base_revision: int, current_revision: int
+) -> bool:
+    if base_revision == current_revision:
+        return True
+    if base_revision > current_revision:
+        return False
+    versions = connection.execute(
+        "SELECT ops_json FROM block_versions WHERE block_id=? AND revision>? AND revision<=?",
+        (block_id, base_revision, current_revision),
+    ).fetchall()
+    if len(versions) != current_revision - base_revision:
+        return False
+    for version in versions:
+        operations = json.loads(version["ops_json"])
+        if not operations or any(item["op"] != "mark_reviewed" for item in operations):
             return False
     return True
 

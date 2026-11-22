@@ -13,9 +13,9 @@ from app.errors import Problem
 from app.schemas.speech import AudioRequest, GlossaryRequest
 from app.services.access import check_document
 from app.services.auth import current_user, require_doc_access
-from app.services.manifests import artifact_current
+from app.services.manifests import artifact_current, only_review_changes
 from app.services.packages import build_package
-from app.services.speech import cache_key, delete_glossary, glossary, set_glossary
+from app.services.speech import audio_matches, delete_glossary, glossary, set_glossary
 
 router = APIRouter()
 
@@ -83,35 +83,27 @@ def get_audio(
     settings = request.app.state.settings
     speaker = provider(settings)
     with database.read_conn() as connection:
+        connection.execute("BEGIN")
+        check_document(connection, document["id"], user["id"])
         block = connection.execute("SELECT * FROM blocks WHERE id=?", (block_id,)).fetchone()
         if block is None:
             raise Problem(404, "block_not_found", "This passage is unavailable.")
         terms = glossary(database, document["id"], user["id"])
         selected = voice or settings.speech_voice
-        key, _ = cache_key(
-            block, terms, selected, speaker.engine_version, settings.active_segmenter_version
-        )
-        # Both private and shared variants are checked; source input hashes must match.
-        private_key = hashlib.sha256((key + ":" + user["id"]).encode()).hexdigest()
         candidates = connection.execute(
-            "SELECT artifacts.*,audio_manifests.body_json FROM artifacts JOIN audio_manifests ON audio_manifests.artifact_id=artifacts.id WHERE block_id=? AND voice=? AND (scope_user_id IS NULL OR scope_user_id=?) ORDER BY artifacts.created_at DESC",
+            "SELECT artifacts.*,audio_manifests.body_json,audio_manifests.cache_key FROM artifacts JOIN audio_manifests ON audio_manifests.artifact_id=artifacts.id WHERE block_id=? AND voice=? AND (scope_user_id IS NULL OR scope_user_id=?) ORDER BY artifacts.created_at DESC",
             (block_id, selected, user["id"]),
         ).fetchall()
         for item in candidates:
-            body = json.loads(item["body_json"])
-            row_key, _ = cache_key(
-                block, terms, selected, item["engine_version"], settings.active_segmenter_version
-            )
-            if item["scope_user_id"] is not None:
-                row_key = hashlib.sha256((row_key + ":" + user["id"]).encode()).hexdigest()
-            stored = connection.execute(
-                "SELECT cache_key FROM audio_manifests WHERE artifact_id=?", (item["id"],)
-            ).fetchone()
-            if (
-                stored["cache_key"] in {key, private_key}
-                and stored["cache_key"] == row_key
-                and artifact_current(connection, item)
+            if audio_matches(
+                connection,
+                item,
+                block,
+                terms,
+                speaker.engine_version,
+                settings.active_segmenter_version,
             ):
+                body: dict[str, Any] = json.loads(item["body_json"])
                 return {
                     **body,
                     "text_sha256": hashlib.sha256(
@@ -123,9 +115,18 @@ def get_audio(
             "SELECT * FROM artifacts WHERE block_id=? AND kind='audio_block' AND status='failed' AND voice=? AND (scope_user_id IS NULL OR scope_user_id=?) ORDER BY updated_at DESC LIMIT 1",
             (block_id, selected, user["id"]),
         ).fetchone()
+        failed_revision = (
+            json.loads(fallback["dependency_revisions_json"]).get(block_id) if fallback else None
+        )
         if (
             fallback is not None
-            and json.loads(fallback["dependency_revisions_json"]).get(block_id) == block["revision"]
+            and failed_revision is not None
+            and only_review_changes(
+                connection,
+                block_id,
+                failed_revision,
+                block["revision"],
+            )
         ):
             return {
                 "status": "text_only",
@@ -212,15 +213,15 @@ def get_package(
     document: dict[str, Any] = Depends(require_doc_access("reader")),
 ) -> Response:
     with request.app.state.database.read_conn() as connection:
+        connection.execute("BEGIN")
+        check_document(connection, document_id, document["_access_user_id"])
         item = connection.execute(
             "SELECT packages.*,artifacts.status,artifacts.dependency_revisions_json,artifacts.kind,artifacts.block_id FROM packages JOIN artifacts ON artifacts.id=packages.artifact_id WHERE packages.id=? AND packages.document_id=?",
             (package_id, document_id),
         ).fetchone()
         if item is None:
             raise Problem(404, "package_not_found", "This package is unavailable.")
-        if item["revision"] != document["current_revision"] or not artifact_current(
-            connection, item
-        ):
+        if not artifact_current(connection, item):
             raise Problem(
                 409,
                 "package_stale",

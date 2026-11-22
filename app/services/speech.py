@@ -2,6 +2,7 @@ import hashlib
 import io
 import json
 import re
+import sqlite3
 import unicodedata
 from dataclasses import replace
 from typing import Any
@@ -16,7 +17,7 @@ from app.errors import Problem
 from app.schemas.content import Block
 from app.schemas.speech import GlossaryRequest
 from app.services.access import check_document
-from app.services.manifests import artifact_current, assert_job_lease
+from app.services.manifests import artifact_current, assert_job_lease, only_review_changes
 from app.services.storage import FileStore
 
 
@@ -61,6 +62,28 @@ def cache_key(
         ).encode()
     ).hexdigest()
     return key, glossary_hash
+
+
+def audio_matches(
+    connection: sqlite3.Connection,
+    artifact: dict[str, Any],
+    block: dict[str, Any],
+    terms: list[dict[str, Any]],
+    engine: str,
+    segmenter_version: str,
+) -> bool:
+    if artifact["engine_version"] != engine or not artifact_current(connection, artifact):
+        return False
+    revision = json.loads(artifact["dependency_revisions_json"]).get(block["id"])
+    if revision is None:
+        return False
+    key, _ = cache_key(
+        {**block, "revision": revision}, terms, artifact["voice"], engine, segmenter_version
+    )
+    if artifact["scope_user_id"] is not None:
+        key = hashlib.sha256((key + ":" + artifact["scope_user_id"]).encode()).hexdigest()
+    stored_key: str = artifact["cache_key"]
+    return key == stored_key
 
 
 def _word_character(value: str) -> bool:
@@ -239,13 +262,21 @@ def build_block(
     if scope_user is not None:
         key = hashlib.sha256((key + ":" + scope_user).encode()).hexdigest()
     with database.read_conn() as connection:
-        cached = connection.execute(
-            "SELECT artifacts.*,audio_manifests.body_json FROM artifacts JOIN audio_manifests ON audio_manifests.artifact_id=artifacts.id WHERE audio_manifests.cache_key=? ORDER BY artifacts.created_at DESC LIMIT 1",
-            (key,),
-        ).fetchone()
-        if cached and artifact_current(connection, cached):
-            cached_body: dict[str, Any] = json.loads(cached["body_json"])
-            return cached_body
+        connection.execute("BEGIN")
+        for cached in connection.execute(
+            "SELECT artifacts.*,audio_manifests.body_json,audio_manifests.cache_key FROM artifacts JOIN audio_manifests ON audio_manifests.artifact_id=artifacts.id WHERE block_id=? AND voice=? AND scope_user_id IS ? AND status='ready' ORDER BY artifacts.created_at DESC",
+            (block_id, voice, scope_user),
+        ):
+            if audio_matches(
+                connection,
+                cached,
+                block,
+                terms,
+                speaker.engine_version,
+                settings.active_segmenter_version,
+            ):
+                cached_body: dict[str, Any] = json.loads(cached["body_json"])
+                return cached_body
     artifact_id = str(uuid4())
     now = now_utc()
 
@@ -436,7 +467,7 @@ def build_block(
         )
         if (
             current is None
-            or current["revision"] != block["revision"]
+            or not only_review_changes(connection, block_id, block["revision"], current["revision"])
             or current_glossary != glossary_hash
         ):
             raise Problem(
