@@ -40,7 +40,13 @@ export interface Block {
   bbox: [number, number, number, number]
   text_raw: string
   text_current: string
+  /** Narration voice. Always en or hi. */
   lang: Lang
+  /** Role 1's own language tag when it is not en or hi ("mul" or "und"), kept so it is never lost. */
+  source_lang?: string
+  /** Sentence starts in text_current (JavaScript string offsets) from the backend segmenter.
+   *  Absent means the reader splits the text itself. */
+  sentence_starts?: number[]
   revision: number
   status: BlockStatus
   confidence: Confidence

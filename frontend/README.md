@@ -61,18 +61,28 @@ and run `npm run audio -- <voice name>`. In the real system this job belongs to 
   Without it the app uses a built-in mock with the same behaviour (revisions, conflicts, evidence, abstention).
 - `src/data/chapters.ts` holds two sample chapters written for development. Replace them with real packages.
 
-### Role 1 content contract (1.0.0 and 1.1.0)
+### Role 1 content contract (1.0.0, 1.1.0 and the proposed 1.2.0)
 
 `src/lib/p1.ts` converts a Role 1 document into what the reader shows. `src/data/p1-sample.json` is a copy of
 `contract/samples/sample_document_en_hi.json` from the team repo and appears as the third sample chapter.
-Where the contract does not say enough, the converter guesses. Each guess is marked `GAP` in the code:
+Role 3's `GET /documents/{id}/content` returns this document unchanged; the document revision comes in the
+`X-Document-Revision` header.
+
+1.2.0 (not yet pinned) is read as follows:
+
+- `heading_level`: 1 stays a top heading; 2 and deeper, and null (unknown), become the second rank
+- `role`: `page_header` and `page_footer` are skipped; footnotes are shown and read
+- `integration.voice_language` picks the voice; the original `mul` or `und` tag is kept as `source_lang`
+- sentence ranges come from Role 3's `GET /documents/{id}/sentence-ranges` (Unicode code points, converted to
+  JavaScript offsets). They are used only when the revision and the SHA-256 of the text match; otherwise
+  the reader splits the text itself
+
+For 1.0.0 and 1.1.0 the converter still guesses where the contract is silent. Each guess is marked `GAP`:
 
 - no heading level (uses the layout label, else the first heading is the title)
 - page headers and footers arrive as paragraphs (skipped by layout label)
 - `mul` and `und` languages (voice picked by counting Hindi and English letters)
 - `review_status` is never set by the pipeline (a passage with any quality flag is treated as needing review)
-- no document-level revision
-- corrections cannot change the passage kind or reading order, although the reader's form offers both
 
 Supported from 1.1.0: page status and warnings (a page that was not read says so on screen and in narration),
 pages without a printed number, uncertain tables, and merged table headers (repeated over each column they cover).

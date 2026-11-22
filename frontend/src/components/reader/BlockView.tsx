@@ -1,6 +1,6 @@
 import { memo, useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { Bookmark, BookmarkCheck, FileSearch, MoreHorizontal, PencilLine, Play } from 'lucide-react'
-import { splitSentences } from '../../lib/sentences'
+import { sentencesOf } from '../../lib/sentences'
 import { FLAG_REASONS, type Block } from '../../types'
 
 export interface BlockActions {
@@ -126,7 +126,7 @@ export const BlockView = memo(function BlockView({ block, current, active, highl
       break
     }
     default: {
-      const sentences = splitSentences(block.text_current, block.lang).map((s, i) => (
+      const sentences = sentencesOf(block).map((s, i) => (
         <span key={i} className="sentence" data-current={highlight && (current === i || current === -1)} onClick={() => actions.listen(block.id, i)}>{s}</span>
       ))
       // A list item keeps its bullet, so a screen reader announces it as part of a list.

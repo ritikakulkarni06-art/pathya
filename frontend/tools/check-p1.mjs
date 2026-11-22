@@ -2,7 +2,7 @@
 // Usage: node --experimental-strip-types tools/check-p1.mjs [more-documents.json ...]
 import { readFileSync } from 'node:fs'
 import { fromP1 } from '../src/lib/p1.ts'
-import { pageAnnouncements } from '../src/lib/sentences.ts'
+import { pageAnnouncements, sentencesOf, toSentenceStarts } from '../src/lib/sentences.ts'
 
 const extra = { subject: 'check', rights_note: 'check' }
 const load = (f) => JSON.parse(readFileSync(f, 'utf8'))
@@ -53,6 +53,33 @@ const c = clone(base)
 c.blocks[1].quality_flags = ['low_confidence', 'critical_symbol_uncertain']
 const cp = fromP1(c, extra).blocks[1]
 ok('critical symbol flag sends the passage to review and is the reason shown first', cp.status === 'needs_review' && cp.confidence.flags[0] === 'critical_symbol_uncertain')
+
+// Contract 1.2.0: heading_level, role, voice_language, and the original mul/und tag.
+const v = clone(base)
+v.schema_version = '1.2.0'
+const vh = v.blocks.filter((b) => b.block_type === 'heading')
+vh.forEach((b) => { b.heading_level = null })
+if (vh[0]) vh[0].heading_level = 1
+if (vh[1]) vh[1].heading_level = 4
+const vp = v.blocks.filter((b) => b.block_type === 'paragraph')
+vp[0].role = 'page_header'
+vp[1].language = 'mul'; vp[1].integration = { voice_language: 'hi' }
+const vv = fromP1(v, extra)
+const levels = vv.blocks.filter((b) => b.type === 'heading').map((b) => b.level)
+ok('1.2.0 heading_level 1 stays 1, deeper and null become 2', levels[0] === 1 && levels.slice(1).every((l) => l === 2))
+ok('1.2.0 page_header role is not shown or read', !vv.blocks.some((b) => b.id === vp[0].id))
+const mulB = vv.blocks.find((b) => b.id === vp[1].id)
+ok('mul passage keeps its tag and uses the backend voice', mulB.source_lang === 'mul' && mulB.lang === 'hi')
+
+// Backend sentence ranges: code points converted to JavaScript offsets, and the pieces rejoin to the text.
+const hiText = 'गति क्या है? यह 𝑣 = 3.5 m/s है। अंत'
+const cp2 = [...hiText]
+const cut = (a, b) => ({ start: a, end: b })
+const i1 = cp2.indexOf('?') + 1, i2 = cp2.indexOf('।') + 1
+const starts = toSentenceStarts(hiText, [cut(0, i1), cut(i1 + 1, i2), cut(i2 + 1, cp2.length)])
+const pieces = starts && sentencesOf({ text_current: hiText, lang: 'hi', sentence_starts: starts })
+ok('code-point ranges with a character outside the basic plane map to the right sentences', !!pieces && pieces.length === 3 && pieces.join('') === hiText && pieces[2] === 'अंत')
+ok('ranges that do not fit the text are ignored', toSentenceStarts('short', [cut(0, 50)]) === null)
 
 for (const f of process.argv.slice(2)) {
   try { const p = fromP1(load(f), extra); ok(`${f}: ${p.pages.length} pages, ${p.blocks.length} passages`, p.blocks.every((b) => b.lang === 'en' || b.lang === 'hi')) }

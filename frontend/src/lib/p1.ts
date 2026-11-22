@@ -19,6 +19,12 @@ interface P1Block {
   confidence: { score: number | null; origin: string; reason: string | null }
   quality_flags: string[]
   provenance: { method: string; engine: string | null; engine_version: string | null; parameters: Record<string, unknown> }
+  /** 1.2.0: heading rank 1-6, null when the pipeline is unsure. */
+  heading_level?: number | null
+  /** 1.2.0: what the block is for on the page. */
+  role?: 'body' | 'page_header' | 'page_footer' | 'footnote'
+  /** 1.2.0: fields set by Role 3 / the reader, never by Role 1. */
+  integration?: { voice_language?: 'en' | 'hi' | null } | null
   table: { row_count: number | null; column_count: number | null; cell_ids: string[] } | null
   table_cell: { row_index: number; column_index: number; row_span: number; column_span: number; is_header: boolean } | null
   equation: { source_text: string | null; mathml: string | null; mathml_review_status: string; spoken_fallback: string | null; spoken_fallback_review_status: string } | null
@@ -36,7 +42,7 @@ export interface P1Document {
   created_at: string
 }
 
-export const P1_VERSIONS = ['1.0.0', '1.1.0']
+export const P1_VERSIONS = ['1.0.0', '1.1.0', '1.2.0']
 
 /** GAP: speech needs one voice per passage, but the contract allows "mul" and "und". Pick by script. */
 function voiceLang(tag: string, text: string, fallback: Lang): Lang {
@@ -79,8 +85,10 @@ export function fromP1(input: unknown, extra: { subject: string; rights_note: st
 
   for (const b of top) {
     const label = String(b.provenance.parameters.layout_label ?? '')
-    // GAP: running page headers and footers arrive as paragraphs. Only the layout label tells them apart.
-    if (label === 'page_header' || label === 'page_footer') continue
+    // 1.2.0 says what a block is for. Before that, running page headers and footers arrive as
+    // paragraphs and only the layout label tells them apart. Footnotes are kept and read.
+    if (b.role === 'page_header' || b.role === 'page_footer') continue
+    if (!b.role && (label === 'page_header' || label === 'page_footer')) continue
     const text = b.current_text ?? ''
     const flags = [...b.quality_flags]
     let type: Block['type'] = b.block_type === 'caption' ? 'paragraph' : (b.block_type as Block['type'])
@@ -93,8 +101,11 @@ export function fromP1(input: unknown, extra: { subject: string; rights_note: st
     let say = text
 
     if (type === 'heading') {
-      // GAP: the contract has no heading level. Use the layout label, else treat the first heading as the title.
-      level = label === 'title' || (!label && headings === 0) ? 1 : 2
+      // 1.2.0 gives heading_level (null when unsure, read as level 2, as agreed with Role 1).
+      // The reader has two heading ranks under the page title: 1 stays 1, everything deeper is 2.
+      // Older documents have no level, so the layout label decides, else the first heading is the title.
+      if (b.heading_level !== undefined) level = b.heading_level === 1 ? 1 : 2
+      else level = label === 'title' || (!label && headings === 0) ? 1 : 2
       headings++
     } else if (b.block_type === 'table') {
       const cells = b.table!.cell_ids.map((id) => byId.get(id)).filter((c): c is P1Block => !!c?.table_cell)
@@ -160,7 +171,8 @@ export function fromP1(input: unknown, extra: { subject: string; rights_note: st
       bbox: b.bbox,
       text_raw: b.raw_text ?? shown,
       text_current: shown,
-      lang: voiceLang(b.language, say, main),
+      lang: b.integration?.voice_language ?? voiceLang(b.language, say, main),
+      ...(b.language !== 'en' && b.language !== 'hi' && { source_lang: b.language }),
       revision: b.revision,
       status,
       // A symbol that changes the meaning is the reason shown first.

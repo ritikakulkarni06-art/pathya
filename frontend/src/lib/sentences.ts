@@ -58,6 +58,29 @@ export function pageAnnouncements(pages: Page[], blocks: Block[]): { before: Map
   return { before, after }
 }
 
+/** The sentences of a passage as they are shown and read. With backend ranges the pieces run from one
+ *  sentence start to the next, so joining them gives back the exact text. Otherwise the reader splits it. */
+export function sentencesOf(block: Block): string[] {
+  const starts = block.sentence_starts
+  if (!starts?.length) return splitSentences(block.text_current, block.lang)
+  const t = block.text_current
+  return starts.map((s, i) => t.slice(i === 0 ? 0 : s, starts[i + 1] ?? t.length)).filter((s) => s.trim())
+}
+
+/** Backend ranges count Unicode code points; JavaScript strings count UTF-16 units. Returns UTF-16 starts,
+ *  or null when the ranges do not fit the text (they are then ignored and the reader splits the text). */
+export function toSentenceStarts(text: string, ranges: { start: number; end: number }[]): number[] | null {
+  const cps = [...text]
+  const offset: number[] = [0]
+  for (const c of cps) offset.push(offset[offset.length - 1] + c.length)
+  let last = -1
+  for (const r of ranges) {
+    if (!(r.start >= 0 && r.end > r.start && r.end <= cps.length && r.start >= last)) return null
+    last = r.end
+  }
+  return ranges.length ? ranges.map((r) => offset[r.start]) : null
+}
+
 /** What the narrator says for each block, in reading order. Display text is never changed. */
 export function unitsFor(block: Block, announceFlags: boolean): SpeechUnit[] {
   const u = (text: string, sentence = -1, lang: Lang = block.lang): SpeechUnit => ({ block_id: block.id, sentence, text, lang })
@@ -88,7 +111,7 @@ export function unitsFor(block: Block, announceFlags: boolean): SpeechUnit[] {
       break
     }
     default:
-      splitSentences(block.text_current, block.lang).forEach((s, i) => units.push(u(s, i)))
+      sentencesOf(block).forEach((s, i) => units.push(u(s, i)))
   }
   return units
 }

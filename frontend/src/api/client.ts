@@ -5,7 +5,7 @@ import { SAMPLE_PACKAGES } from '../data/chapters'
 import { csrfHeader, SIGNED_OUT_EVENT } from './auth'
 import { fromP1 } from '../lib/p1'
 import type { Answer, Block, ChapterPackage, CorrectionRequest, CorrectionResult, DocumentSummary, Lang, RevisionEntry, Usage } from '../types'
-import { splitSentences } from '../lib/sentences'
+import { splitSentences, toSentenceStarts } from '../lib/sentences'
 import { tokens } from '../lib/search'
 
 export class OfflineError extends Error {
@@ -316,12 +316,21 @@ interface BackendDocument {
   state: string
   updated_at: string
   languages: Lang[]
-  counts: { pages: number; blocks: number }
+  counts: { pages: number; blocks: number; review?: number }
 }
-// Role 3 has no subject, printed page range or count of passages to review in the list, so those stay empty here.
+// Role 3 has no subject or printed page range in the list, so those stay empty here.
+
+/** SHA-256 of the exact UTF-8 text, as Role 3 sends it with each block's sentence ranges. */
+const sha256 = async (text: string) =>
+  [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)))].map((b) => b.toString(16).padStart(2, '0')).join('')
+
+interface SentenceRanges {
+  document_revision: number
+  blocks: { block_id: string; text_sha256: string; segmenter: string; ranges: { start: number; end: number }[] }[]
+}
 const summary = (d: BackendDocument): DocumentSummary => ({
   id: d.id, title: d.title, subject: '', languages: d.languages, page_count: d.counts.pages, printed_range: '',
-  current_revision: d.current_revision, review_count: 0, needs_review: d.state === 'review_required',
+  current_revision: d.current_revision, review_count: d.counts.review ?? 0, needs_review: d.counts.review === undefined && d.state === 'review_required',
   rights_note: d.rights_note, updated_at: d.updated_at,
 })
 function http(base: string): PathyaApi {
@@ -370,6 +379,22 @@ function http(base: string): PathyaApi {
       const revision = Number(res.headers.get('X-Document-Revision')) || 1
       pkg.revision = pkg.document.current_revision = revision
       for (const p of pkg.pages) p.source_asset = `${base}/documents/${id}/pages/${p.pdf_index_0}/image`
+      // Sentence ranges from the backend segmenter, used only when they belong to this exact revision and
+      // text. Anything that does not match falls back to the reader's own splitter, so reading never breaks.
+      try {
+        const sr = await call<SentenceRanges>(`/documents/${id}/sentence-ranges`)
+        if (sr.document_revision === revision) {
+          const byId = new Map(sr.blocks.map((b) => [b.block_id, b]))
+          for (const b of pkg.blocks) {
+            const r = byId.get(b.id)
+            if (!r?.ranges.length || r.text_sha256 !== (await sha256(b.text_current))) continue
+            const starts = toSentenceStarts(b.text_current, r.ranges)
+            if (starts) b.sentence_starts = starts
+          }
+        }
+      } catch (e) {
+        if (e instanceof OfflineError) throw e
+      }
       return pkg
     },
     patchBlock: (_doc, req) =>
