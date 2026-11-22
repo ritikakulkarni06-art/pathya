@@ -45,11 +45,13 @@ export interface P1Document {
 export const P1_VERSIONS = ['1.0.0', '1.1.0', '1.2.0']
 
 /** GAP: speech needs one voice per passage, but the contract allows "mul" and "und". Pick by script. */
-function voiceLang(tag: string, text: string, fallback: Lang): Lang {
+/** Same rule as Role 3 (app/services/p1_content.py), so a mul/und passage gets the voice its prepared clips were
+ *  made in: Hindi only when Devanagari letters outnumber English letters; a tie or no letters at all is English. */
+function voiceLang(tag: string, text: string): Lang {
   if (tag === 'en' || tag === 'hi') return tag
   const hi = (text.match(/[ऀ-ॿ]/g) ?? []).length
   const en = (text.match(/[A-Za-z]/g) ?? []).length
-  return hi + en === 0 ? fallback : hi >= en ? 'hi' : 'en'
+  return hi > en ? 'hi' : 'en'
 }
 
 export function fromP1(input: unknown, extra: { subject: string; rights_note: string }): ChapterPackage {
@@ -180,7 +182,7 @@ export function fromP1(input: unknown, extra: { subject: string; rights_note: st
       bbox: b.bbox,
       text_raw: b.raw_text ?? shown,
       text_current: shown,
-      lang: b.integration?.voice_language ?? voiceLang(b.language, say, main),
+      lang: b.integration?.voice_language ?? voiceLang(b.language, say),
       ...(b.language !== 'en' && b.language !== 'hi' && { source_lang: b.language }),
       revision: b.revision,
       status,

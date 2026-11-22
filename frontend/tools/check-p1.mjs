@@ -91,6 +91,19 @@ ok('1.2.0 page_header role is not shown or read', !vv.blocks.some((b) => b.id ==
 const mulB = vv.blocks.find((b) => b.id === vp[1].id)
 ok('mul passage keeps its tag and uses the backend voice', mulB.source_lang === 'mul' && mulB.lang === 'hi')
 
+// mul/und without a backend voice: same rule as Role 3 (Hindi only when Devanagari letters outnumber English).
+{
+  const w = clone(base)
+  const ps = w.blocks.filter((b) => ['paragraph', 'heading', 'list_item'].includes(b.block_type) && b.role !== 'page_header' && b.role !== 'page_footer')
+  const set = (b, tag, text) => { b.language = tag; b.raw_text = b.current_text = text; delete b.integration }
+  set(ps[0], 'mul', 'ab कख')
+  set(ps[1], 'und', '12 = 3 + 9')
+  set(ps[2], 'mul', 'a कखग')
+  const out = fromP1(w, extra).blocks
+  const lang = (b) => out.find((x) => x.id === b.id)?.lang
+  ok('mul/und voice: a tie is English, no letters is English, more Hindi letters is Hindi', lang(ps[0]) === 'en' && lang(ps[1]) === 'en' && lang(ps[2]) === 'hi')
+}
+
 // Backend sentence ranges: code points converted to JavaScript offsets, and the pieces rejoin to the text.
 const hiText = 'गति क्या है? यह 𝑣 = 3.5 m/s है। अंत'
 const cp2 = [...hiText]
