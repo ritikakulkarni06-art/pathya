@@ -1,154 +1,166 @@
 # Contract change request: P1 content contract 1.1.0 → 1.2.0
 
-**Status: PROPOSED. Not approved by P1, P2 or P3.** This document asks for
-review. Record actual written decisions only in the
-[Approval record](#approval-record).
+**Status: PROPOSED, not pinned or frozen. Final approval by P1, P2 and P3 is
+pending.** Atul has given conditional P2 approval, subject to
+`pathya-sentences/3` being the single pinned segmenter. Ritika reports P3
+conformance of **45/45 fixtures** and **327 backend tests passed**. These
+P3 results were reported to P1, not independently rerun by P1. The
+individual decisions below were approved in writing (see
+[Decision approvals](#decision-approvals-21-nov-2026)); the
+[Approval record](#approval-record) for the contract as a whole is still open.
 
 - **Branch:** `person-1` (Person 1's branch), code in `document-ai/`. Commit
   `39331e4`, the 1.1.0 integration baseline P3 pins, is imported as a subtree
-  with its history, so it is an ancestor of `person-1`. Nothing is merged into
-  `main`. An earlier draft on `feature/p1-contract-v1.2.0` is superseded by
-  this branch and was left untouched.
+  with its history. Nothing is merged into `main`.
 - **Schema:** `contract/schemas/pathya_content.v1.2.0.schema.json`.
-- **Conformance vectors:** `contract/conformance/v1.2.0/` holds 17 files: 16
-  conformance documents plus `index.json`, with verdicts for the 1.0.0, 1.1.0
-  and 1.2.0 schemas and for Python. The frozen 1.0.0/1.1.0 set in
+- **Conformance documents:** `contract/conformance/v1.2.0/` holds 12 files:
+  11 documents plus `index.json`, with verdicts for the 1.0.0, 1.1.0 and
+  1.2.0 schemas and for Python. The frozen 1.0.0/1.1.0 set in
   `contract/conformance/` holds 13 files: 12 documents plus `index.json`.
+- **Segmentation fixtures:** `contract/segmentation/` holds the
+  `pathya-sentences/3` fixtures (45 cases) and an example bulk response.
+- **P3 verification:** [docs/p3_verification_guide.md](p3_verification_guide.md).
 
-## Decisions already recorded in writing
+## Summary: 1.2.0 is a producer-only contract
 
-These are from P3's `docs/CONTRACT_APPROVALS.md` (`person-3` at `2621fc9`),
-relayed from Atul (P2) and Tharun (P1). 1.2.0 implements them:
+The P1 Document is the canonical producer payload. It carries only what P1
+extracts. Everything that depends on backend state is served by P3's API:
 
-| Decision | 1.2.0 |
+| Not in the Document | Served by P3 |
 |---|---|
-| The canonical Document is the direct content response body | `extract_document(...).to_json()` returns the Document itself; there is no envelope |
-| Next version adds a document revision | `Document.integration.document_revision` (P3) |
-| Each block needs a stable backend identifier and its own revision | `Block.integration.backend_block_id` (P3); `Block.revision` already exists |
-| Sentence ranges: start-inclusive, end-exclusive code points into the exact `current_text`, before pronunciation substitutions | `Block.integration.sentences` |
-| Ranges cover all text without gaps; trailing whitespace belongs to the preceding range | Enforced by the Python validator; segmenter `pathya-sentences/2` |
-| Only headings, paragraphs and list items need ranges | Ranges on any other block type are rejected |
-| Optional `voice_language` (`en`/`hi`), keeping the source `language` | `Block.integration.voice_language` |
-| Prepared audio entries `{key, url, bytes}` within a revision-scoped package | `Block.integration.audio[]` with `key`, `url`, `bytes`, plus `text_revision` and `text_sha256` |
-| P1 emits `critical_symbol_uncertain`; P3 derives `critical_flag` | Flag plus `critical.critical_flag` and `critical.is_trusted_evidence` |
-| Conformance checks: direct response, fresh offsets after a text correction, critically uncertain content excluded from trusted evidence | Covered by tests in `tests/unit/test_contract_v1_2.py` and `test_pipeline.py` |
+| Document revision | `X-Document-Revision` header on `/content` and `/sentence-ranges` |
+| Backend IDs | P3 replaces every P1 UUID with its own ID in the served Document, so `block.id` *is* the stable backend ID |
+| Sentence ranges | `GET /documents/{id}/sentence-ranges` (bulk, one request per document) and `GET /blocks/{id}` |
+| Audio, voice, pronunciation | `GET /blocks/{id}/audio`, packages, glossary |
 
-## Answers to P3's reconciliation questions (`person-3`, c53dadc)
+Compared with the earlier 1.2.0 draft (`fd36152`), this removes
+`Document.integration`, `Block.integration` (backend block ID, sentence
+ranges, `voice_language`, audio) and the structural correction operations
+`set_block_type` and `set_reading_order`.
 
-| P3 question | 1.2.0 answer |
-|---|---|
-| How does the adapter identify the producer family? | Required `contract_family: "pathya.p1.content"` plus `schema_version`. 1.0.0/1.1.0 documents carry no family field and are recognized by their version and P1 shape. |
-| Which critical-symbol flags does P1 emit, and what must P3 withhold? | One flag: `critical_symbol_uncertain`. P3 derives `critical_flag` while it is present and the block is not `approved`. Withhold from trusted retrieval: those blocks; pages not `ok`; blocks that are `needs_review` or `rejected`; and `unsupported_content` or `block_type_uncertain` blocks until approved. Reference: `critical.is_trusted_evidence`. |
-| How are PDF points, image pixels, rotation, crop and DPI carried? | Unchanged structured `transform`. `source_space` is `pdf_user_space` (points, CropBox ∩ MediaBox, clockwise `/Rotate`) or `image_pixels` (stored pixels, EXIF rotation, DPI from the file or null). Inverse mappings: `geometry.normalized_to_pdf_user_space` and `normalized_to_image_pixels`, tested at all four rotations. DPI is never invented. |
-| Original `mul`/`und` tag and voice language | `Block.language` keeps `en`/`hi`/`mul`/`und`. The narration voice goes in `Block.integration.voice_language` (`en`/`hi`), owned by P2/P3. |
+## Decision approvals (21 Nov 2026)
 
-## What changes
+Written approvals from Atul (P2) and Ritika (P3), relayed by Tharun (P1) on
+21 Nov 2026. Where the teammates' branches already show the decision, the
+evidence is cited. Latest team updates (22 Nov 2026, relayed by P1) are
+recorded below; final contract approval remains pending. Ritika reports
+that both the trust rule and the bulk-response matching rule are recorded.
+
+| # | Decision | Approved by | Evidence or teammate report | 1.2.0 implementation |
+|---|---|---|---|---|
+| 1 | The P1 Document is the canonical producer payload and the direct `/content` body; backend fields stay out of it | P2, P3 | P3 `app/services/p1_content.py` serves the Document with P3 IDs; `docs/API_FOR_FRONTEND.md` | `integration` removed; vector `invalid_v1_2_0_backend_integration_fields` |
+| 2 | Document revision travels in `X-Document-Revision` | P2, P3 | P3 `app/api/content.py`; P2 reads the header | No body field |
+| 3 | Bulk sentence ranges: one request per document, with the revision and, for every current block, block ID, `text_sha256` (UTF-8 bytes of `current_text`), segmenter and code-point ranges with full coverage. Match by `block_id`; no ordering guarantee; reading order may be included for debugging | P2, P3 | P3 `14d9aee`: bulk route; Ritika reports the matching rule is recorded | Reference builder and checker: `sentences.document_sentence_ranges`, `check_sentence_ranges_response` |
+| 4 | `pathya-sentences/3` is the single intended pinned segmenter, with list markers, Roman numerals, lettered items, Devanagari numerals, `pp. Ch. Vol. figs. cf.` and `« »` | P2, P3 | P3 `docs/DECISIONS.md` (`14d9aee`): adopt `/3` once reference rules and fixtures are available; P2 approval is conditional on `/3` being the single pin | `sentences.py`; 45 fixtures with offsets and hashes; Ritika reports 45/45 P3 conformance (not independently rerun by P1); final joint approval and pinning pending |
+| 5 | Audio is reused while text, language, voice, pronunciation settings and segmenter are unchanged; a review-only edit bumps revisions but does not by itself invalidate audio; chapter metadata refreshes and access is revalidated on reconnect | P2, P3 | Ritika reports review-only cache preservation is complete locally; her latest reported backend result is 327 tests passed (not independently rerun by P1); clips and offline packages are preserved, while text corrections still invalidate affected clips and packages | Documented; the Document has no audio fields; prepared-audio interoperability remains pending |
+| 6 | Trust: `unsupported_content` stays visible with a review marker and is excluded until reviewer approval; after approval it is eligible subject to other trust conditions. `block_type_uncertain` stays out until the type is verified | P2, P3 | Confirmed rule relayed by P1; Ritika reports it is recorded | `critical.is_trusted_evidence`; approval preserves flags and markers |
+| 7 | Three P1 correction operations: `replace_text`, `set_language`, `mark_reviewed` | P2, P3 | P3 `app/services/revisions.py` allows exactly these for P1 chapters | History records `mark_reviewed` as `set_review_status: approved` (as P3 already does); structural operations removed |
+| 8 | Heading level: P1 supplies one when reliably determinable, otherwise leaves it null; P2 treats null as level 2 | P2, P3 | Atul reports heading support complete (`a9fbda3`): level 1 remains level 1; level 2, deeper levels and null are read as level 2 | A level is set only when the document has at least two distinct heading sizes |
+| 9 | v1.0.0 and v1.1.0 artifacts stay byte-identical | P1, P3 | P3 pins `39331e4` | SHA-256 pinned in `tests/unit/test_contract_v1_2.py` |
+
+Earlier written decisions that still hold: `critical_symbol_uncertain` from
+P1 with `critical_flag` derived by P3; pages that are `needs_ocr`, `partial` or
+`failed` excluded from trusted evidence; uncertain reading order, math, table
+structure and missing geometry as review conditions; code-point offsets into
+the exact `current_text`, start-inclusive, end-exclusive, covering all text,
+trailing whitespace with the preceding sentence, only headings, paragraphs and
+list items split.
+
+## What changes from 1.1.0
 
 | Change | Owner | Consumer impact |
 |---|---|---|
-| `contract_family` (required) | P1 | P3 checks it at the boundary |
-| `heading_level` (1–6, headings only, nullable) | P1 | P2 can build heading navigation; null means unknown |
-| `role` (body, page_header, page_footer, footnote; required) | P1 | P2 may skip headers and footers in narration; P3 may exclude them from answers |
+| `contract_family: "pathya.p1.content"` (required) | P1 | P3 checks it at the boundary |
+| `heading_level` (1–6, headings only, nullable) | P1 | Null means unspecified; P2 shows it as level 2 |
+| `role` (`body`, `page_header`, `page_footer`, `footnote`; required) | P1 | P2 may skip headers and footers in narration; P3 may exclude them from answers |
 | Pipeline review status (`needs_review` iff a review-trigger flag) | P1 | P3's review queue can rely on it |
-| `critical_symbol_uncertain` flag | P1 | See above; must stay visible in P2 |
-| `Document.integration` (document_revision, backend_document_id) | P3 | Producers leave it null |
-| `Block.integration.sentences` (code-point ranges, revision and hash bound) | P3 (P1 helper) | P2 converts to UTF-16 for JavaScript |
-| `Block.integration.voice_language` | P2/P3 | Narration voice, separate from `language` |
-| `Block.integration.audio[]` (revision-bound references) | P3 | Stale audio makes the document invalid |
-| Corrections `set_block_type` and `set_reading_order` | Proposed | P3 commits; P1 validates and applies (`apply_correction`) |
+| `critical_symbol_uncertain` flag | P1 | P3 derives `critical_flag`; must stay visible in P2 |
+
+Unchanged from 1.1.0: correction history operations (`replace_text`,
+`set_language`, `set_review_status`), every other field and rule.
+
+## Field ownership (final proposal)
+
+| Area | Owner |
+|---|---|
+| Document, pages, blocks, edges, raw and extracted text, block type, language, geometry, provenance, confidence, quality flags, first-pass review status, `heading_level`, `role`, contract version and family, schema, conformance documents, segmentation fixtures | **P1** |
+| Trust rules (`is_trusted_evidence`, `critical_flag`) | **P1** defines, **P3** applies |
+| Backend IDs, access, document and block revisions after import, committing corrections, human review status, correction history, sentence segmentation (running `pathya-sentences/3` and serving ranges), audio generation, storage, keys and validity, voices, glossary, packages | **P3** |
+| Rendering, the `X-Document-Revision` header, code-point → UTF-16 conversion, local clip cache, voice choice, offline copies and reconnect revalidation, null heading level shown as level 2, warnings for flagged blocks | **P2** |
 
 ## Compatibility
 
-- **1.0.0 and 1.1.0 are frozen.** The schemas, the 12 conformance documents and their `index.json`, the sample and
-  the unversioned `contract/pathya_content.schema.json` (a 1.1.0 alias) are
-  byte-identical to `39331e4`; tests pin their SHA-256.
-- **Backward-compatible.** All existing payloads validate unchanged under the
-  1.2.0 schema and Python, including the three valid 1.0.0/1.1.0 samples, and
-  they upgrade losslessly.
+- **1.0.0 and 1.1.0 are frozen.** The schemas, the 12 conformance documents
+  and their `index.json`, the sample and the unversioned
+  `contract/pathya_content.schema.json` (a 1.1.0 alias) are byte-identical to
+  `39331e4`; tests pin their SHA-256.
+- **Backward-compatible.** Existing payloads validate unchanged under the 1.2.0
+  schema and Python, and upgrade losslessly.
 - **Not forward-compatible.** The 1.1.0 schema rejects 1.2.0 documents.
-- **For P3 while it integrates 1.1.0:** `extract_document(...).to_json("1.1.0",
-  drop=("heading_level", "role"))` or `--target-version 1.1.0 --drop
-  heading_level,role`. It fails loudly (exit 5) if the document contains
-  critical flags, integration fields or new correction operations.
+- **Core CLI for 1.1.0 compatibility checks:** use `python -m
+  pathya_document_ai extract` with `--target-version 1.1.0 --drop
+  heading_level,role`. Loss of a critical-symbol flag fails loudly (exit 5).
+- **Optional worker adapter is excluded:** `src/pathya_document_ai/p3_adapter.py`
+  and `tests/unit/test_p3_adapter.py` are excluded from the proposed 26-file
+  core publication. Neither the adapter source nor its 12 tests is available
+  in that publication. Do not configure or import the adapter from the core
+  package. Separately review and publish the adapter and its tests, verify
+  the worker interface and version/loss behavior, and run those tests plus
+  worker integration checks before enabling it. See the guide's optional
+  adapter integration section.
 
-## Reconciliation with the latest written decisions (20 Nov 2026)
+## Verification record and publication scope
 
-Checked against `person-3` at `2621fc9` (`docs/CONTRACT_APPROVALS.md`,
-`docs/DECISIONS.md`, `app/services/sentences.py`, `app/config.py`) and
-`person-2` at `6142588` (`frontend/src/lib/speech.ts`, `frontend/src/types.ts`).
-There were no newer commits on either branch.
+The completed P1 pre-publication review recorded these results for the
+selected core scope; the suites were not rerun for this documentation-only
+update. P3 results are separate teammate reports, not independent P1 runs.
 
-### Settled in writing and implemented as written
+| Check | Recorded result | Scope / attribution |
+|---|---|---|
+| Selected P1 unit tests | 479 passed | Excludes `test_p3_adapter.py` and its 12 tests; do not use the earlier 491-test working-copy total for core publication |
+| Strict P1 integration | 29 passed | Real engines required; two Docling deprecation warnings, no skips |
+| P1 segmentation fixtures | 45/45 passed | `pathya-sentences/3` reference checks |
+| Conformance freshness | 25 files current | 13 frozen baseline files + 12 candidate files, including indexes |
+| Schema freshness | 4 files current | Check mode only; no regeneration |
+| Frozen/reference files | All 19 match `39331e4` | 17 published inputs + two runtime schema copies |
+| P3 conformance | Ritika reports 45/45 fixtures passed | Reported to P1; not independently rerun by P1 |
+| P3 backend tests | Ritika reports 327 passed | Reported to P1; not part of the P1 unit total and not independently rerun by P1 |
 
-| Decision (source) | 1.2.0 |
-|---|---|
-| Canonical Document as the direct content body (P2, P3) | `ExtractionResult.to_json()` returns the Document itself |
-| Document revision (P2) | `Document.integration.document_revision` (P3-owned) |
-| Stable backend block identifier plus per-block revision (P2) | `Block.integration.backend_block_id` (P3-owned); `Block.revision` |
-| Sentence ranges are start-inclusive, end-exclusive code points into the exact `current_text`, before pronunciation substitutions (P2; P1 follow-up) | `SentenceRange`, validated against the text hash |
-| Ranges cover all text without gaps; trailing whitespace belongs to the preceding range (P2) | Enforced by Python; conformance vector `invalid_python_only_v1_2_0_sentence_gap` |
-| Only headings, paragraphs and list items carry ranges (P2) | Enforced; vector `invalid_python_only_v1_2_0_sentences_on_caption` |
-| Text corrections must regenerate ranges (P1 follow-up) | `apply_correction` removes them; `attach_sentences` regenerates them for the new revision |
-| Optional `voice_language` `en`/`hi`, keeping the source `language` (P2) | `Block.integration.voice_language` |
-| Prepared audio entries `{key, url, bytes}` (P2) | `AudioReference.key`, `.url`, `.bytes` |
-| P1 emits `critical_symbol_uncertain`; P3 derives `critical_flag` (P1, P3) | Flag; `critical.critical_flag` |
-| Exclude `needs_ocr`, `partial` and `failed` pages from trusted evidence (P1, P3) | `critical.is_trusted_evidence` |
-| Treat uncertain reading order, math, table structure and missing geometry as review conditions (P1) | Pipeline review-trigger flags include `reading_order_uncertain`, `math_needs_review`, `table_structure_uncertain` and `missing_geometry`. **`reading_order_uncertain` was added in this reconciliation.** Consequence: documents built without layout (every line order-uncertain) come out entirely `needs_review`. |
-| Producer UUIDs scoped to an extraction; P3 owns IDs, access, revisions, commits and invalidation (P1, P3) | Field ownership table; producers leave `integration` null (`producer_violations`) |
-| Conformance checks: direct response, fresh offsets after a text correction, critical content excluded from trusted evidence (P2) | `tests/unit/test_pipeline.py`, `test_contract_v1_2.py` |
+## Remaining items
 
-### Not settled: needs a written decision
+P3 conformance is now reported as 45/45 passed; it is no longer an
+unreported fixture gate. `/3` remains the single intended pinned segmenter.
+The following checks and approvals are still **pending**:
 
-1. **Which segmenter is canonical, and its identifier.**
-   - **P1** ships `pathya-sentences/2` (`sentences.SEGMENTER`).
-   - **P3** ships its own implementation (`SEGMENTER=pathya`, cache version
-     `pathya-reader-v1`, `app/services/sentences.py`).
-   - **Same:** both produce gap-free code-point ranges.
-   - **Different:** they are separate code, and their abbreviation lists
-     differ. Since this reconciliation, both keep a leading list marker
-     ("1.", "iv.") with its item.
-   - **What the contract fixes today:** `segmenter` is a free, non-empty
-     string recording whichever segmenter produced the ranges; the coverage
-     and binding rules apply to both.
-   - **Decide:** one shared implementation, or keep both with their own
-     identifiers?
-2. **Where audio lives.**
-   - **P1 1.2.0:** audio is per block (`Block.integration.audio[]`), bound to
-     that block's `text_revision` and `text_sha256`.
-   - **P2's reader package:** one list, `ChapterPackage.audio`, plus a
-     package-level `audio_voice`.
-   - **Written record:** says only "optional prepared audio entries
-     `{key, url, bytes}`" within "a revision-scoped package".
-   - **Decide:** per block (P1 now), per document, or both?
-3. **Audio `key` format.**
-   - **P2's reader computes** the first 16 hex characters of
-     `SHA-1("<lang>|<sentence text>")` (`frontend/src/lib/speech.ts`). That is
-     an implementation choice, not a recorded contract decision.
-   - **P1's contract treats** `key` as an opaque, non-empty string, unique
-     within a block.
-   - **Decide:** should the contract fix this derivation, and what is
-     `<lang>` for `mul`/`und` blocks?
-4. **`audio_voice`** (P2's package-level voice name for prepared clips) has no
-   contract field.
-5. **Heading levels.** Ranking by glyph size across the document (P1 now), a
-   Docling hierarchy, or null when unknown?
-6. **Correction scope.**
-   - Should `set_block_type` and `set_reading_order` be kept?
-   - May a reorder cross pages? (Not allowed now.)
-   - Should a review-status-only correction invalidate audio? (It does now,
-     because the revision changes.)
-   - Must every correction bump P3's `document_revision`? (P3's call.)
-7. **Trust policy beyond critical symbols.** P1 also withholds
-   `unsupported_content` and `block_type_uncertain` blocks until they are
-   approved. The written record covers only critical-symbol uncertainty and
-   page status.
-8. **HTTP envelope and backend ID mapping** for the reader package (P2/P3
-   scope, outside this producer contract).
+1. **Joint English/Hindi prepared-audio playback interoperability.** Verify
+   `block_id` + `text_sha256` + `sentence_index` + `voice_language` in the
+   relevant P2/P3 playback path, including replacement of the previously
+   reported short SHA-1 lookup key. No completion has been reported.
+2. **`mul`/`und` voice-selection verification** in that playback path.
+3. **Reconnect after review-only changes**, including metadata refresh,
+   access revalidation and preserved audio/offline packages. Local P3 cache
+   preservation and the reported 327 tests do not establish this joint check.
+4. **Final joint P1/P2/P3 approval** before 1.2.0 is finally pinned or frozen.
+   Atul's conditional approval and Ritika's conformance/backend reports do
+   not close the audio, voice or reconnect gates or constitute final joint
+   approval.
+
+The optional worker adapter also requires separate review, publication and
+verification before use; its exclusion does not block the 26-file core.
+The historical handoff ZIP remains an unchanged snapshot and predates this
+approval/status update; do not overwrite it or describe its old docs as the
+updated publication record.
 
 ## Approval record
 
+The latest confirmations below were relayed to P1. The original approval
+and verification dates were not supplied; no dates are inferred.
+
 | Reviewer | Role | Date | Version | Decision | Notes |
 |---|---|---|---|---|---|
-| — | P1 | — | 1.2.0 | **pending** | — |
-| — | P2 | — | 1.2.0 | **pending** | — |
-| — | P3 | — | 1.2.0 | **pending** | P3 is integrating 1.1.0 at `39331e4` |
+| — | P1 | — | 1.2.0 | **Final approval pending** | Final joint P1/P2/P3 approval remains open |
+| Atul | P2 | Not supplied | 1.2.0 | **Conditional approval reported** | Conditional on `pathya-sentences/3` being the single pinned segmenter; final joint approval and playback/voice/reconnect verification remain pending |
+| Ritika | P3 | Not supplied | 1.2.0 | **Verification reported; final approval pending** | Reports 45/45 P3 conformance fixtures and 327 backend tests passed; P1 has not independently rerun P3; final joint approval remains pending |
+
+The earlier individual decisions were approved in writing on 21 Nov 2026
+(relayed); that decision record is distinct from final contract approval.

@@ -1,12 +1,16 @@
 # P1 content contract — versions 1.1.0 (integration baseline) and 1.2.0 (proposed)
 
 > **1.2.0 is PROPOSED on branch `person-1` (in `document-ai/`). It is not
-> approved; P1, P2 and P3 confirmation is pending.** P3 is integrating
-> **1.1.0** at commit `39331e4`; every 1.1.0 artifact is frozen
-> byte-for-byte. See [1.2.0 changes](#120-changes-proposed) and
+> finally approved; final joint P1/P2/P3 approval is pending.** Atul reports
+> conditional P2 approval, subject to `pathya-sentences/3` being the single
+> pinned segmenter. Ritika reports **45/45 P3 conformance fixtures** and
+> **327 backend tests passed**; P1 has not independently rerun these P3
+> checks. **1.1.0** at `39331e4` remains the frozen integration baseline. See [1.2.0 changes](#120-changes-proposed) and
 > `docs/contract_change_request_v1.2.0.md`.
 
-> **Status of 1.1.0: PROPOSED, not approved. P2/P3 approval is pending.**
+> **Historical 1.1.0 proposal status:** P2/P3 approval was pending in that
+> proposal; its frozen baseline is preserved. The current 1.2.0 approval
+> record is linked above.
 >
 > 1.1.0 is **backward-compatible** (every valid 1.0.0 document is still
 > valid) but **not forward-compatible**: a consumer that only implements
@@ -27,14 +31,18 @@ speech) and P3 (backend, storage, question answering) consume.
 | JSON Schema 1.1.0 (frozen at `39331e4`) | `contract/schemas/pathya_content.v1.1.0.schema.json`; `contract/pathya_content.schema.json` is a frozen alias of 1.1.0 that never moves |
 | JSON Schema 1.0.0 (frozen, reconstructed) | `contract/schemas/pathya_content.v1.0.0.schema.json` |
 | Conformance vectors (valid and invalid, with expected verdicts) | `contract/conformance/` (1.0.0/1.1.0, frozen), `contract/conformance/v1.2.0/` |
+| Sentence segmentation fixtures (`pathya-sentences/3`) and bulk-response example | `contract/segmentation/` |
+| P3 verification guide and API examples | `docs/p3_verification_guide.md` |
 | Extraction entry point | `pathya_document_ai.extract_document()`, `python -m pathya_document_ai extract` (see below) |
 | Bilingual sample document (1.0.0) | `contract/samples/sample_document_en_hi.json` |
-| Regenerate or check | `scripts/export_schema.py [--check]`, `scripts/make_conformance.py [--check]` |
+| Regenerate or check | `scripts/export_schema.py [--check]`, `scripts/make_conformance.py [--check]`, `scripts/make_segmentation_fixtures.py [--check]` |
 
-**Status:** proposed by P1 in Phase 1. It is not yet the agreed integration contract.
-P2 and P3 must review the open decisions at the end of this document first.
-No extraction code produces it yet. The sample is hand-written to show the
-format; it is not real extraction output.
+**Reading the version history:** the baseline sections through the 1.1.0
+compatibility policy retain the earlier 1.0.0/1.1.0 proposal and phase notes,
+including their then-open decisions and output defaults. The
+[1.2.0 section](#120-changes-proposed) describes the current candidate,
+extraction entry point and approval status. The shared sample is still a
+hand-written 1.0.0 compatibility fixture, not real extraction output.
 
 ## Two validation layers
 
@@ -362,60 +370,69 @@ Documents P1 produced earlier (1.0.0) are unaffected and still validate.
 
 ## 1.2.0 changes (proposed)
 
-1.2.0 answers P3's reconciliation questions and the agreed P1/backend field
-list. It is backward-compatible (all 1.0.0/1.1.0 documents stay valid, with
-their own rules) and **not forward-compatible**: 1.1.0-only readers reject 1.2.0.
+1.2.0 is a **producer-only** contract: the Document carries what P1 extracts
+and nothing that depends on backend state. It is backward-compatible (all
+1.0.0/1.1.0 documents stay valid, with their own rules) and **not
+forward-compatible**: 1.1.0-only readers reject 1.2.0. Not pinned or frozen;
+final approval is pending (`docs/contract_change_request_v1.2.0.md`).
 
 ### Field ownership
 
 | Field | Owner | Rule |
 |---|---|---|
 | `contract_family` (document) | P1 | Required in 1.2.0, always `"pathya.p1.content"`. Distinguishes this payload from any other format that reuses a version string. |
-| `Block.heading_level` | P1 | 1–6 on headings only; 1 is the most prominent. Derived from the relative glyph size of headings across the document. Null when unknown (no words to measure). |
+| `Block.heading_level` | P1 | 1–6 on headings only; 1 is the most prominent. Set only when reliably determinable: the heading's glyph size was measured and the document has at least two distinct heading sizes (ranked across the document). Otherwise null (unspecified); readers treat null as level 2 (P2). |
 | `Block.role` | P1 | Required in 1.2.0: `body`, `page_header`, `page_footer` or `footnote`. Independent of `block_type`; a running footer is a `paragraph` with role `page_footer`. |
 | `Block.review_status` (machine output) | P1 | Pipeline rule: `needs_review` iff the block carries a review-trigger flag (`critical_symbol_uncertain`, `low_confidence`, `possible_ocr_error`, `block_type_uncertain`, `table_structure_uncertain`, `math_needs_review`, `unsupported_content`, `missing_geometry`, `reading_order_uncertain`), otherwise `unreviewed`. Producers never emit `approved` or `rejected`. |
 | `quality_flags: critical_symbol_uncertain` | P1 | See below. |
-| `Document.integration.document_revision`, `.backend_document_id` | **P3** | Producers leave `integration` null. P3 is authoritative for backend IDs, access control, revisions, commits and invalidation. |
-| `Block.integration.backend_block_id` | **P3** | Stable opaque block identifier assigned by P3 (1–128 characters). Separate from the producer UUID, which is scoped to one extraction run. Survives corrections. |
-| `Block.integration.sentences` | **P3** (P1 provides `sentences.attach_sentences`) | Headings, paragraphs and list items only. Bound to the block revision and SHA-256 of `current_text`. |
-| `Block.integration.voice_language` | **P2/P3** | `en` or `hi`: the narration voice. Never replaces `Block.language` (which may be `mul`/`und`). |
-| `Block.integration.audio[]` | **P3** | Entries `{key, url, bytes}` (P2 decision): `key` is the reader's clip lookup key, unique within the block; `url` is opaque; `bytes` is the size. Each entry is also bound to `text_revision` and `text_sha256`. |
+
+**Not Document fields** (served by P3; see `docs/p3_verification_guide.md`):
+the document revision (`X-Document-Revision` header), backend IDs (P3
+replaces every producer UUID with its own ID in the served Document, so the
+served `block.id` is the stable backend ID), sentence ranges (`GET
+/documents/{id}/sentence-ranges`), voice, pronunciation and audio. A 1.2.0
+Document with an `integration` member, or any of those fields, is invalid.
 
 Producer UUIDs (`Document.id`, page, block, edge ids) are scoped to one
-extraction run. They never grant ownership or access; P3 maps them to its own
-identifiers.
+extraction run. They never grant ownership or access.
 
-### Sentence offsets
+### Sentence offsets (served by P3, reference rules from P1)
 
 - **Unit:** Unicode code points (Python string indices), not bytes or UTF-16.
   JavaScript readers convert with `sentences.to_utf16_ranges` (they differ for
-  characters outside the BMP, e.g. mathematical italic letters).
-- **Text:** the exact `current_text` of the block, with no normalization.
-  Never `raw_text`.
-- **Coverage (P2 decision):** half-open `[start, end)` ranges cover all of
-  `current_text` without gaps or overlaps. The first starts at 0, each starts
-  where the previous ended, and the last ends at the text length. Whitespace
-  after a sentence belongs to that (preceding) range; leading whitespace
-  belongs to the first. Empty text has no ranges.
-- **Eligible blocks (P2 decision):** headings, paragraphs and list items only.
-  Readers build their own descriptions for tables, equations and figures.
-- **Before substitutions:** offsets refer to `current_text` exactly as stored,
-  before any pronunciation substitution in the reader.
-- **Binding:** `text_revision` equals the block's `revision`, and
-  `text_sha256` is SHA-256 of `current_text` in UTF-8. Anything else is stale
-  and the document is invalid.
-- **After a correction:** the revision increments, so ranges and audio of that
-  block are removed by `apply_correction` and must be regenerated
-  (`attach_sentences`) for the new revision. P3 may re-attach audio only by
-  re-binding it to the new revision after verifying the text hash is
-  unchanged.
-- **Segmenter:** `pathya-sentences/2` (`/1` in the earlier draft trimmed
-  whitespace and left gaps). Sentences end after `.`, `!`, `?`, `।`
-  or `॥` (plus closing quotes or brackets) before whitespace or the end of the
-  text. They do not end after listed abbreviations (`Fig.`, `e.g.` …), on
-  decimal points, after a list marker that opens the text (`1.`, `iv.`, `a.`),
-  or before a lowercase Latin word. P3's own segmenter (`pathya-reader-v1`) follows
-  the same coverage rules; which one is canonical is not yet decided.
+  characters outside the BMP, e.g. mathematical italic letters or emoji).
+- **Text:** the exact `current_text` of the block, with no normalization,
+  before pronunciation substitutions. Never `raw_text`.
+- **Hash:** `text_sha256` is the lowercase hex SHA-256 of the exact UTF-8
+  bytes of `current_text`; a block whose `current_text` is null hashes as the
+  empty string.
+- **Coverage:** half-open `[start, end)` ranges cover all of `current_text`
+  without gaps or overlaps, from 0 to the text length. Whitespace after a
+  sentence belongs to that (preceding) range; leading whitespace belongs to
+  the first. Empty text has no ranges.
+- **Eligible blocks:** headings, paragraphs and list items. Every other block
+  is still listed in the bulk response, with its hash and an empty range list.
+- **Bulk matching:** match responses by `block_id`. There is no ordering
+  guarantee; reading order may be included for debugging only.
+- **After a text correction:** the hash changes and P3 serves fresh ranges for
+  the new revision.
+- **Segmenter `pathya-sentences/3`** (`sentences.py`; 45 fixtures in
+  `contract/segmentation/` with expected offsets, UTF-16 offsets and hashes):
+  1. A sentence may end after `. ! ? । ॥`, optionally followed by closing
+     quotes or brackets `" ' ) ] } ’ ” » «`, before whitespace or the end of
+     the text (so `4.5` never splits).
+  2. Not after a listed abbreviation: `e.g. i.e. etc. vs. cf. fig. figs. eq.
+     eqs. no. nos. dr. mr. mrs. ms. approx. p. pp. vol. ch. sec.`
+  3. Not when the text since the previous cut is only a list marker: `1.`,
+     `10.`, `1)`, `(2)`, `iv.`, `IV.`, `a.`, `(a)`, `१.`, `१०.`.
+  4. Not before a word starting with a lowercase ASCII letter.
+  5. Trailing whitespace joins the sentence that ended.
+
+  `/3` adds `cf.` and `« »` to `/2`. Differences from P3's inspected
+  `pathya-reader-v1` baseline are listed in `docs/p3_verification_guide.md`.
+  `pathya-sentences/3` is the single intended pinned segmenter for 1.2.0;
+  Ritika reports 45/45 P3 conformance fixtures passed (not independently
+  rerun by P1); final pinning awaits the remaining joint checks and approvals.
 
 ### Critical-symbol uncertainty
 
@@ -432,61 +449,120 @@ when:
 1. A flagged block is never `unreviewed` (schema and Python enforce this).
    The pipeline sets `needs_review`.
 2. The flag is never removed, even after review. A human decision is recorded
-   in `review_status` through a `set_review_status` correction.
+   in `review_status` (P3 `mark_reviewed`, recorded as `set_review_status:
+   approved`).
 3. P3 derives `critical_flag = true` while the flag is present and
    `review_status` is not `approved` (`critical.critical_flag`).
-4. Not trusted evidence for search or answers until `approved`
-   (`critical.is_trusted_evidence`). The same holds for pages that are not
-   `ok`, for blocks that are `needs_review` or `rejected`, and for
-   `unsupported_content` or `block_type_uncertain`.
-5. The content and the flag stay in the document and **must remain visible**
-   to readers. The trust rule governs retrieval only.
+4. The content and the flag stay in the document and **must remain visible**
+   to readers.
 
 **Known gap:** a symbol that OCR dropped entirely leaves no token to flag.
 That is why OCR'd equations are always flagged.
 
-### Correction policy (proposed)
+### Trust policy (approved 21 Nov 2026)
+
+`critical.is_trusted_evidence(block, page)` decides whether a block may be
+used as trusted evidence for search and answers. A block is excluded when:
+
+| Condition | Excluded until |
+|---|---|
+| Page status `needs_ocr`, `partial` or `failed` | The page is reprocessed |
+| `review_status` is `needs_review` or `rejected` | Approved |
+| `critical_symbol_uncertain` | Approved (`mark_reviewed`) |
+| `block_type_uncertain` | The type is verified: approved (`mark_reviewed`) |
+| `unsupported_content` | Reviewer approval (`mark_reviewed`); then eligible subject to the other trust conditions |
+
+This governs retrieval and answering only. Excluded blocks stay in the
+Document, and the reader still displays them with the warning for their
+flags. Approval does not remove `unsupported_content` or its visible review
+marker. Unapproved blocks carrying this flag remain excluded; checking
+eligibility never approves a block or changes its flags.
+
+### Correction policy
 
 P1's `corrections.apply_correction()` validates one correction and returns the
 resulting document; it persists nothing. **P3 alone authorizes and commits**
 it, checking `base_revision` and invalidating dependants.
 
-| Operation | Allowed | Effect |
-|---|---|---|
-| `replace_text` | Blocks with text (`raw_text` not null) | `current_text` replaced |
-| `set_language` | All | `language` replaced; `voice_language` untouched |
-| `set_review_status` | All | `review_status` replaced; flags kept |
-| `set_block_type` (1.2.0) | Only between `heading`, `paragraph`, `list_item` and `caption`. A caption linked by `caption_of` or `caption_block_id` is rejected until the link is resolved. | `block_type` replaced; `heading_level` becomes null |
-| `set_reading_order` (1.2.0) | Within the same page and parent | Block moved; siblings renumbered 0..n-1 **without** a revision change; `precedes` edges among those siblings rebuilt |
+The three approved operations (unchanged since 1.0.0):
+
+| P3 API operation | Recorded in `Document.corrections` as | Allowed | Effect |
+|---|---|---|---|
+| `replace_text` | `replace_text` | Blocks with text (`raw_text` not null) | `current_text` replaced |
+| `set_language` | `set_language` | All | `language` replaced |
+| `mark_reviewed` | `set_review_status` with `approved` | All | `review_status` becomes `approved`; flags kept |
 
 **For every operation:**
 - **Unchanged:** block `id`, `raw_text`, `provenance` (it describes extraction)
   and quality flags.
 - **Changed:** `revision` increments; the correction is appended to
-  `Document.corrections`; sentence ranges and audio of the block are removed.
+  `Document.corrections`.
 - **Rejected:** a stale `base_revision` (`CorrectionConflictError`).
-- **Never implicit:** review status changes only through `set_review_status`.
+- **Never implicit:** review status changes only through `mark_reviewed`.
 
-**Not decided:** whether retyping should regenerate `heading_level`, whether
-reordering across pages is allowed, and whether P3 needs a document-level
-revision bump per correction. Those decisions are listed in the change
-request.
+Structural corrections (`set_block_type`, `set_reading_order`, split, merge)
+are **not** 1.2.0 operations; P3 rejects them for P1 chapters
+(`p1_correction_unsupported`). They may be proposed for a later version.
+
+**Audio validity (P3, approved):** audio is reused while the text, language,
+voice, pronunciation settings and segmenter are unchanged. A review-only edit
+bumps the block and document revisions but does not by itself invalidate
+audio. Chapter metadata refreshes and access is revalidated on reconnect (P2).
+
+**Prepared-audio key (P2/P3):** `block_id` + `text_sha256` +
+`sentence_index` + `voice_language`. This is the reader-facing lookup key;
+P3 also owns the audio validity inputs above. Prepared-audio interoperability
+remains pending verification for joint English/Hindi playback, including
+the relevant playback path's replacement of the previously reported short
+SHA-1 key. `mul`/`und` voice selection and reconnect after review-only
+changes are separate pending checks; local cache preservation does not
+establish completion of those checks.
+
+**Team status (22 Nov 2026, reported by Atul/Ritika via P1):** P2 heading
+support is complete: level 1 remains level 1; level 2, deeper levels and null
+are read as level 2. P3 review-only cache preservation is complete locally;
+Ritika's latest reported results are **45/45 P3 conformance fixtures**
+and **327 backend tests passed**. P1 has not independently rerun those P3
+checks. Review-only changes preserve audio clips and offline packages
+locally; text corrections still invalidate affected clips and packages.
+Atul's P2 approval is conditional on `pathya-sentences/3` being the single
+pinned segmenter. Joint English/Hindi prepared-audio playback, `mul`/`und`
+voice-selection verification, reconnect after review-only changes and final
+joint P1/P2/P3 approval remain **pending**.
+
+**Core publication verification scope:** the completed P1 review recorded
+479 selected unit tests (excluding the adapter's 12 tests), 29 strict
+integration tests, 45/45 segmentation fixtures, 25 conformance files current,
+four schema files current and all 19 frozen/reference files matching
+`39331e4`. These suites were not rerun for this documentation-only update.
+The earlier 491-test working-copy total includes the adapter tests and is
+not the core publication total; Ritika's 327 is a separate P3 result.
+See the change request's verification record for attribution and scope.
 
 ### Version handling
 
 - `upgrade_document_data(data, target)` migrates forward only.
   - 1.1.0 → 1.2.0 adds `contract_family` and `role`. The role is derived from
     the layout label in provenance, otherwise `body`.
-  - `heading_level` and `integration` stay null.
+  - `heading_level` stays null (unspecified).
 - `export_document_data(doc, "1.1.0", drop=…)` exports for 1.1.0 consumers.
-  - It fails for critical flags, integration fields and new correction
-    operations.
+  - It fails for critical flags.
   - Heading levels and non-body roles are dropped **only** if listed
     explicitly in `drop`.
 - `required_version(doc)` gives the lowest version that represents a document
   exactly.
 
 ### Extraction entry point
+
+The public Python entry point and CLI below are available in the proposed
+core publication. The optional worker adapter
+`src/pathya_document_ai/p3_adapter.py` and
+`tests/unit/test_p3_adapter.py` are excluded from the proposed 26-file core:
+neither the adapter source nor its 12 tests is available there. Do not
+configure or import that module from the core package. Adapter use requires
+separate review/publication of both files, version/loss checks, its 12 tests
+and P3 worker integration verification; see the guide's optional adapter
+section. Core extraction does not require the adapter.
 
 ```python
 from pathya_document_ai import ExtractionOptions, extract_document, validate_document_json
@@ -513,8 +589,8 @@ python -m pathya_document_ai validate chapter.json
   Without layout, each page gets a `layout_not_run` warning.
 
 **Validation:** the output must pass the JSON Schema, the Python validator,
-and the producer rules (no backend fields, no corrections, revision 1,
-pipeline review status, roles set).
+and the producer rules (no corrections, revision 1, pipeline review status,
+roles set). Backend fields cannot be represented at all.
 
 **Exit codes:** 2 input, 3 contract, 4 engine, 5 lossy export.
 
@@ -524,4 +600,4 @@ pipeline review status, roles set).
 |---|---|---|
 | 1.0.0 | Initial proposed contract | P2 and P3 to review |
 | 1.1.0 | Five new quality flags, uncertain table candidates, page status and warnings, required ids, parent on the same page | Backward-compatible only; 1.0.0-only readers reject 1.1.0. **Approval pending** (see the change request). |
-| 1.2.0 (proposed) | contract_family; heading_level; role; pipeline review status; critical_symbol_uncertain; backend `integration` fields (document revision, sentence ranges, voice language, audio); set_block_type and set_reading_order corrections | Backward-compatible only; 1.1.0-only readers reject 1.2.0. 1.1.0 export with explicit `drop`. **Approval pending** (P1, P2, P3). |
+| 1.2.0 (proposed) | Producer-only: contract_family; heading_level (null when not reliably determinable); role; pipeline review status; critical_symbol_uncertain. Backend fields (revision, IDs, sentence ranges, audio) are served by P3's API, not the Document. Correction operations unchanged. Reference segmenter `pathya-sentences/3` with fixtures. | Backward-compatible only; 1.1.0-only readers reject 1.2.0. 1.1.0 export with explicit `drop`. **Final approval pending** (P1, P2, P3); decisions approved 21 Nov 2026. |
