@@ -1,25 +1,48 @@
 import type { Block, Lang, Pronunciation, Page } from '../types'
 
-// Abbreviations that end in a full stop but do not end a sentence.
-const ABBREV = /\b(?:e\.g|i\.e|etc|vs|Fig|Eq|No|Dr|Mr|Mrs|Ms|approx|cf)\.$/i
+// pathya-sentences/3, the segmenter pinned with contract 1.2.0 (same rules as Role 1 and Role 3; checked against
+// their 45 fixtures in tools/p3/pathya-sentences-3.fixtures.json). Used when the backend sent no sentence ranges.
+const ABBREVIATIONS = new Set(['approx.', 'cf.', 'ch.', 'dr.', 'e.g.', 'eq.', 'eqs.', 'etc.', 'fig.', 'figs.', 'i.e.', 'mr.', 'mrs.', 'ms.', 'no.', 'nos.', 'p.', 'pp.', 'sec.', 'vol.', 'vs.'])
+const ENDS = new Set(['.', '!', '?', '।', '॥'])
+const CLOSERS = new Set(['"', "'", ')', ']', '}', '’', '”', '»', '«'])
+const LIST_MARKER = /^\(?(?:\p{Nd}{1,3}|[IVXLCDMivxlcdm]{1,6}|[A-Za-z])[.)]*$/u
+const space = (c: string | undefined) => c !== undefined && /\s/u.test(c)
 
-/** Split text into sentence units for narration and highlighting. Handles the Hindi danda (।). */
-export function splitSentences(text: string, _lang: Lang): string[] {
-  const out: string[] = []
-  let start = 0
-  const re = /[.!?।॥]+["')\]]*\s+/g
-  let m: RegExpExecArray | null
-  while ((m = re.exec(text))) {
-    const end = m.index + m[0].length
-    const piece = text.slice(start, end)
-    const head = piece.trimEnd()
-    // Keep going when the stop belongs to an abbreviation, a decimal or a list number like "1."
-    if (ABBREV.test(head) || /^\s*\d+\.$/.test(head) || /\d\.$/.test(head) && /^\d/.test(text.slice(end))) continue
-    out.push(piece)
-    start = end
+/** Sentence ranges in code points, half-open, covering the text from 0 to its end. */
+export function sentenceRanges(text: string): { start: number; end: number }[] {
+  const cps = [...text]
+  const cuts: number[] = []
+  let prev = 0
+  for (let i = 0; i < cps.length; i++) {
+    if (!ENDS.has(cps[i])) continue
+    let k = i
+    while (k < cps.length && ENDS.has(cps[k])) k++
+    const endsAt = k
+    while (k < cps.length && CLOSERS.has(cps[k])) k++
+    if (k < cps.length && !space(cps[k])) { i = k - 1; continue }
+    // The word that ends here, without opening punctuation, may be an abbreviation.
+    let w = i
+    while (w > prev && !space(cps[w - 1])) w--
+    const word = cps.slice(w, endsAt).join('').replace(/^[("'«»]+/u, '').toLowerCase()
+    const sincePrev = cps.slice(prev, k).join('').trim()
+    let next = k
+    while (next < cps.length && space(cps[next])) next++
+    const lowerNext = next < cps.length && /[a-z]/.test(cps[next])
+    if (ABBREVIATIONS.has(word) || LIST_MARKER.test(sincePrev) || lowerNext || next >= cps.length) { i = k - 1; continue }
+    cuts.push(next)
+    prev = next
+    i = next - 1
   }
-  if (start < text.length) out.push(text.slice(start))
-  return out.filter((s) => s.trim())
+  const bounds = [0, ...cuts, cps.length]
+  const out: { start: number; end: number }[] = []
+  for (let j = 0; j + 1 < bounds.length; j++) if (bounds[j + 1] > bounds[j]) out.push({ start: bounds[j], end: bounds[j + 1] })
+  return out
+}
+
+/** Split text into sentences for narration and highlighting. The pieces join back to the exact text. */
+export function splitSentences(text: string, _lang?: Lang): string[] {
+  const cps = [...text]
+  return sentenceRanges(text).map((r) => cps.slice(r.start, r.end).join('')).filter((x) => x.trim())
 }
 
 export interface SpeechUnit {

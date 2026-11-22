@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "typecheck": "tsc -b --noEmit",
+    "test:sentences": "node --experimental-strip-types --import ./tools/ts-resolve.mjs tools/check-sentences.mjs",
     "test:p1": "node --experimental-strip-types --import ./tools/ts-resolve.mjs tools/check-p1.mjs",
     "test:e2e": "playwright-cli open http://localhost:4173 && playwright-cli --raw run-code --filename=e2e/flow.js && playwright-cli --raw run-code --filename=e2e/add.js && playwright-cli --raw run-code --filename=e2e/audio.js && playwright-cli --raw run-code --filename=e2e/motion.js && playwright-cli --raw run-code --filename=e2e/roles.js && playwright-cli --raw run-code --filename=e2e/p1.js && playwright-cli --raw run-code --filename=e2e/auth.js && playwright-cli --raw run-code --filename=e2e/offline.js && playwright-cli --raw run-code --filename=e2e/axe.js && playwright-cli close",
     "audio": "node --experimental-strip-types --import ./tools/ts-resolve.mjs tools/make-audio.mjs"
