@@ -62,21 +62,22 @@ and run `npm run audio -- <voice name>`. With `VITE_API_URL` set, clips come fro
   Without it the app uses a built-in mock with the same behaviour (revisions, conflicts, evidence, abstention).
 - `src/data/chapters.ts` holds two sample chapters written for development. Replace them with real packages.
 
-### Role 1 content contract (1.0.0, 1.1.0 and the proposed 1.2.0)
+### Role 1 content contract (1.0.0, 1.1.0 and 1.2.0)
 
 `src/lib/p1.ts` converts a Role 1 document into what the reader shows. `src/data/p1-sample.json` is a copy of
 `contract/samples/sample_document_en_hi.json` from the team repo and appears as the third sample chapter.
 Role 3's `GET /documents/{id}/content` returns this document unchanged; the document revision comes in the
 `X-Document-Revision` header.
 
-1.2.0 (not yet pinned) is read as follows:
+1.2.0 (approved by all three roles and pinned on 23 November 2026, segmenter `pathya-sentences/3`) is read as follows:
 
 - `heading_level`: 1 stays a top heading; 2 and deeper, and null (unknown), become the second rank
 - `role`: `page_header` and `page_footer` are skipped; footnotes are shown and read
 - `integration.voice_language` picks the voice; the original `mul` or `und` tag is kept as `source_lang`
 - sentence ranges come from Role 3's `GET /documents/{id}/sentence-ranges` (Unicode code points, converted to
   JavaScript offsets). They are used only when the revision and the SHA-256 of the text match; otherwise
-  the reader splits the text itself
+  the reader splits the text itself with the same `pathya-sentences/3` rules (`npm run test:sentences` checks
+  them against the shared 45 fixtures)
 
 For 1.0.0 and 1.1.0 the converter still guesses where the contract is silent. Each guess is marked `GAP`:
 
@@ -127,7 +128,6 @@ Waiting on the other roles:
   classmate's ID from their email
 - forgot password: no backend route
 - a joint check of prepared audio against Role 3's running server
-- the pinned 1.2.0 contract and sentence segmenter (Role 1)
 - a test in a real browser against the running backend
 
 ## Where things are
