@@ -59,6 +59,14 @@ class Settings(BaseSettings):
     session_ttl_seconds: int = Field(default=86400, ge=60)
     login_rate_limit: int = Field(default=5, ge=1)
     login_window_seconds: int = Field(default=60, ge=1)
+    # Password reset. Without SMTP_HOST the message is written to <data dir>/outbox for the operator.
+    password_reset_ttl_seconds: int = Field(default=1800, ge=60, le=86400)
+    public_app_url: str = ""
+    smtp_host: str = ""
+    smtp_port: int = Field(default=587, ge=1, le=65535)
+    smtp_username: str = ""
+    smtp_password: SecretStr = SecretStr("")
+    mail_from: str = "Pathya <no-reply@pathya.local>"
     speech_provider: str = "disabled"
     speech_voice: str = "default"
     speech_engine_version: str = ""

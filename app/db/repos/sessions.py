@@ -29,3 +29,9 @@ def revoke(connection: sqlite3.Connection, token_hash: str, now: str) -> None:
         "UPDATE sessions SET revoked_at=? WHERE token_hash=? AND revoked_at IS NULL",
         (now, token_hash),
     )
+
+
+def revoke_all(connection: sqlite3.Connection, user_id: str, now: str) -> None:
+    connection.execute(
+        "UPDATE sessions SET revoked_at=? WHERE user_id=? AND revoked_at IS NULL", (now, user_id)
+    )

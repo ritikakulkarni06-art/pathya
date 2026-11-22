@@ -28,7 +28,20 @@ the separate pathya_csrf cookie and echo it in X-CSRF-Token for authenticated
 writes, with `credentials: include`. Serve frontend/API over HTTPS in the same
 site, preferably one origin behind a proxy. CORS cannot bypass SameSite rules.
 Cross-origin deployments need an explicit CORS_ORIGINS entry; wildcard origins
-are refused. There is no password-reset UI/API or public administrator promotion.
+are refused. There is no public administrator promotion.
+
+Password reset: POST /auth/password-reset `{email}` always answers 204, so it never
+reveals whether an account exists. For a known account it sends a link
+`<PUBLIC_APP_URL>/reset-password?token=...` that is valid for PASSWORD_RESET_TTL_SECONDS
+(30 minutes by default). Without SMTP_HOST the message is written to `$PATHYA_DATA_DIR/outbox/`.
+POST /auth/password-reset/confirm `{token,password}` sets the new password (12 to 128
+characters), works once, and ends every session of that account; an expired or used
+link gives 400 `reset_link_invalid`. Both routes share the sign-in rate limit.
+
+Sharing (owner only): GET /documents/{id}/grants returns `{grants:[{user_id,email,role,created_at}]}`.
+POST /documents/{id}/grants takes `{email,role}` or `{user_id,role}` (exactly one of them; role
+`reader` or `reviewer`); an unknown address gives 404 `user_not_found`, and sharing with
+yourself gives 409 `grant_to_owner`. DELETE /documents/{id}/grants/{user_id} removes access.
 
 Problems are application/problem+json with `{type,title,status,detail,code}` and
 code-specific extras. Announce plain-language detail; never render source/model

@@ -1052,6 +1052,19 @@
       422
     ]
   },
+  "grant_to_owner": {
+    "example": {
+      "code": "grant_to_owner",
+      "detail": "You already own this chapter.",
+      "status": 409,
+      "title": "Grant to owner",
+      "type": "urn:pathya:error:grant_to_owner"
+    },
+    "origin": "application",
+    "statuses": [
+      409
+    ]
+  },
   "greater_than": {
     "example": {
       "code": "greater_than",
@@ -2302,6 +2315,19 @@
       422
     ]
   },
+  "reset_link_invalid": {
+    "example": {
+      "code": "reset_link_invalid",
+      "detail": "This reset link has expired or was already used. Ask for a new one.",
+      "status": 400,
+      "title": "Reset link invalid",
+      "type": "urn:pathya:error:reset_link_invalid"
+    },
+    "origin": "application",
+    "statuses": [
+      400
+    ]
+  },
   "retention_not_extended": {
     "example": {
       "code": "retention_not_extended",
@@ -3020,7 +3046,7 @@
   "user_not_found": {
     "example": {
       "code": "user_not_found",
-      "detail": "The requested account is unavailable.",
+      "detail": "No Pathya account uses that address. Ask your classmate to create one first.",
       "status": 404,
       "title": "User not found",
       "type": "urn:pathya:error:user_not_found"

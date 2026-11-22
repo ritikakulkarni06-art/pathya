@@ -1,3 +1,5 @@
+import email
+import email.policy
 import json
 
 import pytest
@@ -116,7 +118,14 @@ def test_access_dependency_matrix(session_app, minimum, user_id):
 
 def test_route_enumeration_requires_authentication(tmp_path):
     application = create_app(Settings(_env_file=None, pathya_env="test", pathya_data_dir=tmp_path))
-    public = {"/healthz", "/readyz", "/auth/register", "/auth/login"}
+    public = {
+        "/healthz",
+        "/readyz",
+        "/auth/register",
+        "/auth/login",
+        "/auth/password-reset",
+        "/auth/password-reset/confirm",
+    }
 
     def dependencies(node):
         for dependency in node.dependencies:
@@ -255,3 +264,110 @@ def test_limiter_expires(monkeypatch):
     limiter.check("ip", "email")
     clock[0] = 21.0
     limiter.check("ip", "email")
+
+
+def test_owner_shares_by_email_lists_and_revokes(session_app):
+    with signed_client(session_app, "u") as client:
+        shared = client.post(
+            "/documents/d/grants", json={"email": " Other@Example.test ", "role": "reviewer"}
+        )
+        assert shared.status_code == 204
+        listed = client.get("/documents/d/grants").json()["grants"]
+        assert {(g["user_id"], g["email"], g["role"]) for g in listed} >= {
+            ("other", "other@example.test", "reviewer")
+        }
+        missing = client.post(
+            "/documents/d/grants", json={"email": "nobody@example.test", "role": "reader"}
+        )
+        assert missing.status_code == 404
+        assert missing.json()["code"] == "user_not_found"
+        both = client.post(
+            "/documents/d/grants",
+            json={"email": "other@example.test", "user_id": "other", "role": "reader"},
+        )
+        assert both.status_code == 422
+        assert client.delete("/documents/d/grants/other").status_code == 204
+        assert "other" not in {
+            g["user_id"] for g in client.get("/documents/d/grants").json()["grants"]
+        }
+    with signed_client(session_app, "reader") as client:
+        assert client.get("/documents/d/grants").status_code == 403
+
+
+def _reset_link(settings):
+    outbox = settings.pathya_data_dir / "outbox"
+    messages = sorted(outbox.glob("*.eml")) if outbox.exists() else []
+    if not messages:
+        return None
+    text = email.message_from_bytes(
+        messages[-1].read_bytes(), policy=email.policy.default
+    ).get_content()
+    return text.split("reset-password?token=")[1].split()[0]
+
+
+def test_password_reset_through_outbox(session_app):
+    settings = session_app.state.settings
+    client = TestClient(session_app, base_url="https://testserver")
+    old, new = "first password 123", "second password 456"
+    assert (
+        client.post(
+            "/auth/register", json={"email": "asha@example.test", "password": old}
+        ).status_code
+        == 201
+    )
+    assert (
+        client.post("/auth/login", json={"email": "asha@example.test", "password": old}).status_code
+        == 200
+    )
+    assert client.get("/auth/me").status_code == 200
+
+    # Unknown addresses get the same answer and no message.
+    assert (
+        client.post("/auth/password-reset", json={"email": "ghost@example.test"}).status_code == 204
+    )
+    assert _reset_link(settings) is None
+
+    assert (
+        client.post("/auth/password-reset", json={"email": "ASHA@example.test"}).status_code == 204
+    )
+    token = _reset_link(settings)
+    assert token
+    bad = client.post("/auth/password-reset/confirm", json={"token": "x" * 40, "password": new})
+    assert bad.status_code == 400 and bad.json()["code"] == "reset_link_invalid"
+    assert (
+        client.post(
+            "/auth/password-reset/confirm", json={"token": token, "password": new}
+        ).status_code
+        == 204
+    )
+    # Every session ends, the old password stops working, the link works only once.
+    assert client.get("/auth/me").status_code == 401
+    assert (
+        client.post("/auth/login", json={"email": "asha@example.test", "password": old}).status_code
+        == 401
+    )
+    session_app.state.login_limiter.events.clear()  # the 5-per-minute sign-in limit is not under test here
+    assert (
+        client.post("/auth/login", json={"email": "asha@example.test", "password": new}).status_code
+        == 200
+    )
+    again = client.post(
+        "/auth/password-reset/confirm", json={"token": token, "password": "third password 789"}
+    )
+    assert again.status_code == 400
+
+
+def test_password_reset_link_expires(session_app):
+    settings = session_app.state.settings
+    client = TestClient(session_app, base_url="https://testserver")
+    client.post(
+        "/auth/register", json={"email": "ravi@example.test", "password": "first password 123"}
+    )
+    client.post("/auth/password-reset", json={"email": "ravi@example.test"})
+    token = _reset_link(settings)
+    with session_app.state.database.write_tx() as connection:
+        connection.execute("UPDATE password_resets SET expires_at='2000-01-01T00:00:00+00:00'")
+    expired = client.post(
+        "/auth/password-reset/confirm", json={"token": token, "password": "second password 456"}
+    )
+    assert expired.status_code == 400

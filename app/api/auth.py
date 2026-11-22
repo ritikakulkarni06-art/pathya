@@ -9,7 +9,15 @@ from fastapi import APIRouter, Depends, Request, Response
 from app.config import Settings
 from app.db.repos import audit, grants, sessions, users
 from app.errors import Problem
-from app.schemas.auth import Credentials, GrantRequest, UserView
+from app.schemas.auth import (
+    Credentials,
+    GrantList,
+    GrantRequest,
+    PasswordResetConfirm,
+    PasswordResetRequest,
+    UserView,
+)
+from app.services import mail
 from app.services.access import check_document
 from app.services.auth import (
     CSRF_COOKIE,
@@ -126,6 +134,92 @@ def logout(
     response.delete_cookie(CSRF_COOKIE, secure=True, samesite="lax")
 
 
+RESET_SUBJECT = "Reset your Pathya password"
+
+
+@router.post("/auth/password-reset", status_code=204)
+def request_password_reset(payload: PasswordResetRequest, request: Request) -> None:
+    """Always 204, so the answer never reveals whether an account exists."""
+    session_mode(request)
+    limit_login(request, payload.email)
+    settings: Settings = request.app.state.settings
+    with request.app.state.database.write_tx() as connection:
+        user = users.by_email(connection, payload.email)
+        if user is None or not user["password_hash"]:
+            return
+        token = secrets.token_urlsafe(32)
+        now = datetime.now(UTC)
+        connection.execute(
+            "UPDATE password_resets SET used_at=? WHERE user_id=? AND used_at IS NULL",
+            (now.isoformat(), user["id"]),
+        )
+        connection.execute(
+            "INSERT INTO password_resets(id,user_id,token_hash,created_at,expires_at) VALUES (?,?,?,?,?)",
+            (
+                str(uuid4()),
+                user["id"],
+                token_digest(token),
+                now.isoformat(),
+                (now + timedelta(seconds=settings.password_reset_ttl_seconds)).isoformat(),
+            ),
+        )
+        audit.record(
+            connection, user["id"], "password_reset_requested", None, user["id"], now_utc(), {}
+        )
+    base = (settings.public_app_url or str(request.base_url)).rstrip("/")
+    minutes = settings.password_reset_ttl_seconds // 60
+    mail.send(
+        settings,
+        payload.email,
+        RESET_SUBJECT,
+        f"Someone asked to reset the password for this Pathya account.\n\n"
+        f"Open this link within {minutes} minutes to choose a new password:\n"
+        f"{base}/reset-password?token={token}\n\n"
+        "If it was not you, ignore this message; your password stays the same.\n",
+    )
+
+
+@router.post("/auth/password-reset/confirm", status_code=204)
+def confirm_password_reset(payload: PasswordResetConfirm, request: Request) -> None:
+    """Sets the new password and signs the account out everywhere. A link works once."""
+    session_mode(request)
+    now = datetime.now(UTC)
+    with request.app.state.database.write_tx() as connection:
+        row = connection.execute(
+            "SELECT * FROM password_resets WHERE token_hash=? AND used_at IS NULL",
+            (token_digest(payload.token),),
+        ).fetchone()
+        if row is None or datetime.fromisoformat(row["expires_at"]) <= now:
+            raise Problem(
+                400,
+                "reset_link_invalid",
+                "This reset link has expired or was already used. Ask for a new one.",
+            )
+        connection.execute(
+            "UPDATE password_resets SET used_at=? WHERE id=?", (now.isoformat(), row["id"])
+        )
+        connection.execute(
+            "UPDATE users SET password_hash=? WHERE id=?",
+            (PASSWORDS.hash(payload.password), row["user_id"]),
+        )
+        sessions.revoke_all(connection, row["user_id"], now.isoformat())
+        audit.record(
+            connection, row["user_id"], "password_reset", None, row["user_id"], now_utc(), {}
+        )
+
+
+@router.get("/documents/{document_id}/grants", response_model=GrantList)
+def list_grants(
+    document_id: str,
+    request: Request,
+    document: dict[str, Any] = Depends(require_doc_access("owner")),
+    user: dict[str, Any] = Depends(current_user),
+) -> dict[str, Any]:
+    with request.app.state.database.read_conn() as connection:
+        check_document(connection, document_id, user["id"], "owner")
+        return {"grants": grants.list_for_document(connection, document_id)}
+
+
 @router.post("/documents/{document_id}/grants", status_code=204)
 def grant(
     document_id: str,
@@ -136,15 +230,26 @@ def grant(
 ) -> None:
     with request.app.state.database.write_tx() as connection:
         check_document(connection, document_id, user["id"], "owner")
-        if users.get_user(connection, payload.user_id) is None:
-            raise Problem(404, "user_not_found", "The requested account is unavailable.")
-        grants.put(connection, document_id, payload.user_id, payload.role, user["id"], now_utc())
+        target = (
+            users.get_user(connection, payload.user_id)
+            if payload.user_id
+            else users.by_email(connection, payload.email or "")
+        )
+        if target is None:
+            raise Problem(
+                404,
+                "user_not_found",
+                "No Pathya account uses that address. Ask your classmate to create one first.",
+            )
+        if target["id"] == user["id"]:
+            raise Problem(409, "grant_to_owner", "You already own this chapter.")
+        grants.put(connection, document_id, target["id"], payload.role, user["id"], now_utc())
         audit.record(
             connection,
             user["id"],
             "grant",
             document_id,
-            payload.user_id,
+            target["id"],
             now_utc(),
             {"role": payload.role},
         )

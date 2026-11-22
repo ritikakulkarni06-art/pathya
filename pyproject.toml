@@ -26,6 +26,8 @@ testpaths = ["tests"]
 asyncio_default_fixture_loop_scope = "function"
 
 [tool.ruff]
+# document-ai/ (P1) has its own lint settings and checks; frontend/ is the reader.
+extend-exclude = ["document-ai", "frontend"]
 line-length = 100
 
 [tool.ruff.lint]
