@@ -151,8 +151,8 @@ Tharun shared the reconciled candidate bundle from his `person-1` working tree
 at base commit `fd361526fe077b3c9cf3cc8a0436b0766bf50037`. P3's previous
 segmenter matched 31 of 45 fixtures. The `pathya-sentences/3` port matched all
 45 in the P3 reader range and built-in speech code, including expected
-code-point and UTF-16 offsets and text and sentence hashes. Prepared-audio
-interoperability, shared approval and pinning remain pending.
+code-point and UTF-16 offsets and text and sentence hashes. Shared approval
+and pinning remain pending.
 
 Atul reported the prepared-audio implementation and passing local
 `npm run test:p1` checks at P2 commit
@@ -162,8 +162,44 @@ text SHA-256, sentence index and voice language. It skips synthetic clips.
 Manifest-based downloads are suitable for the live interoperability check.
 
 P3 sends the resolved `en` or `hi` in audio `language` and retains the
-original `mul` or `und` in content. Check equal script counts and text with
-no matching script characters. P3 defaults to English in both cases, while
-P2 picks Hindi on a nonzero tie and the chapter language when both counts
-are zero. Check reconnect both while the new chapter manifest is pending
-and after it is published. Live HTTPS verification remains pending.
+original `mul` or `und` in content. Atul reported and pushed the matching P2
+fallback in `3936525566fa49847eb1f41f0bf6bf69de983b9b`. The reader now picks
+Hindi only when the Devanagari count exceeds the English count, with English
+on a tie or when both are zero. The commit includes a test for these cases.
+
+Atul supplied a reader build with `VITE_API_URL=/api` and shared a Piper
+adapter and test chapter in `9460bdc54b441f4db36b4bf381f3bb1bb64b26f2`.
+The supplied build passed a local same-origin ASGI check for static files,
+API routing, session cookies and CSRF. P3 parsed the chapter as v1.1.0 and
+resolved its `mul` list item to Hindi and its `und` paragraph to English.
+
+P3 generated real Piper WAVs for both passages in an isolated local preview.
+The API served the WAVs with matching hashes and `/3` offsets. A review-only
+correction temporarily returned `manifest_pending`, kept the original audio
+assets available and reused them in the newly published manifest.
+
+Atul reported that the live reader played and downloaded the prepared English
+clip for the `und` paragraph and the Hindi clip for the `mul` list item.
+Both clip checksums matched. The first pending-manifest reconnect updated the
+saved chapter from revision 1 to 2, but the reader discarded the saved clips.
+Atul reported a fix in `d033981da81efc79e3fbe7e06e81b39e009911d6`. The
+reader tests passed, and the preview served a build from that commit.
+P3 published revision 2 with the same prepared audio asset IDs and hashes.
+Atul reported that reconnect while revision 3 was pending refreshed the
+review state, retained both saved clips and requested no clip downloads in
+the captured repeat run. P3 published the revision 3 manifest and verified
+that both clip IDs and hashes match revision 2.
+
+## Live prepared-audio interoperability, 23 November 2026
+
+Atul confirmed all three joint checks passed on the live HTTPS preview with
+P2 commit `d033981da81efc79e3fbe7e06e81b39e009911d6` and P3's
+`pathya-sentences/3` implementation at `82841efb63f587c7ba35b58b49b14ae91a621796`.
+The reader found both prepared clips
+with the four-field key and selected English for `und` and Hindi for `mul`.
+Reconnect refreshed review state and retained both clips while the manifest
+was pending. After publication, the saved chapter stayed at revision 3,
+cleared `audio_pending` and kept both files. The reader requested the chapter
+manifest and per-passage audio metadata, with no WAV requests in the
+published-manifest check. Atul confirmed P2 is ready for final v1.2.0 approval
+and pinning. The final shared approval and pin are still pending.
