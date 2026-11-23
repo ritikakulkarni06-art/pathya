@@ -909,6 +909,19 @@
       422
     ]
   },
+  "extraction_failed": {
+    "example": {
+      "code": "extraction_failed",
+      "detail": "Extraction failed. Try again or upload another copy.",
+      "status": 422,
+      "title": "Extraction failed",
+      "type": "urn:pathya:error:extraction_failed"
+    },
+    "origin": "application",
+    "statuses": [
+      422
+    ]
+  },
   "extraction_integrity": {
     "example": {
       "code": "extraction_integrity",
@@ -916,6 +929,19 @@
       "status": 422,
       "title": "Extraction integrity",
       "type": "urn:pathya:error:extraction_integrity"
+    },
+    "origin": "application",
+    "statuses": [
+      422
+    ]
+  },
+  "extraction_timeout": {
+    "example": {
+      "code": "extraction_timeout",
+      "detail": "Extraction took too long. Try fewer pages.",
+      "status": 422,
+      "title": "Extraction timeout",
+      "type": "urn:pathya:error:extraction_timeout"
     },
     "origin": "application",
     "statuses": [
@@ -2067,6 +2093,19 @@
       422
     ]
   },
+  "p1_engine_unavailable": {
+    "example": {
+      "code": "p1_engine_unavailable",
+      "detail": "Text recognition is not installed on the server. Ask the administrator to install Tesseract.",
+      "status": 503,
+      "title": "P1 engine unavailable",
+      "type": "urn:pathya:error:p1_engine_unavailable"
+    },
+    "origin": "application",
+    "statuses": [
+      503
+    ]
+  },
   "p1_extractor_unavailable": {
     "example": {
       "code": "p1_extractor_unavailable",
@@ -2857,6 +2896,19 @@
       "type": "urn:pathya:error:union_tag_not_found"
     },
     "origin": "pydantic_extraction_catalog",
+    "statuses": [
+      422
+    ]
+  },
+  "unreadable_source": {
+    "example": {
+      "code": "unreadable_source",
+      "detail": "This file could not be read. Upload a PDF or image.",
+      "status": 422,
+      "title": "Unreadable source",
+      "type": "urn:pathya:error:unreadable_source"
+    },
+    "origin": "application",
     "statuses": [
       422
     ]

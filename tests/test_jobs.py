@@ -104,6 +104,18 @@ def test_fixture_extract_and_idempotent_retry(worker_client):
     with database.read_conn() as conn:
         assert conn.execute("SELECT count(*) AS n FROM pages").fetchone()["n"] == 10
         count = conn.execute("SELECT count(*) AS n FROM blocks").fetchone()["n"]
+        # Unflagged passages are voiced now; flagged ones wait for review.
+        audio = conn.execute("SELECT payload_json FROM jobs WHERE kind='build_audio'").fetchone()
+        stored = {row["id"] for row in conn.execute("SELECT id FROM blocks")}
+        flagged = {
+            row["id"]
+            for row in conn.execute(
+                "SELECT id FROM blocks WHERE critical_flag=1 OR status='needs_review'"
+            )
+        }
+    voiced = set(json.loads(audio["payload_json"])["block_ids"])
+    assert flagged and voiced and not voiced & flagged
+    assert voiced | flagged == stored and len(stored) == count
     with database.write_tx() as conn:
         conn.execute("UPDATE jobs SET state='queued' WHERE id=?", (response["job_id"],))
     for _ in range(5):

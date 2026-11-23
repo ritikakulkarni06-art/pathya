@@ -7,7 +7,7 @@ from pydantic import ValidationError
 from app.errors import Problem
 from app.schemas.p1.models import Document
 
-PRODUCER_COMMIT = "39331e4291d2af6b68654dead2e9e8b9595de32f"
+PRODUCER_COMMIT = "b326e675872018c4e8f9b58486b4c681badae3b3"
 
 
 @dataclass(frozen=True)

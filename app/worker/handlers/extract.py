@@ -182,12 +182,26 @@ def handle(database: Database, settings: Settings, job: dict[str, Any]) -> None:
             or owned["lease_expires_at"] <= now_utc()
         ):
             raise LeaseLost()
-        for kind in ("build_index",) if needs_review else ("build_audio", "build_index"):
+        # Flagged passages are voiced after review (the rebuild covers changed passages), so
+        # build audio for the others now; otherwise they would never be voiced.
+        unflagged = [
+            row["id"]
+            for row in connection.execute(
+                "SELECT id FROM blocks WHERE document_id=? AND json_array_length(successor_ids_json)=0 AND critical_flag=0 AND status!='needs_review'",
+                (document_id,),
+            )
+        ]
+        audio: dict[str, Any] = {"revision": 1}
+        if needs_review:
+            audio["block_ids"] = unflagged
+        for kind, body in (("build_audio", audio), ("build_index", {"revision": 1})):
+            if kind == "build_audio" and needs_review and not unflagged:
+                continue
             jobs.enqueue(
                 connection,
                 document_id,
                 kind,
-                {"revision": 1},
+                body,
                 settings.job_max_attempts,
                 document_id + ":1:" + kind,
                 now_utc(),
