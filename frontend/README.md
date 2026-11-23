@@ -133,8 +133,10 @@ Downloaded chapters are kept per account. After sign-in and on reconnecting, eac
 server: a newer revision is fetched, and a chapter the account can no longer open (403, 404, 410) is deleted from
 the device. Signing out deletes that account's downloads, bookmarks and saved places.
 
-Still to check by hand: a full run with a real PDF (upload, Role 1 processing, reading and listening), and a
-screen-reader pass with NVDA or TalkBack.
+Full local run on 23 November 2026 (Role 3 server, Role 1's real extractor and Piper): a five-page textbook PDF
+was uploaded, extracted (its equation flagged for review), read, shown with page pictures, narrated from 37 prepared
+passages, and downloaded with all 40 clips. Still to check by hand: a scanned PDF (needs Tesseract on the server)
+and a screen-reader pass with NVDA or TalkBack.
 
 ## Where things are
 
